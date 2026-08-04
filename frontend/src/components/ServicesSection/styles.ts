@@ -1,12 +1,12 @@
 import { motion } from 'framer-motion';
 import styled from 'styled-components';
-import { colors, fonts } from '../../styles/globalStyles';
+import { breakpoints, colors, fonts, homepageTokens, layout, motion as motionTokens } from '../../styles/theme';
 
 export const Section = styled.section`
   position: relative;
   isolation: isolate;
   overflow: hidden;
-  padding: clamp(5rem, 8vw, 8.5rem) clamp(1rem, 4vw, 4.5rem);
+  padding: ${homepageTokens.sectionPaddingBlock} ${homepageTokens.sectionPaddingInline};
   background: ${colors.white};
   color: ${colors.background};
 
@@ -32,13 +32,13 @@ export const Section = styled.section`
       linear-gradient(rgba(16, 24, 39, 0.045) 1px, transparent 1px),
       linear-gradient(90deg, rgba(16, 24, 39, 0.045) 1px, transparent 1px),
       radial-gradient(circle at 76% 18%, rgba(108, 99, 255, 0.09), transparent 34%);
-    background-size: clamp(36px, 4vw, 60px) clamp(36px, 4vw, 60px), clamp(36px, 4vw, 60px) clamp(36px, 4vw, 60px), auto;
+    background-size: ${homepageTokens.services.backgroundGridSize} ${homepageTokens.services.backgroundGridSize}, ${homepageTokens.services.backgroundGridSize} ${homepageTokens.services.backgroundGridSize}, auto;
     mask-image: linear-gradient(to right, transparent, #000 32%);
     pointer-events: none;
   }
 
-  @media (max-width: 767px) {
-    padding-block: clamp(4.25rem, 16vw, 5.5rem);
+  @media (max-width: ${breakpoints.tabletMax}) {
+    padding-block: ${homepageTokens.mobileSectionPaddingBlock};
 
     &::after {
       width: 100%;
@@ -51,12 +51,12 @@ export const Section = styled.section`
 export const Container = styled.div`
   position: relative;
   z-index: 1;
-  width: min(100%, 1440px);
+  width: ${layout.containerWidth};
   margin-inline: auto;
   display: grid;
-  gap: clamp(3rem, 6vw, 7rem);
+  gap: ${homepageTokens.services.contentGap};
 
-  @media (min-width: 1100px) {
+  @media (min-width: ${breakpoints.servicesWide}) {
     grid-template-columns: minmax(0, 0.78fr) minmax(34rem, 1fr);
     align-items: start;
   }
@@ -65,7 +65,7 @@ export const Container = styled.div`
 export const Intro = styled(motion.div)`
   max-width: 39rem;
 
-  @media (min-width: 1100px) {
+  @media (min-width: ${breakpoints.servicesWide}) {
     position: sticky;
     top: 7rem;
   }
@@ -75,12 +75,12 @@ export const Eyebrow = styled.p`
   display: flex;
   align-items: center;
   gap: 0.7rem;
-  margin-bottom: clamp(1.25rem, 2vw, 1.75rem);
+  margin-bottom: ${homepageTokens.eyebrowMarginBottom};
   color: ${colors.highlight};
   font-family: ${fonts.primary};
-  font-size: clamp(0.75rem, 0.82vw, 0.84rem);
+  font-size: ${homepageTokens.eyebrowSize};
   font-weight: 650;
-  letter-spacing: 0.075em;
+  letter-spacing: ${homepageTokens.eyebrowTracking};
   text-transform: uppercase;
 
   &::before {
@@ -94,20 +94,20 @@ export const Eyebrow = styled.p`
 export const Title = styled.h2`
   max-width: 12ch;
   font-family: ${fonts.heading};
-  font-size: clamp(2.5rem, 4.4vw, 4.75rem);
+  font-size: ${homepageTokens.sectionTitleSize};
   font-weight: 650;
-  letter-spacing: -0.058em;
-  line-height: 0.98;
+  letter-spacing: ${homepageTokens.sectionTitleTracking};
+  line-height: ${homepageTokens.sectionTitleLineHeight};
   text-wrap: balance;
 `;
 
 export const Description = styled.p`
-  max-width: 35rem;
-  margin-top: clamp(1.5rem, 2.5vw, 2.25rem);
+  max-width: ${homepageTokens.copyMaxWidth};
+  margin-top: ${homepageTokens.sectionCopyMarginTop};
   color: rgba(16, 24, 39, 0.7);
   font-family: ${fonts.primary};
-  font-size: clamp(1rem, 1.1vw, 1.1rem);
-  line-height: 1.65;
+  font-size: ${homepageTokens.sectionCopySize};
+  line-height: ${homepageTokens.sectionCopyLineHeight};
 `;
 
 export const ServicesList = styled.ol`
@@ -121,16 +121,16 @@ export const ServiceItem = styled(motion.li)<{ $featured: boolean }>`
   position: relative;
   min-width: 0;
   min-height: 8.75rem;
-  padding: clamp(1.4rem, 2.4vw, 2rem) clamp(0.75rem, 1.8vw, 1.5rem);
+  padding: ${homepageTokens.services.itemPadding};
   display: grid;
   grid-template-columns: 2.5rem minmax(0, 1fr) auto;
   align-items: start;
-  gap: clamp(1rem, 2vw, 1.8rem);
+  gap: ${homepageTokens.services.itemGap};
   border-top: 1px solid rgba(16, 24, 39, 0.16);
   background: ${({ $featured }) => ($featured
     ? 'linear-gradient(100deg, rgba(108, 99, 255, 0.07), rgba(145, 168, 255, 0.035) 62%, transparent)'
     : 'transparent')};
-  transition: transform 200ms ease, background 200ms ease;
+  transition: transform ${motionTokens.duration.base} ${motionTokens.easing.standard}, background ${motionTokens.duration.base} ${motionTokens.easing.standard};
 
   @media (hover: hover) and (pointer: fine) {
     &:hover {
@@ -142,7 +142,7 @@ export const ServiceItem = styled(motion.li)<{ $featured: boolean }>`
     &:hover > span:last-child { transform: translate3d(3px, 0, 0); color: ${colors.highlight}; }
   }
 
-  @media (max-width: 767px) {
+  @media (max-width: ${breakpoints.tabletMax}) {
     min-height: 0;
     padding: 1.5rem 0.25rem;
     grid-template-columns: 2rem minmax(0, 1fr) auto;
@@ -162,7 +162,7 @@ export const Accent = styled.span`
   opacity: 0;
   transform: scaleY(0.25);
   transform-origin: center;
-  transition: transform 200ms ease, opacity 200ms ease;
+  transition: transform ${motionTokens.duration.base} ${motionTokens.easing.standard}, opacity ${motionTokens.duration.base} ${motionTokens.easing.standard};
 `;
 
 export const Number = styled.span`
@@ -180,7 +180,7 @@ export const ServiceCopy = styled.div`
 
 export const ServiceTitle = styled.h3`
   font-family: ${fonts.heading};
-  font-size: clamp(1.3rem, 1.8vw, 1.7rem);
+  font-size: ${homepageTokens.services.itemTitleSize};
   font-weight: 650;
   letter-spacing: -0.035em;
   line-height: 1.1;
@@ -191,7 +191,7 @@ export const ServiceDescription = styled.p`
   margin-top: 0.65rem;
   color: rgba(16, 24, 39, 0.68);
   font-family: ${fonts.primary};
-  font-size: clamp(0.94rem, 1vw, 1rem);
+  font-size: ${homepageTokens.services.itemCopySize};
   line-height: 1.58;
 `;
 
@@ -202,9 +202,9 @@ export const Arrow = styled.span`
   width: 2.5rem;
   height: 2.5rem;
   color: rgba(16, 24, 39, 0.62);
-  transition: transform 200ms ease, color 200ms ease;
+  transition: transform ${motionTokens.duration.base} ${motionTokens.easing.standard}, color ${motionTokens.duration.base} ${motionTokens.easing.standard};
 
-  @media (max-width: 480px) {
+  @media (max-width: ${breakpoints.mobileMax}) {
     width: 2rem;
     height: 2rem;
   }

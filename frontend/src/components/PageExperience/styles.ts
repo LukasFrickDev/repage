@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import styled, { keyframes } from 'styled-components';
-import { colors } from '../../styles/globalStyles';
+import { colors } from '../../styles/theme';
 
 const float = keyframes`
   0%, 100% { transform: translate3d(0, 0, 0); }

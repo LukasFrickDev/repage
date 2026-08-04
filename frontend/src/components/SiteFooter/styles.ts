@@ -1,20 +1,20 @@
 import styled from 'styled-components';
-import { colors, fonts } from '../../styles/globalStyles';
+import { breakpoints, colors, fonts, homepageTokens, layout, motion } from '../../styles/theme';
 
 export const Footer = styled.footer`
-  padding: clamp(2.5rem, 5vw, 4.5rem) clamp(1rem, 4vw, 4.5rem);
+  padding: ${layout.footerPaddingBlock} ${homepageTokens.sectionPaddingInline};
   border-top: 1px solid rgba(185, 192, 204, 0.12);
-  background: linear-gradient(180deg, #0d1522, ${colors.background});
+  background: linear-gradient(180deg, ${colors.inkDeep}, ${colors.background});
   color: ${colors.white};
 `;
 
 export const Container = styled.div`
-  width: min(100%, 1440px);
+  width: ${layout.containerWidth};
   margin-inline: auto;
   display: grid;
-  gap: clamp(2rem, 4vw, 4rem);
+  gap: ${layout.footerContentGap};
 
-  @media (min-width: 900px) {
+  @media (min-width: ${breakpoints.content}) {
     grid-template-columns: minmax(16rem, 1.1fr) minmax(20rem, 0.9fr) minmax(16rem, 0.8fr);
     align-items: end;
   }
@@ -49,7 +49,7 @@ export const BrandDescription = styled.p`
 export const Navigation = styled.nav`
   display: flex;
   flex-wrap: wrap;
-  gap: 0.35rem clamp(1.1rem, 2vw, 2rem);
+  gap: 0.35rem ${layout.footerNavigationGap};
 
   a {
     position: relative;
@@ -59,7 +59,7 @@ export const Navigation = styled.nav`
     font-size: 0.86rem;
     font-weight: 540;
     text-decoration: none;
-    transition: color 180ms ease;
+    transition: color ${motion.duration.fast} ${motion.easing.standard};
   }
 
   a::after {
@@ -72,7 +72,7 @@ export const Navigation = styled.nav`
     background: linear-gradient(90deg, ${colors.highlight}, ${colors.neonBlue});
     transform: scaleX(0);
     transform-origin: left;
-    transition: transform 180ms ease;
+    transition: transform ${motion.duration.fast} ${motion.easing.standard};
   }
 
   a:hover, a:focus-visible { color: ${colors.white}; }
@@ -84,7 +84,7 @@ export const Navigation = styled.nav`
 `;
 
 export const Meta = styled.div`
-  @media (min-width: 900px) { text-align: right; }
+  @media (min-width: ${breakpoints.content}) { text-align: right; }
 
   p {
     color: rgba(245, 242, 236, 0.76);

@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import styled, { css } from 'styled-components';
-import { colors, fonts } from '../../styles/globalStyles';
+import { breakpoints, colors, fonts, layout, motion as motionTokens } from '../../styles/theme';
 
 export const Header = styled(motion.header)<{ $scrolled: boolean; $open: boolean }>`
   position: fixed;
@@ -8,7 +8,7 @@ export const Header = styled(motion.header)<{ $scrolled: boolean; $open: boolean
   z-index: 20;
   border-bottom: 1px solid transparent;
   background: transparent;
-  transition: background 220ms ease, border-color 220ms ease, box-shadow 220ms ease;
+  transition: background ${motionTokens.duration.medium} ${motionTokens.easing.standard}, border-color ${motionTokens.duration.medium} ${motionTokens.easing.standard}, box-shadow ${motionTokens.duration.medium} ${motionTokens.easing.standard};
 
   ${({ $scrolled, $open }) => ($scrolled || $open) && css`
     border-color: rgba(245, 242, 236, 0.11);
@@ -19,8 +19,8 @@ export const Header = styled(motion.header)<{ $scrolled: boolean; $open: boolean
 `;
 
 export const Inner = styled.div`
-  width: min(calc(100% - clamp(2rem, 8vw, 9rem)), 1440px);
-  height: clamp(4.25rem, 5.2vw, 4.75rem);
+  width: ${layout.headerInlineWidth};
+  height: ${layout.headerHeight};
   margin-inline: auto;
   display: flex;
   align-items: center;
@@ -46,7 +46,7 @@ export const Brand = styled.a`
 export const DesktopNavigation = styled.nav`
   display: none;
   align-items: center;
-  gap: clamp(1.15rem, 2.3vw, 2.3rem);
+  gap: ${layout.headerNavigationGap};
 
   a {
     position: relative;
@@ -56,7 +56,7 @@ export const DesktopNavigation = styled.nav`
     font-size: 0.88rem;
     font-weight: 540;
     text-decoration: none;
-    transition: color 160ms ease;
+    transition: color ${motionTokens.duration.quick} ${motionTokens.easing.standard};
   }
 
   a::after {
@@ -69,13 +69,13 @@ export const DesktopNavigation = styled.nav`
     background: linear-gradient(90deg, ${colors.highlight}, ${colors.neonBlue});
     transform: scaleX(0);
     transform-origin: left;
-    transition: transform 180ms ease;
+    transition: transform ${motionTokens.duration.fast} ${motionTokens.easing.standard};
   }
 
   a:hover, a:focus-visible { color: ${colors.white}; }
   a:hover::after, a:focus-visible::after { transform: scaleX(1); }
 
-  @media (min-width: 900px) { display: flex; }
+  @media (min-width: ${breakpoints.content}) { display: flex; }
 `;
 
 const cta = `
@@ -85,16 +85,16 @@ const cta = `
   justify-content: center;
   gap: 0.55rem;
   border: 1px solid transparent;
-  border-radius: 10px;
+  border-radius: ${layout.radii.control};
   background: linear-gradient(105deg, ${colors.highlight}, ${colors.neonBlue});
   color: ${colors.background};
   font-family: ${fonts.primary};
   font-size: 0.84rem;
   font-weight: 650;
   text-decoration: none;
-  transition: transform 180ms ease, box-shadow 180ms ease;
+  transition: transform ${motionTokens.duration.fast} ${motionTokens.easing.standard}, box-shadow ${motionTokens.duration.fast} ${motionTokens.easing.standard};
 
-  svg { transition: transform 180ms ease; }
+  svg { transition: transform ${motionTokens.duration.fast} ${motionTokens.easing.standard}; }
   &:hover { transform: translateY(-1px); box-shadow: 0 10px 26px rgba(108, 99, 255, 0.24); }
   &:hover svg { transform: translateX(3px); }
 `;
@@ -102,7 +102,7 @@ const cta = `
 export const DesktopCta = styled.a`
   ${cta}
   display: none;
-  @media (min-width: 900px) { display: inline-flex; }
+  @media (min-width: ${breakpoints.content}) { display: inline-flex; }
 `;
 
 export const MenuButton = styled.button`
@@ -112,17 +112,17 @@ export const MenuButton = styled.button`
   height: 2.65rem;
   padding: 0;
   border: 1px solid rgba(245, 242, 236, 0.22);
-  border-radius: 10px;
+  border-radius: ${layout.radii.control};
   background: transparent;
   color: ${colors.white};
 
-  @media (min-width: 900px) { display: none; }
+  @media (min-width: ${breakpoints.content}) { display: none; }
 `;
 
 export const MobilePanel = styled.div<{ $open: boolean }>`
   display: grid;
   grid-template-rows: ${({ $open }) => ($open ? '1fr' : '0fr')};
-  transition: grid-template-rows 200ms ease;
+  transition: grid-template-rows ${motionTokens.duration.base} ${motionTokens.easing.standard};
 
   > nav {
     width: min(calc(100% - 2rem), 640px);
@@ -141,7 +141,7 @@ export const MobilePanel = styled.div<{ $open: boolean }>`
     text-decoration: none;
   }
 
-  @media (min-width: 900px) { display: none; }
+  @media (min-width: ${breakpoints.content}) { display: none; }
 `;
 
 export const MobileCta = styled.a`
