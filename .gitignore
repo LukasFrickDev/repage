@@ -1,0 +1,86 @@
+# Environment variables
+.env
+.env.*
+!.env.example
+!.env.*.example
+
+# Secrets and local credentials
+*.pem
+*.key
+*.crt
+secrets/
+credentials/
+
+# Node / frontend
+node_modules/
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+frontend/coverage/
+frontend/playwright-report/
+frontend/test-results/
+frontend/.eslintcache
+*.tsbuildinfo
+
+# Python / backend
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+backend/.venv/
+backend/venv/
+backend/env/
+.venv/
+venv/
+
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+
+# Django
+backend/staticfiles/
+backend/media/
+backend/logs/
+*.log
+
+# Local databases
+*.sqlite3
+*.sqlite3-journal
+
+# Python packaging
+build/
+dist/
+*.egg-info/
+.eggs/
+pip-wheel-metadata/
+
+# IDEs and editors
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.example.json
+.idea/
+*.code-workspace
+
+# Operating system
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+.cache/
+tmp/
+temp/
+
+# Local tooling
+.codex/
+.claude/
