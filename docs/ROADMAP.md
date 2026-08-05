@@ -16,7 +16,7 @@ A V1 deve servir como referência comercial da marca, apoiar prospecção e cond
 * Fundação documental aprovada e materializada.
 * Frontend em React, TypeScript, Vite e Styled Components.
 * Framer Motion, homepage responsiva, logo, marca, tokens e direção visual disponíveis.
-* Roteamento público, páginas auxiliares e layout compartilhado ainda não materializados.
+* Roteamento público, páginas auxiliares, `PublicLayout`, âncoras, gerenciamento de foco e scroll, menu mobile acessível, metadados básicos e testes automatizados materializados na entrega 1.
 * Portfólio, cases, conteúdo e mídias reais ainda incompletos.
 * Formulário ainda sem persistência.
 * Backend, PostgreSQL e e-mails ainda inexistentes.
