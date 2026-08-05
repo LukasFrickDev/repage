@@ -1,18 +1,12 @@
-import React from 'react';
-import { BrowserRouter } from 'react-router-dom';
-import { Provider } from 'react-redux';
-import store from '../src/store';
+import Home from './pages/Home';
 import GlobalStyles from './styles/globalStyles';
-import Rotas from './routes';
 
-const App: React.FC = () => {
+const App = () => {
   return (
-    <Provider store={store}>
+    <>
       <GlobalStyles />
-      <BrowserRouter>
-        <Rotas />
-      </BrowserRouter>
-    </Provider>
+      <Home />
+    </>
   );
 };
 

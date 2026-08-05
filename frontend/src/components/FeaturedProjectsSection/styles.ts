@@ -1,12 +1,12 @@
 import { motion } from 'framer-motion';
 import styled, { css } from 'styled-components';
-import { colors, fonts } from '../../styles/globalStyles';
+import { breakpoints, colors, fonts, homepageTokens, layout } from '../../styles/theme';
 
 export const Section = styled.section`
   position: relative;
   isolation: isolate;
   overflow: hidden;
-  padding: clamp(5rem, 8vw, 8.5rem) clamp(1rem, 4vw, 4.5rem);
+  padding: ${homepageTokens.sectionPaddingBlock} ${homepageTokens.sectionPaddingInline};
   border-top: 1px solid rgba(145, 168, 255, 0.12);
   background: ${colors.background};
   color: ${colors.white};
@@ -20,28 +20,28 @@ export const Section = styled.section`
       radial-gradient(circle at 88% 10%, rgba(108, 99, 255, 0.1), transparent 28%),
       linear-gradient(rgba(145, 168, 255, 0.035) 1px, transparent 1px),
       linear-gradient(90deg, rgba(145, 168, 255, 0.035) 1px, transparent 1px);
-    background-size: auto, clamp(40px, 4vw, 64px) clamp(40px, 4vw, 64px), clamp(40px, 4vw, 64px) clamp(40px, 4vw, 64px);
+    background-size: auto, ${homepageTokens.projects.backgroundGridSize} ${homepageTokens.projects.backgroundGridSize}, ${homepageTokens.projects.backgroundGridSize} ${homepageTokens.projects.backgroundGridSize};
     mask-image: linear-gradient(to bottom, #000, transparent 78%);
     pointer-events: none;
   }
 
-  @media (max-width: 767px) {
-    padding-block: clamp(4.25rem, 16vw, 5.5rem);
+  @media (max-width: ${breakpoints.tabletMax}) {
+    padding-block: ${homepageTokens.mobileSectionPaddingBlock};
   }
 `;
 
 export const Container = styled.div`
-  width: min(100%, 1440px);
+  width: ${layout.containerWidth};
   margin-inline: auto;
 `;
 
 export const Heading = styled(motion.div)`
   display: grid;
-  gap: clamp(1.5rem, 4vw, 5rem);
+  gap: ${homepageTokens.sectionGap};
   align-items: end;
-  margin-bottom: clamp(3.5rem, 6vw, 6.5rem);
+  margin-bottom: ${homepageTokens.headingMarginBottom};
 
-  @media (min-width: 900px) {
+  @media (min-width: ${breakpoints.content}) {
     grid-template-columns: minmax(0, 1fr) minmax(20rem, 0.62fr);
   }
 `;
@@ -54,12 +54,12 @@ export const Eyebrow = styled.p`
   display: flex;
   align-items: center;
   gap: 0.7rem;
-  margin-bottom: clamp(1.25rem, 2vw, 1.75rem);
+  margin-bottom: ${homepageTokens.eyebrowMarginBottom};
   color: ${colors.neonBlue};
   font-family: ${fonts.primary};
-  font-size: clamp(0.75rem, 0.82vw, 0.84rem);
+  font-size: ${homepageTokens.eyebrowSize};
   font-weight: 650;
-  letter-spacing: 0.075em;
+  letter-spacing: ${homepageTokens.eyebrowTracking};
   text-transform: uppercase;
 
   &::before {
@@ -73,24 +73,24 @@ export const Eyebrow = styled.p`
 export const Title = styled.h2`
   max-width: 13ch;
   font-family: ${fonts.heading};
-  font-size: clamp(2.5rem, 4.5vw, 4.8rem);
+  font-size: ${homepageTokens.sectionTitleSize};
   font-weight: 650;
-  letter-spacing: -0.058em;
-  line-height: 0.98;
+  letter-spacing: ${homepageTokens.sectionTitleTracking};
+  line-height: ${homepageTokens.sectionTitleLineHeight};
   text-wrap: balance;
 `;
 
 export const Description = styled.p`
-  max-width: 35rem;
+  max-width: ${homepageTokens.copyMaxWidth};
   color: ${colors.textSecondary};
   font-family: ${fonts.primary};
-  font-size: clamp(1rem, 1.1vw, 1.1rem);
-  line-height: 1.65;
+  font-size: ${homepageTokens.sectionCopySize};
+  line-height: ${homepageTokens.sectionCopyLineHeight};
 `;
 
 export const ProjectList = styled.ol`
   display: grid;
-  gap: clamp(2.75rem, 6vw, 6rem);
+  gap: ${homepageTokens.projects.listGap};
   margin: 0;
   padding: 0;
   list-style: none;
@@ -102,7 +102,7 @@ export const Project = styled(motion.li)`
   min-width: 0;
   border-top: 1px solid rgba(185, 192, 204, 0.2);
 
-  @media (min-width: 900px) {
+  @media (min-width: ${breakpoints.content}) {
     grid-template-columns: minmax(0, 1.38fr) minmax(16rem, 0.62fr);
     align-items: stretch;
 
@@ -115,19 +115,10 @@ export const Project = styled(motion.li)`
   }
 `;
 
-const previewVariant = ($variant: number) => {
-  const variants = [
-    css`--accent-position: 76% 24%; --plane-rotate: -2deg; --word-x: 4%;`,
-    css`--accent-position: 24% 72%; --plane-rotate: 2deg; --word-x: 10%;`,
-    css`--accent-position: 82% 72%; --plane-rotate: -1deg; --word-x: 6%;`,
-    css`--accent-position: 28% 24%; --plane-rotate: 1.5deg; --word-x: 12%;`,
-  ];
-
-  return variants[$variant] ?? variants[0];
-};
+const previewAccentPosition = ($variant: number) => ['76% 24%', '24% 72%', '82% 72%', '28% 24%'][$variant] ?? '76% 24%';
+const previewRotation = ($variant: number) => ['-2deg', '2deg', '-1deg', '1.5deg'][$variant] ?? '-2deg';
 
 export const Preview = styled.div<{ $variant: number }>`
-  ${({ $variant }) => previewVariant($variant)}
   position: relative;
   min-width: 0;
   aspect-ratio: 16 / 8.7;
@@ -135,10 +126,10 @@ export const Preview = styled.div<{ $variant: number }>`
   border-inline: 1px solid rgba(145, 168, 255, 0.16);
   border-bottom: 1px solid rgba(145, 168, 255, 0.16);
   background:
-    radial-gradient(circle at var(--accent-position), rgba(108, 99, 255, 0.28), transparent 26%),
+    radial-gradient(circle at ${({ $variant }) => previewAccentPosition($variant)}, rgba(108, 99, 255, 0.28), transparent 26%),
     linear-gradient(rgba(145, 168, 255, 0.06) 1px, transparent 1px),
     linear-gradient(90deg, rgba(145, 168, 255, 0.06) 1px, transparent 1px),
-    #151f31;
+    ${colors.inkRaised};
   background-size: auto, 9% 16%, 9% 16%, auto;
 
   &::after {
@@ -153,23 +144,21 @@ export const Preview = styled.div<{ $variant: number }>`
 
   @media (hover: hover) and (pointer: fine) {
     ${Project}:hover &::after { transform: translate3d(20%, 0, 0); }
-    ${Project}:hover & > div:last-child { transform: translate3d(0, -4px, 0) rotate(var(--plane-rotate)); border-color: rgba(145, 168, 255, 0.42); }
   }
 
-  @media (max-width: 599px) { aspect-ratio: 1.15 / 1; }
+  @media (max-width: ${breakpoints.compactMax}) { aspect-ratio: 1.15 / 1; }
 
   @media (prefers-reduced-motion: reduce) {
     &::after { transition: none; }
     ${Project}:hover &::after { transform: translate3d(-20%, 0, 0); }
-    ${Project}:hover & > div:last-child { transform: rotate(var(--plane-rotate)); }
   }
 `;
 
 export const PreviewIndex = styled.span`
   position: absolute;
   z-index: 2;
-  top: clamp(1rem, 2vw, 1.5rem);
-  left: clamp(1rem, 2vw, 1.5rem);
+  top: ${homepageTokens.projects.previewInset};
+  left: ${homepageTokens.projects.previewInset};
   color: ${colors.neonBlue};
   font-family: ${fonts.ui};
   font-size: 0.72rem;
@@ -180,17 +169,21 @@ export const PreviewIndex = styled.span`
 export const ProjectWord = styled.span`
   position: absolute;
   z-index: 1;
-  left: var(--word-x);
+  left: 4%;
   bottom: -0.08em;
   max-width: 90%;
   overflow: hidden;
   color: rgba(245, 242, 236, 0.06);
   font-family: ${fonts.heading};
-  font-size: clamp(3.25rem, 7vw, 7.75rem);
+  font-size: ${homepageTokens.projects.wordSize};
   font-weight: 650;
   letter-spacing: -0.07em;
   line-height: 0.8;
   white-space: nowrap;
+
+  ${Project}:nth-child(2) & { left: 10%; }
+  ${Project}:nth-child(3) & { left: 6%; }
+  ${Project}:nth-child(4) & { left: 12%; }
 `;
 
 export const InterfacePlane = styled.div<{ $variant: number }>`
@@ -201,13 +194,23 @@ export const InterfacePlane = styled.div<{ $variant: number }>`
   border: 1px solid rgba(245, 242, 236, 0.2);
   background: rgba(16, 24, 39, 0.94);
   box-shadow: 0 24px 60px rgba(4, 8, 17, 0.4), 12px 16px 44px rgba(108, 99, 255, 0.1);
-  transform: rotate(var(--plane-rotate));
+  transform: rotate(${({ $variant }) => previewRotation($variant)});
   transition: transform 260ms ease, border-color 260ms ease;
 
   ${({ $variant }) => $variant % 2 === 1 && css`inset: 13% 14% 15% 9%;`}
 
-  @media (max-width: 599px) { inset: 17% 7% 12% 9%; }
-  @media (prefers-reduced-motion: reduce) { transition: none; }
+  @media (hover: hover) and (pointer: fine) {
+    ${Project}:hover & {
+      transform: translate3d(0, -4px, 0) rotate(${({ $variant }) => previewRotation($variant)});
+      border-color: rgba(145, 168, 255, 0.42);
+    }
+  }
+
+  @media (max-width: ${breakpoints.compactMax}) { inset: 17% 7% 12% 9%; }
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+    ${Project}:hover & { transform: rotate(${({ $variant }) => previewRotation($variant)}); }
+  }
 `;
 
 export const InterfaceHeader = styled.div`
@@ -218,7 +221,7 @@ export const InterfaceHeader = styled.div`
   align-items: center;
   gap: 5px;
   border-bottom: 1px solid rgba(185, 192, 204, 0.13);
-  background: #141e30;
+  background: ${colors.inkHeader};
 
   i {
     width: 5px;
@@ -263,7 +266,7 @@ export const InterfaceLead = styled.div`
   display: grid;
   gap: 7px;
 
-  i { height: clamp(5px, 0.7vw, 9px); background: rgba(245, 242, 236, 0.68); }
+  i { height: ${homepageTokens.projects.interfaceLineHeight}; background: rgba(245, 242, 236, 0.68); }
   i:first-child { width: 58%; }
   i:last-child { width: 36%; background: ${colors.neonBlue}; }
 `;
@@ -280,15 +283,15 @@ export const InterfaceGrid = styled.div`
 `;
 
 export const ProjectInfo = styled.div`
-  padding: clamp(1.5rem, 3vw, 3rem);
+  padding: ${homepageTokens.projects.infoPadding};
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
   border-bottom: 1px solid rgba(185, 192, 204, 0.2);
   background: rgba(20, 30, 48, 0.52);
 
-  @media (max-width: 899px) { min-height: 11rem; }
-  @media (max-width: 599px) { min-height: 9.5rem; padding-inline: 1.25rem; }
+  @media (max-width: ${breakpoints.contentMax}) { min-height: 11rem; }
+  @media (max-width: ${breakpoints.compactMax}) { min-height: 9.5rem; padding-inline: 1.25rem; }
 `;
 
 export const ProjectNumber = styled.span`
@@ -303,7 +306,7 @@ export const ProjectNumber = styled.span`
 export const ProjectTitle = styled.h3`
   margin-top: 2rem;
   font-family: ${fonts.heading};
-  font-size: clamp(1.65rem, 2.8vw, 2.75rem);
+  font-size: ${homepageTokens.projects.titleSize};
   font-weight: 650;
   letter-spacing: -0.05em;
   line-height: 1;
@@ -313,6 +316,6 @@ export const ProjectCategory = styled.p`
   margin-top: 0.75rem;
   color: ${colors.textSecondary};
   font-family: ${fonts.primary};
-  font-size: clamp(0.88rem, 1vw, 0.98rem);
+  font-size: ${homepageTokens.projects.categorySize};
   line-height: 1.45;
 `;

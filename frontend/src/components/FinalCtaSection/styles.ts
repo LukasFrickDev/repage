@@ -1,12 +1,12 @@
 import { motion } from 'framer-motion';
 import styled from 'styled-components';
-import { colors, fonts } from '../../styles/globalStyles';
+import { breakpoints, colors, fonts, homepageTokens, layout } from '../../styles/theme';
 
 export const Section = styled.section`
   position: relative;
   isolation: isolate;
   overflow: hidden;
-  padding: clamp(5.5rem, 10vw, 10rem) clamp(1rem, 4vw, 4.5rem);
+  padding: ${homepageTokens.finalCta.sectionPaddingBlock} ${homepageTokens.sectionPaddingInline};
   border-top: 1px solid rgba(145, 168, 255, 0.12);
   background:
     linear-gradient(180deg, rgba(24, 34, 53, 0.96), ${colors.background}),
@@ -35,7 +35,7 @@ export const Section = styled.section`
     background:
       linear-gradient(rgba(145, 168, 255, 0.045) 1px, transparent 1px),
       linear-gradient(90deg, rgba(145, 168, 255, 0.045) 1px, transparent 1px);
-    background-size: clamp(40px, 4vw, 64px) clamp(40px, 4vw, 64px);
+    background-size: ${homepageTokens.finalCta.backgroundGridSize} ${homepageTokens.finalCta.backgroundGridSize};
     mask-image: radial-gradient(ellipse at center, #000, transparent 72%);
     pointer-events: none;
   }
@@ -62,7 +62,7 @@ export const Convergence = styled.div`
   i:nth-child(2) { left: 50%; background: linear-gradient(transparent, rgba(145, 168, 255, 0.42), transparent 88%); }
   i:last-child { right: 18%; transform: rotate(8deg); }
 
-  @media (max-width: 767px) {
+  @media (max-width: ${breakpoints.tabletMax}) {
     inset-inline: -20%;
     opacity: 0.65;
   }
@@ -81,17 +81,17 @@ export const Eyebrow = styled.p`
   align-items: center;
   justify-content: center;
   gap: 0.7rem;
-  margin-bottom: clamp(1.25rem, 2vw, 1.75rem);
+  margin-bottom: ${homepageTokens.eyebrowMarginBottom};
   color: ${colors.neonBlue};
   font-family: ${fonts.primary};
-  font-size: clamp(0.75rem, 0.82vw, 0.84rem);
+  font-size: ${homepageTokens.eyebrowSize};
   font-weight: 650;
-  letter-spacing: 0.075em;
+  letter-spacing: ${homepageTokens.eyebrowTracking};
   text-transform: uppercase;
 
   &::before, &::after {
     content: '';
-    width: clamp(1.25rem, 3vw, 2.5rem);
+    width: ${homepageTokens.finalCta.eyebrowLineWidth};
     height: 1px;
     background: linear-gradient(90deg, transparent, ${colors.highlight});
   }
@@ -102,32 +102,32 @@ export const Eyebrow = styled.p`
 export const Title = styled.h2`
   margin-inline: auto;
   font-family: ${fonts.heading};
-  font-size: clamp(2.75rem, 5.5vw, 5.75rem);
+  font-size: ${homepageTokens.sectionTitleSize};
   font-weight: 650;
-  letter-spacing: -0.065em;
-  line-height: 0.96;
+  letter-spacing: ${homepageTokens.sectionTitleTracking};
+  line-height: ${homepageTokens.sectionTitleLineHeight};
   text-wrap: balance;
 `;
 
 export const Description = styled.p`
   max-width: 39rem;
-  margin: clamp(1.5rem, 2.5vw, 2.25rem) auto 0;
+  margin: ${homepageTokens.sectionCopyMarginTop} auto 0;
   color: ${colors.textSecondary};
   font-family: ${fonts.primary};
-  font-size: clamp(1rem, 1.1vw, 1.1rem);
-  line-height: 1.65;
+  font-size: ${homepageTokens.sectionCopySize};
+  line-height: ${homepageTokens.sectionCopyLineHeight};
 `;
 
 export const Cta = styled.button`
   min-height: 3.5rem;
-  margin-top: clamp(2rem, 4vw, 3rem);
+  margin-top: ${homepageTokens.finalCta.ctaMarginTop};
   padding: 0.9rem 1.35rem;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.7rem;
   border: 1px solid rgba(245, 242, 236, 0.14);
-  border-radius: 12px;
+  border-radius: ${layout.radii.action};
   background: linear-gradient(105deg, ${colors.highlight}, ${colors.neonBlue});
   box-shadow: 0 16px 42px rgba(108, 99, 255, 0.24), 0 0 0 1px rgba(145, 168, 255, 0.1);
   color: ${colors.background};
@@ -140,7 +140,7 @@ export const Cta = styled.button`
 
   svg { flex: 0 0 auto; }
 
-  @media (max-width: 480px) {
+  @media (max-width: ${breakpoints.mobileMax}) {
     width: min(100%, 22rem);
   }
 `;

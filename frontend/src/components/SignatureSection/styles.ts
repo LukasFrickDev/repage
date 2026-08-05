@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import styled, { css, keyframes } from 'styled-components';
-import { colors, fonts } from '../../styles/globalStyles';
+import { breakpoints, colors, fonts, homepageTokens, layout } from '../../styles/theme';
 
 const traceFlow = keyframes`
   from { background-position: 180% 50%; }
@@ -11,7 +11,7 @@ export const Section = styled.section`
   position: relative;
   isolation: isolate;
   overflow: hidden;
-  padding: clamp(5rem, 8vw, 8.5rem) clamp(1rem, 4vw, 4.5rem);
+  padding: ${homepageTokens.sectionPaddingBlock} ${homepageTokens.sectionPaddingInline};
   border-top: 1px solid rgba(145, 168, 255, 0.12);
   background:
     radial-gradient(circle at 86% 28%, rgba(108, 99, 255, 0.1), transparent 30%),
@@ -21,13 +21,13 @@ export const Section = styled.section`
 
 export const Container = styled.div`
   position: relative;
-  width: min(100%, 1440px);
+  width: ${layout.containerWidth};
   margin-inline: auto;
   display: grid;
   align-items: center;
-  gap: clamp(2rem, 5vw, 6rem);
+  gap: ${homepageTokens.signature.contentGap};
 
-  @media (min-width: 768px) {
+  @media (min-width: ${breakpoints.tablet}) {
     grid-template-columns: minmax(0, 0.95fr) minmax(18rem, 0.75fr);
   }
 `;
@@ -37,7 +37,7 @@ export const Content = styled(motion.div)`
   z-index: 3;
   max-width: 45rem;
 
-  @media (max-width: 767px) {
+  @media (max-width: ${breakpoints.tabletMax}) {
     &::before {
       content: '';
       position: absolute;
@@ -53,12 +53,12 @@ export const Eyebrow = styled.p`
   display: flex;
   align-items: center;
   gap: 0.7rem;
-  margin-bottom: clamp(1.25rem, 2vw, 1.75rem);
+  margin-bottom: ${homepageTokens.eyebrowMarginBottom};
   color: ${colors.neonBlue};
   font-family: ${fonts.primary};
-  font-size: clamp(0.75rem, 0.82vw, 0.84rem);
+  font-size: ${homepageTokens.eyebrowSize};
   font-weight: 650;
-  letter-spacing: 0.075em;
+  letter-spacing: ${homepageTokens.eyebrowTracking};
   text-transform: uppercase;
 
   &::before {
@@ -72,24 +72,24 @@ export const Eyebrow = styled.p`
 export const Title = styled.h2`
   max-width: 12ch;
   font-family: ${fonts.heading};
-  font-size: clamp(2.75rem, 5vw, 5.25rem);
+  font-size: ${homepageTokens.sectionTitleSize};
   font-weight: 650;
-  letter-spacing: -0.065em;
-  line-height: 0.96;
+  letter-spacing: ${homepageTokens.sectionTitleTracking};
+  line-height: ${homepageTokens.sectionTitleLineHeight};
   text-wrap: balance;
 `;
 
 export const Description = styled.p`
   max-width: 38rem;
-  margin-top: clamp(1.5rem, 2.5vw, 2.25rem);
+  margin-top: ${homepageTokens.sectionCopyMarginTop};
   color: ${colors.textSecondary};
   font-family: ${fonts.primary};
-  font-size: clamp(1rem, 1.1vw, 1.1rem);
-  line-height: 1.65;
+  font-size: ${homepageTokens.sectionCopySize};
+  line-height: ${homepageTokens.sectionCopyLineHeight};
 `;
 
 export const Signature = styled.div`
-  margin-top: clamp(2.5rem, 4vw, 4rem);
+  margin-top: ${homepageTokens.signature.signatureMarginTop};
   display: flex;
   align-items: center;
   gap: 0.9rem;
@@ -106,7 +106,7 @@ export const SignatureName = styled.strong`
   display: block;
   color: ${colors.white};
   font-family: ${fonts.primary};
-  font-size: clamp(0.86rem, 1vw, 0.96rem);
+  font-size: ${homepageTokens.signature.nameSize};
   font-weight: 620;
   line-height: 1.35;
 `;
@@ -116,7 +116,7 @@ export const SignatureRole = styled.span`
   margin-top: 0.2rem;
   color: rgba(185, 192, 204, 0.68);
   font-family: ${fonts.primary};
-  font-size: clamp(0.75rem, 0.85vw, 0.82rem);
+  font-size: ${homepageTokens.signature.roleSize};
   line-height: 1.35;
 `;
 
@@ -134,7 +134,7 @@ export const Identity = styled(motion.div)`
   border-right: 1px solid rgba(145, 168, 255, 0.08);
   background: linear-gradient(135deg, rgba(24, 34, 53, 0.78), rgba(16, 24, 39, 0.22));
 
-  @media (max-width: 767px) {
+  @media (max-width: ${breakpoints.tabletMax}) {
     position: absolute;
     z-index: 1;
     top: -8%;
@@ -212,7 +212,7 @@ export const SymbolField = styled(motion.div)`
     filter: drop-shadow(0 0 30px rgba(108, 99, 255, 0.24));
   }
 
-  @media (max-width: 767px) {
+  @media (max-width: ${breakpoints.tabletMax}) {
     top: 8%;
     right: -5%;
     width: 86%;
@@ -236,7 +236,7 @@ export const SignalPoint = styled.span<{ $position: 'one' | 'two' | 'three' }>`
     three: css`bottom: 18.5%; left: 42%; transform: translate3d(var(--pointer-y), calc(0px - var(--pointer-x)), 0);`,
   })[$position]}
 
-  @media (max-width: 1099px) { transition: none; }
+  @media (max-width: ${breakpoints.signaturePointerMax}) { transition: none; }
   @media (prefers-reduced-motion: reduce) { transform: none; transition: none; }
 `;
 
@@ -250,7 +250,7 @@ export const EdgeNotation = styled.div`
 
   i {
     display: block;
-    width: clamp(18px, 3vw, 34px);
+    width: ${homepageTokens.signature.notationWidth};
     height: 3px;
     background: rgba(185, 192, 204, 0.18);
   }
