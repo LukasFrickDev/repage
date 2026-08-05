@@ -7,7 +7,7 @@ const lightShift = keyframes`
   50% { opacity: 0.8; transform: translate3d(-1.5%, 1%, 0) scale(1.025); }
 `;
 
-export const Page = styled.main`
+export const Page = styled.div`
   min-width: 0;
   overflow-x: clip;
   background: ${colors.background};

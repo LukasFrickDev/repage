@@ -4,10 +4,15 @@ type NavigationItem = {
 };
 
 export const navigation: NavigationItem[] = [
-  { label: 'Serviços', href: '#servicos' },
-  { label: 'Projetos', href: '#projetos' },
-  { label: 'Como funciona', href: '#processo' },
-  { label: 'Sobre', href: '#sobre' },
+  { label: 'Serviços', href: '/#servicos' },
+  { label: 'Projetos', href: '/portfolio' },
+  { label: 'Como funciona', href: '/#processo' },
+  { label: 'Sobre', href: '/#sobre' },
+];
+
+export const legalNavigation: NavigationItem[] = [
+  { label: 'Privacidade', href: '/privacidade' },
+  { label: 'Cookies', href: '/cookies' },
 ];
 
 export const heroContent = {
@@ -15,8 +20,8 @@ export const heroContent = {
   title: 'Uma nova página para o seu negócio começa aqui.',
   description:
     'Criamos sites claros, rápidos e sob medida para empresas e profissionais que precisam transmitir confiança e transformar visitas em novos contatos.',
-  primaryCta: { label: 'Solicitar orçamento', href: '#briefing' },
-  secondaryCta: { label: 'Conhecer projetos', href: '#projetos' },
+  primaryCta: { label: 'Solicitar orçamento', href: '/#contato' },
+  secondaryCta: { label: 'Conhecer projetos', href: '/portfolio' },
 };
 
 export const servicesSectionContent = {
@@ -97,9 +102,7 @@ export const signatureSectionContent = {
 export const finalCtaSectionContent = {
   eyebrow: 'Seu próximo site começa aqui',
   title: 'Vamos criar uma presença digital à altura do seu negócio.',
-  description:
-    'Conte um pouco sobre o que você precisa. A partir daí, alinhamos a melhor direção para o seu projeto.',
-  ctaLabel: 'Solicitar orçamento',
+  description: 'O canal de contato está em preparação. Em breve, será possível enviar uma solicitação por aqui.',
 };
 
 export const siteFooterContent = {

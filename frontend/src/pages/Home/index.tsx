@@ -1,22 +1,22 @@
 import { ArrowRight } from 'lucide-react';
 import { useReducedMotion } from 'framer-motion';
+import { Link } from 'react-router-dom';
+import { routeMetadata, useRouteMetadata } from '../../app/routeMetadata';
 import { FeaturedProjectsSection } from '../../components/FeaturedProjectsSection';
 import { FinalCtaSection } from '../../components/FinalCtaSection';
-import { HomeHeader } from '../../components/HomeHeader';
 import { PageExperience } from '../../components/PageExperience';
 import { ProcessSection } from '../../components/ProcessSection';
 import { ServicesSection } from '../../components/ServicesSection';
-import { SiteFooter } from '../../components/SiteFooter';
 import { SignatureSection } from '../../components/SignatureSection';
 import { heroContent } from '../../content/repageContent';
 import * as S from './styles';
 
 const Home = () => {
   const prefersReducedMotion = useReducedMotion();
+  useRouteMetadata(routeMetadata.home);
 
   return (
-    <S.Page id="top">
-      <HomeHeader />
+    <S.Page>
       <S.Hero aria-labelledby="hero-title">
         <S.HeroBackdrop aria-hidden="true" />
         <S.HeroInner>
@@ -30,6 +30,8 @@ const Home = () => {
             </S.Eyebrow>
             <S.Title
               id="hero-title"
+              data-route-heading
+              tabIndex={-1}
               initial={prefersReducedMotion ? false : { opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.58, delay: 0.14, ease: [0.22, 1, 0.36, 1] }}
@@ -43,11 +45,11 @@ const Home = () => {
             >
               <S.Description>{heroContent.description}</S.Description>
               <S.Actions>
-                <S.PrimaryCta href={heroContent.primaryCta.href}>
+                <S.PrimaryCta as={Link} to={heroContent.primaryCta.href}>
                   <span>{heroContent.primaryCta.label}</span>
                   <ArrowRight size={18} aria-hidden="true" />
                 </S.PrimaryCta>
-                <S.SecondaryCta href={heroContent.secondaryCta.href}>
+                <S.SecondaryCta as={Link} to={heroContent.secondaryCta.href}>
                   <span>{heroContent.secondaryCta.label}</span>
                   <ArrowRight size={18} aria-hidden="true" />
                 </S.SecondaryCta>
@@ -65,7 +67,6 @@ const Home = () => {
       <ProcessSection />
       <SignatureSection />
       <FinalCtaSection />
-      <SiteFooter />
     </S.Page>
   );
 };

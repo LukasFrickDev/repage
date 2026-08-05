@@ -1,6 +1,6 @@
 # 0001 — Fundação do frontend, roteamento e caminho de conversão
 
-* **Status:** approved
+* **Status:** implemented
 * **Responsável:** Lukas Frick
 * **Data:** 5 de agosto de 2026
 * **Branch-base:** `main`

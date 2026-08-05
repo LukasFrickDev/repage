@@ -9,7 +9,7 @@ export function ServicesSection() {
   const prefersReducedMotion = useReducedMotion();
 
   return (
-    <S.Section id="servicos" aria-labelledby="services-title">
+    <S.Section id="servicos" aria-labelledby="services-title" tabIndex={-1}>
       <S.Container>
         <S.Intro
           initial={prefersReducedMotion ? false : { opacity: 0, y: 16 }}

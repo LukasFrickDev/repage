@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import { breakpoints, colors, fonts, homepageTokens, layout, motion } from '../../styles/theme';
 
@@ -24,7 +25,7 @@ export const BrandBlock = styled.div`
   max-width: 25rem;
 `;
 
-export const Brand = styled.div`
+export const Brand = styled(Link)`
   display: inline-flex;
   align-items: center;
   gap: 0.55rem;
@@ -33,6 +34,7 @@ export const Brand = styled.div`
   font-size: 1.08rem;
   font-weight: 650;
   letter-spacing: -0.05em;
+  text-decoration: none;
 
   img { width: 1.45rem; height: 1.45rem; }
 `;

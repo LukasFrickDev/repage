@@ -37,7 +37,7 @@ export function SignatureSection() {
   };
 
   return (
-    <S.Section id="sobre" aria-labelledby="signature-title">
+    <S.Section id="sobre" aria-labelledby="signature-title" tabIndex={-1}>
       <S.Container>
         <S.Content
           initial={prefersReducedMotion ? false : { opacity: 0, y: 16 }}

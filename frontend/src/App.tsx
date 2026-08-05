@@ -1,12 +1,11 @@
-import Home from './pages/Home';
-import GlobalStyles from './styles/globalStyles';
+import { BrowserRouter } from 'react-router-dom';
+import { AppRoutes } from './app/router';
 
 const App = () => {
   return (
-    <>
-      <GlobalStyles />
-      <Home />
-    </>
+    <BrowserRouter>
+      <AppRoutes />
+    </BrowserRouter>
   );
 };
 

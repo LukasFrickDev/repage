@@ -8,7 +8,7 @@ export function ProcessSection() {
   const prefersReducedMotion = useReducedMotion();
 
   return (
-    <S.Section id="processo" aria-labelledby="process-title">
+    <S.Section id="processo" aria-labelledby="process-title" tabIndex={-1}>
       <S.Container>
         <S.Heading
           initial={prefersReducedMotion ? false : { opacity: 0, y: 16 }}

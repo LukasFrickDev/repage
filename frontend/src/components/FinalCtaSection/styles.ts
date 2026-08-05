@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import styled from 'styled-components';
-import { breakpoints, colors, fonts, homepageTokens, layout } from '../../styles/theme';
+import { breakpoints, colors, fonts, homepageTokens } from '../../styles/theme';
 
 export const Section = styled.section`
   position: relative;
@@ -116,31 +116,4 @@ export const Description = styled.p`
   font-family: ${fonts.primary};
   font-size: ${homepageTokens.sectionCopySize};
   line-height: ${homepageTokens.sectionCopyLineHeight};
-`;
-
-export const Cta = styled.button`
-  min-height: 3.5rem;
-  margin-top: ${homepageTokens.finalCta.ctaMarginTop};
-  padding: 0.9rem 1.35rem;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.7rem;
-  border: 1px solid rgba(245, 242, 236, 0.14);
-  border-radius: ${layout.radii.action};
-  background: linear-gradient(105deg, ${colors.highlight}, ${colors.neonBlue});
-  box-shadow: 0 16px 42px rgba(108, 99, 255, 0.24), 0 0 0 1px rgba(145, 168, 255, 0.1);
-  color: ${colors.background};
-  font-family: ${fonts.primary};
-  font-size: 0.96rem;
-  font-weight: 650;
-  line-height: 1;
-  opacity: 1;
-  cursor: default;
-
-  svg { flex: 0 0 auto; }
-
-  @media (max-width: ${breakpoints.mobileMax}) {
-    width: min(100%, 22rem);
-  }
 `;
