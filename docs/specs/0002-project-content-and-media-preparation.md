@@ -1,12 +1,13 @@
 # 0002 — Preparação de conteúdo e mídias dos projetos
 
-* **Status:** approved
+* **Status:** implemented
 * **Responsável:** Lukas Frick
 * **Data:** 5 de agosto de 2026
 * **Branch-base:** `main`
 * **Entrega do roadmap:** 2 — Organização de conteúdo e mídias reais
 * **Spec predecessora:** `0001-frontend-foundation-and-routing.md`
 * **Documentos relacionados:** `AGENTS.md`, `frontend/AGENTS.md`, `docs/PRODUCT.md`, `docs/ARCHITECTURE.md`, `docs/DESIGN_SYSTEM.md` e `docs/ROADMAP.md`
+* **Commit documental:** `14255ba` — `docs: add project content and media preparation spec`
 
 ## 1. Contexto
 
