@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
 import styled, { css } from 'styled-components';
 import { breakpoints, colors, fonts, layout, motion as motionTokens } from '../../styles/theme';
 
@@ -28,7 +29,7 @@ export const Inner = styled.div`
   gap: 1rem;
 `;
 
-export const Brand = styled.a`
+export const Brand = styled(Link)`
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
@@ -99,7 +100,7 @@ const cta = `
   &:hover svg { transform: translateX(3px); }
 `;
 
-export const DesktopCta = styled.a`
+export const DesktopCta = styled(Link)`
   ${cta}
   display: none;
   @media (min-width: ${breakpoints.content}) { display: inline-flex; }
@@ -119,10 +120,19 @@ export const MenuButton = styled.button`
   @media (min-width: ${breakpoints.content}) { display: none; }
 `;
 
-export const MobilePanel = styled.div<{ $open: boolean }>`
+export const MenuStatus = styled.span`
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+`;
+
+export const MobilePanel = styled.div`
   display: grid;
-  grid-template-rows: ${({ $open }) => ($open ? '1fr' : '0fr')};
-  transition: grid-template-rows ${motionTokens.duration.base} ${motionTokens.easing.standard};
 
   > nav {
     width: min(calc(100% - 2rem), 640px);
@@ -130,7 +140,6 @@ export const MobilePanel = styled.div<{ $open: boolean }>`
     display: flex;
     flex-direction: column;
     gap: 0.1rem;
-    overflow: hidden;
   }
 
   nav > a:not(:last-child) {
@@ -144,7 +153,7 @@ export const MobilePanel = styled.div<{ $open: boolean }>`
   @media (min-width: ${breakpoints.content}) { display: none; }
 `;
 
-export const MobileCta = styled.a`
+export const MobileCta = styled(Link)`
   ${cta}
   display: inline-flex;
   width: 100%;

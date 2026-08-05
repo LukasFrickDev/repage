@@ -178,9 +178,46 @@ npm run test
 npm run build
 ```
 
-Mudança visual exige, quando houver navegador: rotas afetadas, desktop, notebook, tablet, mobile, viewport baixa, teclado, foco, menu, movimento reduzido, console, rede, loading, sucesso, erro, mídia indisponível e overflow.
+### Validação em navegador da Repage
 
-Relatar navegador indisponível sem inferir resultados.
+Quando uma alteração afetar interface, navegação ou comportamento público, usar preferencialmente o servidor MCP `playwright` disponível no ambiente local, conforme as instruções globais do Codex.
+
+Não considerar `agent.browsers.list()` como verificação suficiente da disponibilidade do Playwright MCP.
+
+Validar, conforme o escopo da entrega:
+
+- rotas públicas afetadas;
+- navegação entre rotas e âncoras;
+- desktop amplo;
+- notebook;
+- tablet;
+- mobile;
+- mobile compacto;
+- viewport com pouca altura;
+- celular na horizontal;
+- teclado e ordem de foco;
+- skip link;
+- menu mobile;
+- retorno e contenção de foco;
+- movimento reduzido;
+- overflow horizontal;
+- bloqueio de scroll do fundo;
+- console;
+- rede;
+- warnings do React;
+- links e ações reais;
+- estados de loading, sucesso e erro;
+- comportamento com mídia indisponível.
+
+Screenshots servem como evidência complementar, mas não substituem a validação de teclado, foco, navegação, console e comportamento responsivo.
+
+Quando o Playwright MCP não puder ser utilizado:
+
+- registrar a tentativa realizada;
+- informar a ferramenta ou ação utilizada;
+- registrar o erro exato;
+- executar todas as validações independentes do navegador;
+- não inferir resultados visuais ou interativos.
 
 ## Regressões proibidas
 

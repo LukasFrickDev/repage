@@ -79,4 +79,4 @@ Somente spec aprovada orienta implementação planejada.
 
 | Spec | Status | Entrega |
 |---|---|---|
-| — | — | Nenhuma spec materializada |
+| [`0001-frontend-foundation-and-routing.md`](0001-frontend-foundation-and-routing.md) | `implemented` | Fundação do frontend, roteamento e caminho de conversão |

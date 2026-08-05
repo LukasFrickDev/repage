@@ -136,7 +136,6 @@ export const homepageTokens = {
     sectionPaddingBlock: 'clamp(5.5rem, 10vw, 10rem)',
     backgroundGridSize: 'clamp(40px, 4vw, 64px)',
     eyebrowLineWidth: 'clamp(1.25rem, 3vw, 2.5rem)',
-    ctaMarginTop: 'clamp(2rem, 4vw, 3rem)',
   },
 } as const;
 

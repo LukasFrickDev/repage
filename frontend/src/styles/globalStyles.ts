@@ -13,13 +13,15 @@ const GlobalStyles = createGlobalStyle`
     margin: 0; min-width: 320px; min-height: 100vh; overflow-x: clip; background: ${colors.background}; color: ${colors.white};
     font-family: ${fonts.primary};
   }
-  body, button, input, textarea, select { font: inherit; }
+  button, input, textarea, select { font: inherit; }
   button { cursor: pointer; }
   img { display: block; max-width: 100%; }
   h1, h2, h3, h4, p { margin: 0; }
   a { color: inherit; }
+  :where(section[id], main[id]) { scroll-margin-top: 6rem; }
   ::selection { background: ${withAlpha(colors.violet, 0.32)}; color: ${colors.paper}; }
   :focus-visible { outline: 3px solid ${colors.neonBlue}; outline-offset: 4px; }
+  :where(section[id], main[id])[tabindex='-1']:focus-visible { outline-offset: -5px; }
   @media (prefers-reduced-motion: reduce) {
     * { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; transition-duration: 0.01ms !important; }
   }

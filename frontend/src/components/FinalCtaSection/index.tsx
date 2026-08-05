@@ -1,4 +1,3 @@
-import { ArrowRight } from 'lucide-react';
 import { useReducedMotion } from 'framer-motion';
 import { finalCtaSectionContent } from '../../content/repageContent';
 import * as S from './styles';
@@ -9,7 +8,7 @@ export function FinalCtaSection() {
   const prefersReducedMotion = useReducedMotion();
 
   return (
-    <S.Section aria-labelledby="final-cta-title">
+    <S.Section id="contato" aria-labelledby="final-cta-title" tabIndex={-1}>
       <S.Convergence aria-hidden="true"><i /><i /><i /></S.Convergence>
       <S.Content
         initial={prefersReducedMotion ? false : { opacity: 0, y: 16 }}
@@ -20,10 +19,6 @@ export function FinalCtaSection() {
         <S.Eyebrow>{finalCtaSectionContent.eyebrow}</S.Eyebrow>
         <S.Title id="final-cta-title">{finalCtaSectionContent.title}</S.Title>
         <S.Description>{finalCtaSectionContent.description}</S.Description>
-        <S.Cta type="button" disabled>
-          <span>{finalCtaSectionContent.ctaLabel}</span>
-          <ArrowRight size={19} aria-hidden="true" />
-        </S.Cta>
       </S.Content>
     </S.Section>
   );
