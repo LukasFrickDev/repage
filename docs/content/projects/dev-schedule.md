@@ -1,35 +1,26 @@
 # DevSchedule
 
 - **Slug:** `dev-schedule`
-- **Natureza:** desafio técnico
-- **Estado de prontidão:** conteúdo e link prontos; mídia bloqueada pela indisponibilidade do navegador controlável.
+- **Natureza:** desafio técnico, não cliente
+- **Prontidão:** conteúdo, link e mídia de demonstração estão prontos para futuras interfaces; o registro principal permanece `draft`.
 
-## Fontes inspecionadas
+## Fontes e fatos confirmados
 
-- `docs/PRODUCT.md`, seção 25.7.
-- Repositório público `LukasFrickDev/DevSchedule`, branch `main`, commit `bdc2057bd49219913a01f74ed564c51899df26e4`.
-- README, árvore-raiz e URL pública listada pelo README; HTTP 200 em 5 de agosto de 2026.
-
-## Fatos confirmados
-
-- É um desafio técnico de agendamento, não um cliente.
-- A área pública lista serviços, consulta horários e cria agendamentos.
-- A área administrativa tem autenticação JWT e gerencia agendamentos.
+- `docs/PRODUCT.md`, seção 25.7; repositório público `LukasFrickDev/DevSchedule`, branch `main`, commit `bdc2057bd49219913a01f74ed564c51899df26e4`.
 - O README confirma React, TypeScript, Vite, Styled Components, Django REST Framework, PostgreSQL, Docker, Vercel e Render.
+- É um desafio técnico, não um cliente. A área pública demonstra serviço, data, disponibilidade e dados; o dashboard demonstra estado administrativo controlado.
 
-## Participação, serviços e tecnologia
+## Link, autorização e privacidade
 
-- O README atribui o desenvolvimento a Lukas Frick; não há participação atribuída à Repage.
-- Serviços relacionados: desenvolvimento frontend e backend de aplicação web.
-- A relação temporal com a formalização da Repage não foi confirmada.
+- **Link:** `verified`.
+- **Autorização:** `not-required` por ser desafio técnico.
+- **Privacidade:** o fluxo de cliente não efetiva agendamento. Não foram versionados tokens, cookies ou storage state. A revisão final aprovou o conjunto para o contexto do portfólio.
 
-## Link, autorização e mídia
+## Mídia incorporada
 
-- **URL pública:** verificada por HTTP (200). O link pode ser usado como referência técnica, sujeito à revisão posterior da interface.
-- **Autorização:** `not-required`, por ser desafio técnico.
-- **Mídia:** nenhuma. Tentativa de navegador controlável retornou `No browser is available`, impedindo validação desktop/mobile e captura.
-- **Privacidade:** nenhuma mídia versionada; futuras capturas devem usar dados fictícios controlados.
+- Cliente PNG: `devschedule-social.png`, `devschedule-client-services-mobile.png`, `devschedule-client-calendar-{desktop,mobile}.png`, `devschedule-client-availability-{desktop,mobile}.png`, `devschedule-client-data-{desktop,mobile}.png`.
+- Administração PNG: `devschedule-admin-dashboard-{desktop,mobile}.png`.
+- WebM: `videos/devschedule-client-{desktop,mobile}.webm`, `videos/devschedule-admin-{desktop,mobile}.webm`.
+- O tour de cliente desktop reutiliza `devschedule-social.png`; os demais reutilizam a screenshot do mesmo fluxo e viewport como poster e fallback. `devschedule-social.png` é o ativo social em `1200×630`.
 
-## Pendências e próximo passo
-
-- Repetir validação em navegador, incluindo console, rede, desktop e mobile, e capturar apenas estados seguros.
+Os arquivos `devschedule-admin-appointments-{desktop,mobile}.png` foram deliberadamente excluídos e não são pendência. Os ativos ficam em `frontend/public/projects/dev-schedule/`; metadados completos estão no manifesto tipado.

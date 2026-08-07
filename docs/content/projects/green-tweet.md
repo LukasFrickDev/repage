@@ -1,34 +1,29 @@
 # GreenTweet
 
 - **Slug:** `green-tweet`
-- **Natureza:** projeto próprio
-- **Estado de prontidão:** conteúdo e link prontos; mídia bloqueada pela indisponibilidade do navegador controlável.
+- **Natureza:** projeto próprio, não cliente
+- **Prontidão:** conteúdo, link e mídia de demonstração estão prontos para futuras interfaces; o registro principal permanece `draft`.
 
-## Fontes inspecionadas
+## Fontes e fatos confirmados
 
-- `docs/PRODUCT.md`, seção 25.7.
-- Repositório público `LukasFrickDev/greentweet`, branch `main`, commit `d79af6d6b74911c5b7f5e2589f752a5f133aa3`.
-- README, árvore-raiz e URL pública listada pelo README; HTTP 200 em 5 de agosto de 2026.
+- `docs/PRODUCT.md`, seção 25.7; repositório público `LukasFrickDev/greentweet`, branch `main`, commit `d79af6d6b74911c5b7f5e2589f752a5f133aa3`.
+- O README confirma React, TypeScript, Vite, Django REST Framework, PostgreSQL, cadastro, autenticação JWT, perfis, publicações, curtidas, comentários, seguidores, notificações e busca.
+- É projeto próprio, não cliente; autoria atribuída pelo README a Lukas Frick, sem participação atribuída à Repage.
 
-## Fatos confirmados
+## Link, autorização e privacidade
 
-- É projeto próprio full stack inspirado em rede social, não um cliente.
-- O README confirma cadastro, autenticação JWT, perfis, publicações, curtidas, comentários, seguidores, notificações e busca.
-- O README confirma React, TypeScript, Vite, Django REST Framework, PostgreSQL e os serviços de infraestrutura documentados no repositório.
+- **Link:** `verified`.
+- **Autorização:** `not-required` por ser projeto próprio.
+- **Privacidade:** a demonstração autenticada não versiona credenciais, cookie, token, storage state, mensagens privadas ou campos de login. Identificadores e perfis exibidos pertencem ao estado demonstrativo público e são adequados ao contexto do projeto.
 
-## Participação, serviços e tecnologia
+## Mídia incorporada
 
-- O README atribui autoria a Lukas Frick; não há participação atribuída à Repage.
-- Serviços relacionados: frontend e backend de aplicação web.
-- A relação temporal com a formalização da Repage não foi confirmada.
+- PNG: `greentweet-social.png`, `greentweet-feed-mobile.png`, `greentweet-feed-posts-mobile.png`, `greentweet-profile-{desktop,mobile}.png`, `greentweet-notifications-{desktop,mobile}.png`, `greentweet-demo-profile-{desktop,mobile}.png`, `greentweet-comments-{desktop,mobile}.png`.
+- WebM: `videos/greentweet-tour-desktop.webm`, `videos/greentweet-tour-mobile.webm`.
+- O tour desktop reutiliza `greentweet-social.png`, o ativo social em `1200×630`; o mobile reutiliza a screenshot de feed móvel.
 
-## Link, autorização e mídia
+Os ativos ficam em `frontend/public/projects/green-tweet/`. Dimensões, tamanhos, alt, descrição e metadados de vídeo estão no manifesto tipado.
 
-- **URL pública:** verificada por HTTP (200). O link pode ser usado como referência técnica, sujeito à revisão posterior da interface.
-- **Autorização:** `not-required`, por ser projeto próprio.
-- **Mídia:** nenhuma. Tentativa de navegador controlável retornou `No browser is available`.
-- **Privacidade:** nenhuma mídia versionada; capturas futuras devem usar conta e dados de demonstração controlados.
+## Pendência editorial e próximo passo
 
-## Pendências e próximo passo
-
-- Repetir validação visual em desktop e mobile, conferir rede e console e capturar somente conteúdo fictício seguro.
+A relação temporal com a formalização da Repage continua sem confirmação.

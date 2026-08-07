@@ -2,33 +2,28 @@
 
 - **Slug:** `alicerce-da-alma`
 - **Natureza:** projeto pago
-- **Estado de prontidão:** bloqueado; autorização pendente e conteúdo verificável insuficiente.
+- **Prontidão:** mídia e link estão prontos; participação, serviços específicos e relação temporal seguem parciais. O registro principal permanece `draft`.
 
-## Fontes inspecionadas
+## Fontes e fatos confirmados
 
-- `docs/PRODUCT.md`, seção 25.7.
-- Repositório privado `LukasFrickDev/alicerce-da-alma`, branch `main`, commit `b788b4effd2c3757f86d312f98afdbcf01824ae6`.
-- README e árvore-raiz; URL de origem consultada por HTTP em 5 de agosto de 2026 (200).
+- `docs/PRODUCT.md`, seção 25.7; repositório privado `LukasFrickDev/alicerce-da-alma`, branch `main`, commit `b788b4effd2c3757f86d312f98afdbcf01824ae6`.
+- A árvore confirma TypeScript com `src` e `public`; o README é o modelo padrão do Lovable e não confirma contexto, participação ou funcionalidades adicionais.
+- A preparação local verificou uma interface institucional pública em desktop e mobile.
 
-## Fatos confirmados
+## Link, autorização e privacidade
 
-- O Produto o classifica como projeto pago e condiciona o case à validação completa de informações e materiais.
-- A árvore do repositório confirma uma aplicação TypeScript com `src` e `public`.
-- O README é o modelo padrão do Lovable e não confirma contexto, necessidade, solução, participação ou funcionalidades do projeto.
+- **Link:** `verified`.
+- **Autorização:** `confirmed`, por confirmação direta de Lukas em 2026-08-05 para preparação e publicação no portfólio da Repage; não é atribuída ao cliente.
+- **Privacidade:** não foram identificados e-mail, telefone, token, formulário preenchido ou conteúdo administrativo nas telas selecionadas. A revisão final aprovou o conjunto para o contexto do portfólio.
 
-## Participação, serviços e tecnologia
+## Mídia incorporada
 
-- Participação de Lukas ou da Repage, serviços, tecnologias específicas e relação temporal não foram confirmados por fonte adequada.
-- Não há resultado comercial verificável registrado.
+- PNG: `alicerce-social.png`, `alicerce-home-mobile.png`, `alicerce-services-{desktop,mobile}.png`, `alicerce-differentials-{desktop,mobile}.png`, `alicerce-testimonials-{desktop,mobile}.png`.
+- WebM: `videos/alicerce-tour-desktop.webm`, `videos/alicerce-tour-mobile.webm`.
+- O tour desktop reutiliza `alicerce-social.png`, o ativo social em `1200×630`; o mobile reutiliza a screenshot de abertura móvel.
 
-## Link, autorização e mídia
+Os arquivos `alicerce-author-{desktop,mobile}.png` e `alicerce-cta-{desktop,mobile}.png` foram deliberadamente excluídos e não são pendência. Os ativos ficam em `frontend/public/projects/alicerce-da-alma/`; metadados completos estão no manifesto tipado.
 
-- **Link:** bloqueado no manifesto apesar da resposta HTTP 200, pois não há autorização para uso público.
-- **Autorização:** `pending`.
-- **Mídia:** nenhuma.
-- **Privacidade:** nenhuma mídia versionada.
+## Pendência editorial e próximo passo
 
-## Pendências e próximo passo
-
-- Obter confirmação explícita de autorização, participação e conteúdo seguro com Lukas.
-- Revisar o código e validar visualmente somente após definir um estado demonstrativo sem dados sensíveis.
+Confirmar participação, serviços específicos e relação temporal antes de escrever copy definitiva de case.

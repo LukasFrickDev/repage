@@ -463,31 +463,41 @@ Não mover páginas ou componentes sem necessidade.
 
 ## 15. Critérios de aceite
 
-* [ ] Spec adicionada como `approved` antes da implementação.
-* [ ] Índice de specs atualizado.
-* [ ] Estado atual do roadmap corrigido sem alterar sequência.
-* [ ] Índice de conteúdo criado.
-* [ ] Seis dossiês criados.
-* [ ] Fontes inspecionadas registradas.
-* [ ] Fatos e pendências separados.
-* [ ] Participação e natureza corretas.
-* [ ] Projetos próprios e desafios não são clientes.
-* [ ] Autorizações explícitas e não inventadas.
-* [ ] URLs verificadas ou bloqueadas.
-* [ ] Manifesto tipado criado.
-* [ ] Manifesto corresponde aos seis projetos.
-* [ ] Todos permanecem como rascunho.
-* [ ] Ativos e manifesto correspondem.
-* [ ] Mídias estão revisadas e otimizadas.
-* [ ] Nenhum dado sensível conhecido foi incluído.
-* [ ] Projeto pago sem autorização não recebeu nova mídia identificável.
-* [ ] Bloqueios possuem próximo passo.
-* [ ] Testes adicionados.
-* [ ] Lint, typecheck, testes e build aprovados.
-* [ ] Playwright usado quando disponível.
-* [ ] Repage não sofreu redesign.
-* [ ] Cases não foram antecipados.
-* [ ] Nada foi inventado.
+* [x] Spec adicionada como `approved` antes da implementação.
+* [x] Índice de specs atualizado.
+* [x] Estado atual do roadmap corrigido sem alterar sequência.
+* [x] Índice de conteúdo criado.
+* [x] Seis dossiês criados.
+* [x] Fontes inspecionadas registradas.
+* [x] Fatos e pendências separados.
+* [x] Participação e natureza corretas.
+* [x] Projetos próprios e desafios não são clientes.
+* [x] Autorizações explícitas e não inventadas.
+* [x] URLs verificadas ou bloqueadas.
+* [x] Manifesto tipado criado.
+* [x] Manifesto corresponde aos seis projetos.
+* [x] Todos permanecem como rascunho.
+* [x] Ativos e manifesto correspondem.
+* [x] Mídias estão revisadas e otimizadas.
+* [x] Nenhum dado sensível conhecido foi incluído.
+* [x] Projeto pago sem autorização não recebeu nova mídia identificável.
+* [x] Bloqueios possuem próximo passo.
+* [x] Testes adicionados.
+* [x] Lint, typecheck, testes e build aprovados.
+* [x] Playwright usado quando disponível.
+* [x] Repage não sofreu redesign.
+* [x] Cases não foram antecipados.
+* [x] Nada foi inventado.
+
+### 15.1 Conclusão da integração em 2026-08-07
+
+Os 47 PNGs e 14 WebMs aprovados foram integrados sem recaptura, recorte, reencode ou duplicação em `frontend/public/projects/<slug>/`. Cada ativo está ligado ao manifesto tipado por caminho, formato, dimensão, tamanho, papel, alt, descrição, origem, autorização e revisão de privacidade. Os WebMs VP8 não têm áudio e reutilizam uma screenshot aprovada como poster e fallback futuro, sem criar novos binários.
+
+As seis imagens sociais foram preparadas em PNG `1200 × 630`, uma por projeto, e registradas no manifesto sem substituir os posters ou fallbacks existentes. Os arquivos deliberadamente excluídos de DevSchedule e Alicerce da Alma não são pendência.
+
+As quatro mídias de projetos pagos foram liberadas com a seguinte fonte operacional, sem atribuir a confirmação aos respectivos clientes: `Autorização de uso de mídia confirmada diretamente por Lukas Frick em 2026-08-05 para preparação e publicação no portfólio da Repage.` DevSchedule e GreenTweet permanecem corretamente identificados como desafio técnico e projeto próprio.
+
+Não foram implementados redesign, homepage final, cards finais, cases finais ou consumo visual das mídias. A validação reproduzível da Repage é feita por Playwright Test; a execução de 2026-08-07 aprovou os smoke tests em desktop, tablet e mobile.
 
 ## 16. Riscos
 

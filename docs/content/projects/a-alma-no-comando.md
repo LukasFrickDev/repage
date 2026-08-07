@@ -2,33 +2,28 @@
 
 - **Slug:** `a-alma-no-comando`
 - **Natureza:** projeto pago
-- **Estado de prontidão:** parcial; publicação bloqueada por autorização pendente e URL indisponível.
+- **Prontidão:** conteúdo, link e mídia estão prontos para futuras interfaces; o registro principal permanece `draft`.
 
-## Fontes inspecionadas
+## Fontes e fatos confirmados
 
-- `docs/PRODUCT.md`, seção 25.7.
-- Repositório público `LukasFrickDev/alma-no-comando`, branch `main`, commit `65197c2493f1ffc465952f35c0e55b71654b498f`.
-- README e árvore-raiz; URL de origem consultada por HTTP em 5 de agosto de 2026 (404).
+- `docs/PRODUCT.md`, seção 25.7; repositório público `LukasFrickDev/alma-no-comando`, branch `main`, commit `65197c2493f1ffc465952f35c0e55b71654b498f`.
+- O README confirma landing page React, TypeScript, Vite e Styled Components, responsiva e organizada por seções.
+- A preparação local verificou uma landing page única em desktop e mobile. Participação, serviços e relação temporal permanecem sem confirmação editorial pública.
 
-## Fatos confirmados
+## Link, autorização e privacidade
 
-- O Produto classifica o projeto como pago e condiciona o case à validação completa das informações e materiais.
-- O README confirma uma landing page React, TypeScript, Vite e Styled Components, responsiva e organizada por seções.
-- O README descreve conteúdo ligado a livro e marca, mas esses detalhes não estão liberados para uso público nesta entrega.
+- **Link:** `verified`.
+- **Autorização:** `confirmed`, por confirmação direta de Lukas em 2026-08-05 para preparação e publicação no portfólio da Repage; não é atribuída ao cliente.
+- **Privacidade:** não há formulário preenchido, mensagem, credencial ou conteúdo administrativo. O nome exibido integra publicamente a obra apresentada e é adequado ao contexto do projeto.
 
-## Participação, serviços e tecnologia
+## Mídia incorporada
 
-- A relação de Lukas ou da Repage com o projeto, os serviços e a relação temporal não foram confirmados para publicação.
-- Não há resultados comerciais verificáveis registrados.
+- PNG: `alma-social.png`, `alma-home-mobile.png`, `alma-method-desktop.png`, `alma-book-desktop.png`, `alma-manifesto-{desktop,mobile}.png`.
+- WebM: `videos/alma-tour-desktop.webm`, `videos/alma-tour-mobile.webm`.
+- O tour desktop reutiliza `alma-social.png`, o ativo social em `1200×630`; o mobile reutiliza a screenshot de abertura móvel.
 
-## Link, autorização e mídia
+Os ativos ficam em `frontend/public/projects/a-alma-no-comando/`. Dimensões, tamanhos, alt, descrição e metadados de vídeo estão no manifesto tipado.
 
-- **Link:** `unavailable`; a URL encontrada na fonte retornou HTTP 404. Não registrar a URL no conteúdo publicável sem autorização.
-- **Autorização:** `pending`.
-- **Mídia:** nenhuma.
-- **Privacidade:** nenhuma mídia versionada.
+## Pendência editorial e próximo passo
 
-## Pendências e próximo passo
-
-- Confirmar autorização, participação e uma URL válida com Lukas.
-- Quando autorizado, validar a aplicação em navegador antes de capturar qualquer ativo.
+Confirmar participação, serviços e relação temporal antes de escrever copy definitiva de case.

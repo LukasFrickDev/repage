@@ -1,34 +1,30 @@
-# Axium
+# Axium Desenvolvimento Humano
 
 - **Slug:** `axium`
 - **Natureza:** projeto pago
-- **Estado de prontidão:** parcial; publicação bloqueada por autorização pendente.
+- **Prontidão:** conteúdo, link e mídia estão prontos para futuras interfaces; o registro principal permanece `draft`.
 
-## Fontes inspecionadas
+## Fontes e fatos confirmados
 
-- `docs/PRODUCT.md`, seção 25.7.
-- Repositório privado `LukasFrickDev/Axium-DH`, branch `main`, commit `922bb795d14d0bcaf0a656c8eb600381a18a714f`.
-- README e árvore-raiz do repositório; URL de origem consultada por HTTP em 5 de agosto de 2026 (200).
+- `docs/PRODUCT.md`, seção 25.7; repositório privado `LukasFrickDev/Axium-DH`, branch `main`, commit `922bb795d14d0bcaf0a656c8eb600381a18a714f`.
+- O Produto o classifica como projeto frontend pago para empresa de serviços. O repositório confirma TypeScript e diretórios `api`, `public` e `src`; o README é o modelo do Create React App.
+- A preparação local verificou as rotas `/`, `/nr-01` e `/blog/6` em desktop e mobile. Participação pública, serviços detalhados e relação temporal seguem pendentes de fonte específica.
 
-## Fatos confirmados
+## Link, autorização e privacidade
 
-- O Produto o classifica como projeto frontend pago para empresa de serviços.
-- O Produto registra experiência institucional, formulário, registro de lead e integração com RD Station como informações sujeitas à evidência aplicável.
-- O repositório confirma uma aplicação TypeScript e contém diretórios `api`, `public` e `src`; o README é o texto padrão do Create React App e não confirma detalhes adicionais.
+- **Link:** `verified`.
+- **Autorização:** `confirmed`, por confirmação direta de Lukas em 2026-08-05 para preparação e publicação no portfólio da Repage; não é atribuída ao cliente.
+- **Privacidade:** não há credenciais ou sessão nas rotas capturadas. A revisão final aprovou o conjunto para o contexto do portfólio.
+- **Rede externa:** chamadas de Analytics e remarketing falharam com `net::ERR_ABORTED` em ambas as larguras durante a preparação, sem impacto visual ou funcional; não foram versionados parâmetros, cabeçalhos, cookies ou identificadores.
 
-## Participação, serviços e tecnologia
+## Mídia incorporada
 
-- Participação pública, serviços detalhados e relação temporal com a Repage não foram confirmados.
-- Não há resultado comercial verificável registrado.
+- PNG: `axium-social.png`, `axium-home-mobile.png`, `axium-nr01-desktop.png`, `axium-nr01-mobile.png`, `axium-blog-desktop.png`, `axium-blog-mobile.png`.
+- WebM: `videos/axium-tour-desktop.webm`, `videos/axium-tour-mobile.webm`.
+- Posters e fallbacks reutilizam `axium-social.png` e `axium-home-mobile.png`; o primeiro é o ativo social em `1200×630`. Os tours finais têm 64,80 s (desktop) e 76,16 s (mobile).
 
-## Link, autorização e mídia
+Os ativos ficam em `frontend/public/projects/axium/`. Dimensões, tamanhos, alt, descrição e metadados de vídeo estão no manifesto tipado.
 
-- **Link:** bloqueado no manifesto enquanto a autorização estiver pendente.
-- **Autorização:** `pending`; não foi fornecida confirmação explícita.
-- **Mídia:** nenhuma; não autorizada para inclusão nesta entrega.
-- **Privacidade:** nenhuma mídia versionada.
+## Pendência editorial e próximo passo
 
-## Pendências e próximo passo
-
-- Confirmar autorização, participação e detalhes técnicos por fonte específica.
-- Só então validar visualmente a aplicação e preparar mídia segura.
+Confirmar participação, relação temporal e detalhes técnicos antes de escrever copy definitiva de case.

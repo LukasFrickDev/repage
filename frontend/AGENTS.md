@@ -167,27 +167,69 @@ Nenhum segredo em `VITE_*`; nenhum dado pessoal em URL, Analytics ou console; ne
 
 ## Testes e QA
 
-Cobertura prioritária: schema, normalização, projetos, rotas, metadados, consentimento, API, estados e acessibilidade.
+Cobertura prioritária:
 
-Quando configurados:
+- schema e normalização;
+- dados e seletores de projetos;
+- rotas e navegação;
+- metadados;
+- consentimento;
+- integrações com API;
+- estados de interface;
+- acessibilidade;
+- fluxos públicos críticos.
+
+Quando configurados, executar:
 
 ```bash
 npm run lint
 npm run typecheck
 npm run test
+npm run test:e2e
 npm run build
 ```
 
+Não remover testes, reduzir cobertura ou alterar regras apenas para obter aprovação.
+
 ### Validação em navegador da Repage
 
-Quando uma alteração afetar interface, navegação ou comportamento público, usar preferencialmente o servidor MCP `playwright` disponível no ambiente local, conforme as instruções globais do Codex.
+A validação reproduzível em navegador deve usar prioritariamente a suíte Playwright Test do projeto por meio de:
 
-Não considerar `agent.browsers.list()` como verificação suficiente da disponibilidade do Playwright MCP.
+```bash
+npm run test:e2e
+```
 
-Validar, conforme o escopo da entrega:
+A suíte deve iniciar ou reutilizar o servidor Vite conforme a configuração do projeto, executar o Chromium e produzir resultado verificável pelo terminal.
+
+O servidor MCP `playwright` pode ser utilizado como apoio para:
+
+- exploração interativa;
+- inspeção visual complementar;
+- reprodução manual de comportamentos;
+- captura adicional de screenshots;
+- investigação de problemas não cobertos pelos testes automatizados.
+
+A indisponibilidade do Playwright MCP ou do navegador nativo do agente não deve bloquear o QA quando `npm run test:e2e` puder ser executado.
+
+Não considerar `agent.browsers.list()` como verificação da disponibilidade:
+
+- do Playwright Test;
+- do Playwright CLI;
+- do servidor MCP `playwright`.
+
+Quando aparecer uma mensagem como `no browser is available`, não repetir tentativas pelo mesmo mecanismo. Verificar diretamente se a suíte do projeto pode ser executada pelo terminal.
+
+### Cobertura por entrega
+
+Quando uma alteração afetar interface, navegação ou comportamento público, ampliar ou ajustar os testes end-to-end conforme o escopo.
+
+Validar, quando aplicável:
 
 - rotas públicas afetadas;
 - navegação entre rotas e âncoras;
+- reload direto;
+- voltar e avançar;
+- links e ações reais;
 - desktop amplo;
 - notebook;
 - tablet;
@@ -197,27 +239,42 @@ Validar, conforme o escopo da entrega:
 - celular na horizontal;
 - teclado e ordem de foco;
 - skip link;
+- foco visível;
 - menu mobile;
-- retorno e contenção de foco;
+- contenção e retorno de foco;
+- fechamento por `Esc`;
+- bloqueio e restauração do scroll do fundo;
 - movimento reduzido;
 - overflow horizontal;
-- bloqueio de scroll do fundo;
 - console;
-- rede;
 - warnings do React;
-- links e ações reais;
+- falhas de rede;
 - estados de loading, sucesso e erro;
 - comportamento com mídia indisponível.
 
-Screenshots servem como evidência complementar, mas não substituem a validação de teclado, foco, navegação, console e comportamento responsivo.
+Priorizar comportamento observável. Evitar snapshots extensos e testes acoplados à estrutura interna dos componentes.
 
-Quando o Playwright MCP não puder ser utilizado:
+### Evidências e limitações
 
-- registrar a tentativa realizada;
-- informar a ferramenta ou ação utilizada;
+Screenshots, traces e vídeos são evidências complementares.
+
+Testes automatizados não substituem integralmente inspeção visual ou julgamento de qualidade estética. O relatório deve diferenciar claramente:
+
+- comportamentos cobertos pela suíte automatizada;
+- comportamentos inspecionados interativamente;
+- viewports realmente executados;
+- itens não validados;
+- bloqueios encontrados.
+
+Quando a suíte Playwright Test falhar:
+
+- registrar o comando executado;
 - registrar o erro exato;
-- executar todas as validações independentes do navegador;
+- distinguir falha da aplicação, configuração, servidor ou instalação do navegador;
+- executar todas as validações independentes ainda possíveis;
 - não inferir resultados visuais ou interativos.
+
+Quando o Playwright MCP estiver indisponível, não tratar isso como bloqueio se a suíte Playwright Test do projeto estiver funcionando.
 
 ## Regressões proibidas
 
