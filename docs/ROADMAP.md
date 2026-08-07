@@ -16,8 +16,8 @@ A V1 deve servir como referência comercial da marca, apoiar prospecção e cond
 * Fundação documental aprovada e materializada.
 * Frontend em React, TypeScript, Vite e Styled Components.
 * Framer Motion, homepage responsiva, logo, marca, tokens e direção visual disponíveis.
-* Roteamento público, páginas auxiliares e layout compartilhado ainda não materializados.
-* Portfólio, cases, conteúdo e mídias reais ainda incompletos.
+* Roteamento público, páginas auxiliares, `PublicLayout`, âncoras, gerenciamento de foco e scroll, menu mobile acessível, metadados básicos e testes automatizados materializados na entrega 1.
+* A entrega 2 está concluída: conteúdo, dossiês e mídias reais dos seis projetos foram auditados e preparados. Portfólio, homepage e cases finais continuam pendentes das entregas posteriores; a auditoria da área administrativa do DevSchedule não é mídia pública nem bloqueia esta entrega.
 * Formulário ainda sem persistência.
 * Backend, PostgreSQL e e-mails ainda inexistentes.
 * Consentimento, Analytics, SEO e prerender ainda inexistentes.
