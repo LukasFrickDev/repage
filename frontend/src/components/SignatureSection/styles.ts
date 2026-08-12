@@ -1,58 +1,48 @@
 import { motion } from 'framer-motion';
-import styled, { css, keyframes } from 'styled-components';
+import styled from 'styled-components';
 import { breakpoints, colors, fonts, homepageTokens, layout } from '../../styles/theme';
-
-const traceFlow = keyframes`
-  from { background-position: 180% 50%; }
-  to { background-position: -80% 50%; }
-`;
 
 export const Section = styled.section`
   position: relative;
   isolation: isolate;
+  min-height: clamp(40rem, 64vw, 54rem);
   overflow: hidden;
-  padding: ${homepageTokens.sectionPaddingBlock} ${homepageTokens.sectionPaddingInline};
-  border-top: 1px solid rgba(145, 168, 255, 0.12);
+  padding: clamp(7rem, 12vw, 12rem) ${homepageTokens.sectionPaddingInline};
+  display: grid;
+  align-items: center;
   background:
-    radial-gradient(circle at 86% 28%, rgba(108, 99, 255, 0.1), transparent 30%),
-    ${colors.background};
+    linear-gradient(112deg, rgba(16, 24, 39, 0.98), rgba(24, 34, 53, 0.93)),
+    ${colors.backgroundSecondary};
   color: ${colors.white};
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 12%;
+    width: 42%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(145, 168, 255, 0.38));
+  }
+
+  @media (max-width: ${breakpoints.tabletMax}) {
+    min-height: 42rem;
+    align-items: end;
+  }
 `;
 
 export const Container = styled.div`
   position: relative;
+  z-index: 3;
   width: ${layout.containerWidth};
   margin-inline: auto;
-  display: grid;
-  align-items: center;
-  gap: ${homepageTokens.signature.contentGap};
-
-  @media (min-width: ${breakpoints.tablet}) {
-    grid-template-columns: minmax(0, 0.95fr) minmax(18rem, 0.75fr);
-  }
 `;
 
-export const Content = styled(motion.div)`
-  position: relative;
-  z-index: 3;
-  max-width: 45rem;
-
-  @media (max-width: ${breakpoints.tabletMax}) {
-    &::before {
-      content: '';
-      position: absolute;
-      z-index: -1;
-      inset: -2rem -1rem;
-      background: linear-gradient(90deg, rgba(16, 24, 39, 0.98), rgba(16, 24, 39, 0.88) 70%, transparent);
-      pointer-events: none;
-    }
-  }
+export const Content = styled.div`
+  width: min(100%, 49rem);
 `;
 
 export const Eyebrow = styled.p`
-  display: flex;
-  align-items: center;
-  gap: 0.7rem;
   margin-bottom: ${homepageTokens.eyebrowMarginBottom};
   color: ${colors.neonBlue};
   font-family: ${fonts.primary};
@@ -60,44 +50,45 @@ export const Eyebrow = styled.p`
   font-weight: 650;
   letter-spacing: ${homepageTokens.eyebrowTracking};
   text-transform: uppercase;
-
-  &::before {
-    content: '';
-    width: 1.75rem;
-    height: 1px;
-    background: linear-gradient(90deg, ${colors.highlight}, ${colors.neonBlue});
-  }
 `;
 
 export const Title = styled.h2`
-  max-width: 12ch;
+  max-width: 13ch;
   font-family: ${fonts.heading};
-  font-size: ${homepageTokens.sectionTitleSize};
-  font-weight: 650;
-  letter-spacing: ${homepageTokens.sectionTitleTracking};
-  line-height: ${homepageTokens.sectionTitleLineHeight};
+  font-size: clamp(3.2rem, 5.7vw, 6.4rem);
+  font-weight: 610;
+  letter-spacing: -0.068em;
+  line-height: 0.92;
   text-wrap: balance;
 `;
 
 export const Description = styled.p`
-  max-width: 38rem;
-  margin-top: ${homepageTokens.sectionCopyMarginTop};
+  max-width: 39rem;
+  margin: clamp(2rem, 4vw, 3.2rem) 0 0 clamp(0rem, 5vw, 6rem);
   color: ${colors.textSecondary};
   font-family: ${fonts.primary};
-  font-size: ${homepageTokens.sectionCopySize};
-  line-height: ${homepageTokens.sectionCopyLineHeight};
+  font-size: clamp(1rem, 1.25vw, 1.14rem);
+  line-height: 1.68;
+
+  @media (max-width: ${breakpoints.tabletMax}) {
+    margin-left: 0;
+  }
 `;
 
 export const Signature = styled.div`
-  margin-top: ${homepageTokens.signature.signatureMarginTop};
+  margin: clamp(2.5rem, 5vw, 4.5rem) 0 0 clamp(0rem, 5vw, 6rem);
   display: flex;
   align-items: center;
-  gap: 0.9rem;
+  gap: 1rem;
+
+  @media (max-width: ${breakpoints.tabletMax}) {
+    margin-left: 0;
+  }
 `;
 
 export const SignatureMark = styled.span`
   width: 2px;
-  height: 2.8rem;
+  height: 3.2rem;
   flex: 0 0 auto;
   background: linear-gradient(${colors.highlight}, ${colors.neonBlue});
 `;
@@ -106,155 +97,71 @@ export const SignatureName = styled.strong`
   display: block;
   color: ${colors.white};
   font-family: ${fonts.primary};
-  font-size: ${homepageTokens.signature.nameSize};
+  font-size: 0.94rem;
   font-weight: 620;
   line-height: 1.35;
 `;
 
 export const SignatureRole = styled.span`
   display: block;
-  margin-top: 0.2rem;
+  margin-top: 0.25rem;
   color: rgba(185, 192, 204, 0.68);
   font-family: ${fonts.primary};
-  font-size: ${homepageTokens.signature.roleSize};
+  font-size: 0.8rem;
   line-height: 1.35;
 `;
 
-export const Identity = styled(motion.div)`
-  --pointer-x: 0px;
-  --pointer-y: 0px;
-  position: relative;
-  z-index: 1;
-  width: 100%;
-  max-width: 43rem;
-  justify-self: end;
-  aspect-ratio: 1.08 / 1;
-  overflow: hidden;
-  border-left: 1px solid rgba(145, 168, 255, 0.15);
-  border-right: 1px solid rgba(145, 168, 255, 0.08);
-  background: linear-gradient(135deg, rgba(24, 34, 53, 0.78), rgba(16, 24, 39, 0.22));
-
-  @media (max-width: ${breakpoints.tabletMax}) {
-    position: absolute;
-    z-index: 1;
-    top: -8%;
-    right: -38vw;
-    width: min(130vw, 34rem);
-    height: 116%;
-    max-width: none;
-    aspect-ratio: auto;
-    filter: opacity(0.38);
-    border: 0;
-    pointer-events: none;
-  }
-`;
-
-export const TechnicalGrid = styled.div`
-  position: absolute;
-  inset: 0;
-  background:
-    linear-gradient(rgba(145, 168, 255, 0.08) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(145, 168, 255, 0.08) 1px, transparent 1px);
-  background-size: 12.5% 12.5%;
-  mask-image: linear-gradient(90deg, transparent, #000 28%, #000);
-`;
-
-export const Plane = styled.div<{ $position: 'top' | 'bottom' }>`
-  position: absolute;
-  border: 1px solid rgba(145, 168, 255, 0.16);
-  background: linear-gradient(120deg, rgba(108, 99, 255, 0.08), rgba(145, 168, 255, 0.025));
-
-  ${({ $position }) => $position === 'top' ? css`
-    top: 11%; right: 4%; width: 44%; height: 16%;
-    clip-path: polygon(10% 0, 100% 0, 100% 100%, 0 100%, 0 38%);
-  ` : css`
-    right: 18%; bottom: 8%; width: 35%; height: 13%;
-    clip-path: polygon(0 0, 88% 0, 100% 36%, 100% 100%, 0 100%);
-  `}
-`;
-
-export const Trace = styled.span<{ $position: 'first' | 'second' | 'third' }>`
-  position: absolute;
-  z-index: 2;
-  height: 1px;
-  background: linear-gradient(90deg, rgba(108, 99, 255, 0.08), ${colors.neonBlue}, rgba(145, 168, 255, 0.06));
-  background-size: 220% 100%;
-  animation: ${traceFlow} 12s linear infinite;
-
-  ${({ $position }) => ({
-    first: css`top: 31%; left: 4%; width: 68%;`,
-    second: css`top: 58%; right: 0; width: 54%; animation-delay: -4s;`,
-    third: css`bottom: 19%; left: 11%; width: 47%; animation-delay: -8s;`,
-  })[$position]}
-
-  @media (prefers-reduced-motion: reduce) { animation: none; }
-`;
-
-export const SymbolField = styled(motion.div)`
+export const BrandStage = styled.div`
   position: absolute;
   z-index: 1;
-  top: 9%;
-  right: -9%;
-  width: 76%;
-  aspect-ratio: 1;
+  top: 50%;
+  right: clamp(-4rem, -3vw, -1rem);
+  width: min(52vw, 46rem);
+  height: min(52vw, 46rem);
   display: grid;
   place-items: center;
-  border-left: 1px solid rgba(108, 99, 255, 0.18);
-  background:
-    radial-gradient(circle at 52% 48%, rgba(108, 99, 255, 0.18), transparent 54%),
-    linear-gradient(90deg, rgba(145, 168, 255, 0.035), transparent);
-  clip-path: polygon(8% 0, 100% 0, 100% 100%, 0 100%, 0 8%);
+  transform: translateY(-50%);
 
-  img {
-    width: 76%;
-    height: 76%;
-    opacity: 0.82;
-    filter: drop-shadow(0 0 30px rgba(108, 99, 255, 0.24));
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 12%;
+    border: 1px solid rgba(145, 168, 255, 0.16);
+    border-radius: 50%;
+  }
+
+  @media (max-width: ${breakpoints.laptopMax}) {
+    right: -18%;
+    opacity: 0.62;
   }
 
   @media (max-width: ${breakpoints.tabletMax}) {
-    top: 8%;
-    right: -5%;
-    width: 86%;
-    opacity: 0.72;
+    top: 10%;
+    right: -22%;
+    width: min(100vw, 31rem);
+    height: min(100vw, 31rem);
+    transform: none;
+    opacity: 0.35;
   }
 `;
 
-export const SignalPoint = styled.span<{ $position: 'one' | 'two' | 'three' }>`
+export const BrandLetter = styled(motion.span)`
   position: absolute;
-  z-index: 4;
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: ${colors.neonBlue};
-  box-shadow: 0 0 0 4px rgba(145, 168, 255, 0.08), 0 0 16px rgba(145, 168, 255, 0.78);
-  transition: transform 300ms ease;
-
-  ${({ $position }) => ({
-    one: css`top: 30.5%; left: 25%; transform: translate3d(var(--pointer-x), var(--pointer-y), 0);`,
-    two: css`top: 57.5%; right: 19%; transform: translate3d(calc(0px - var(--pointer-x)), calc(0px - var(--pointer-y)), 0);`,
-    three: css`bottom: 18.5%; left: 42%; transform: translate3d(var(--pointer-y), calc(0px - var(--pointer-x)), 0);`,
-  })[$position]}
-
-  @media (max-width: ${breakpoints.signaturePointerMax}) { transition: none; }
-  @media (prefers-reduced-motion: reduce) { transform: none; transition: none; }
+  color: rgba(145, 168, 255, 0.1);
+  font-family: ${fonts.heading};
+  font-size: clamp(18rem, 35vw, 34rem);
+  font-weight: 620;
+  letter-spacing: -0.12em;
+  line-height: 0.8;
 `;
 
-export const EdgeNotation = styled.div`
+export const BrandName = styled(motion.span)`
   position: absolute;
-  z-index: 3;
-  right: 4%;
-  bottom: 4%;
-  display: flex;
-  gap: 5px;
-
-  i {
-    display: block;
-    width: ${homepageTokens.signature.notationWidth};
-    height: 3px;
-    background: rgba(185, 192, 204, 0.18);
-  }
-
-  i:nth-child(2) { width: 9px; background: ${colors.highlight}; }
-  i:nth-child(3) { width: 5px; background: ${colors.neonBlue}; }
+  right: 9%;
+  bottom: 17%;
+  color: ${colors.white};
+  font-family: ${fonts.heading};
+  font-size: clamp(2.1rem, 4.5vw, 4.8rem);
+  font-weight: 620;
+  letter-spacing: -0.06em;
 `;

@@ -17,11 +17,12 @@ A V1 deve servir como referência comercial da marca, apoiar prospecção e cond
 * Frontend em React, TypeScript, Vite e Styled Components.
 * Framer Motion, homepage responsiva, logo, marca, tokens e direção visual disponíveis.
 * Roteamento público, páginas auxiliares, `PublicLayout`, âncoras, gerenciamento de foco e scroll, menu mobile acessível, metadados básicos e testes automatizados materializados na entrega 1.
-* A entrega 2 está concluída: conteúdo, dossiês e mídias reais dos seis projetos foram auditados e preparados. Portfólio, homepage e cases finais continuam pendentes das entregas posteriores; a auditoria da área administrativa do DevSchedule não é mídia pública nem bloqueia esta entrega.
+* A entrega 2 está concluída: conteúdo, dossiês e mídias reais dos seis projetos foram auditados e preparados. Portfólio e cases finais continuam pendentes da entrega posterior; a auditoria da área administrativa do DevSchedule não é mídia pública nem bloqueia esta entrega.
+* A entrega 3 está em implementação: a homepage reúne os três destaques, ofertas, diferenciais, processo, Sobre e contato com conteúdo e mídias reais, mas a conclusão depende de revisão visual humana.
 * Formulário ainda sem persistência.
 * Backend, PostgreSQL e e-mails ainda inexistentes.
 * Consentimento, Analytics, SEO e prerender ainda inexistentes.
-* Testes automatizados, CI/CD e deploy definitivo ainda inexistentes.
+* Testes automatizados estão configurados no frontend; CI/CD e deploy definitivo ainda inexistentes.
 
 ## Princípios de execução
 

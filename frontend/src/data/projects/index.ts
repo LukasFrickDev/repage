@@ -13,6 +13,7 @@ type ProjectBase = {
   slug: string;
   nature: ProjectNature;
   predatesRepage?: true;
+  featuredOrder?: 1 | 2 | 3;
 };
 
 export type DraftProject = ProjectBase & {
@@ -26,9 +27,9 @@ export type PublishedProject = ProjectBase & {
 export type Project = DraftProject | PublishedProject;
 
 export const projects = [
-  { title: 'EchoCosmicEnergia', slug: 'echo-cosmic-energia', nature: 'paid', publicationStatus: 'draft' },
-  { title: 'Axium', slug: 'axium', nature: 'paid', publicationStatus: 'draft' },
-  { title: 'DevSchedule', slug: 'dev-schedule', nature: 'technical-challenge', publicationStatus: 'draft' },
+  { title: 'EchoCosmicEnergia', slug: 'echo-cosmic-energia', nature: 'paid', publicationStatus: 'draft', featuredOrder: 1 },
+  { title: 'Axium', slug: 'axium', nature: 'paid', publicationStatus: 'draft', featuredOrder: 2 },
+  { title: 'DevSchedule', slug: 'dev-schedule', nature: 'technical-challenge', publicationStatus: 'draft', featuredOrder: 3 },
   { title: 'GreenTweet', slug: 'green-tweet', nature: 'owned', publicationStatus: 'draft' },
   { title: 'A Alma no Comando', slug: 'a-alma-no-comando', nature: 'paid', publicationStatus: 'draft' },
   { title: 'Alicerce da Alma', slug: 'alicerce-da-alma', nature: 'paid', publicationStatus: 'draft' },
@@ -52,6 +53,12 @@ export function listDraftProjects(records: readonly Project[] = projects): Draft
 
 export function listPublishedProjects(records: readonly Project[] = projects): PublishedProject[] {
   return records.filter((project): project is PublishedProject => project.publicationStatus === 'published');
+}
+
+export function listFeaturedProjects(records: readonly Project[] = projects): Project[] {
+  return records
+    .filter((project) => project.featuredOrder !== undefined)
+    .sort((first, second) => (first.featuredOrder ?? 0) - (second.featuredOrder ?? 0));
 }
 
 export function findDuplicateProjectSlugs(records: readonly Project[] = projects): string[] {

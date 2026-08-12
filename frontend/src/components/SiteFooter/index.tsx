@@ -5,7 +5,7 @@ import * as S from './styles';
 
 export function SiteFooter() {
   return (
-    <S.Footer>
+    <S.Footer data-home-section="footer">
       <S.Container>
         <S.BrandBlock>
           <S.Brand to="/" aria-label="Repage, ir para a página inicial">

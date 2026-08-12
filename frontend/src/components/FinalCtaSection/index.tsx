@@ -8,7 +8,7 @@ export function FinalCtaSection() {
   const prefersReducedMotion = useReducedMotion();
 
   return (
-    <S.Section id="contato" aria-labelledby="final-cta-title" tabIndex={-1}>
+    <S.Section id="contato" data-home-section="contact" aria-labelledby="final-cta-title" tabIndex={-1}>
       <S.Convergence aria-hidden="true"><i /><i /><i /></S.Convergence>
       <S.Content
         initial={prefersReducedMotion ? false : { opacity: 0, y: 16 }}

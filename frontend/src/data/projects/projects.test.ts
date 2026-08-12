@@ -4,12 +4,14 @@ import {
   findProjectBySlug,
   isProjectNature,
   listDraftProjects,
+  listFeaturedProjects,
   listProjects,
   listPublishedProjects,
   PROJECT_NATURES,
   projects,
 } from '.';
 import type { Project, PublishedProject } from '.';
+import { listHomepageFeaturedProjects } from './homepage';
 
 describe('project data', () => {
   it('registers the six confirmed projects with valid natures', () => {
@@ -50,5 +52,37 @@ describe('project data', () => {
 
     expect(findDuplicateProjectSlugs([projects[0], duplicate])).toEqual(['echo-cosmic-energia']);
     expect(findDuplicateProjectSlugs()).toEqual([]);
+  });
+
+  it('returns exactly the three homepage highlights in the approved order', () => {
+    expect(listFeaturedProjects().map((project) => project.slug)).toEqual([
+      'echo-cosmic-energia',
+      'axium',
+      'dev-schedule',
+    ]);
+    expect(listFeaturedProjects()).toHaveLength(3);
+    expect(listFeaturedProjects().every((project) => project.publicationStatus === 'draft')).toBe(true);
+    expect(listFeaturedProjects().some((project) => project.slug === 'green-tweet')).toBe(false);
+  });
+
+  it('resolves each homepage highlight cover from the readiness manifest', () => {
+    const highlights = listHomepageFeaturedProjects();
+
+    expect(highlights.map(({ project }) => project.slug)).toEqual([
+      'echo-cosmic-energia',
+      'axium',
+      'dev-schedule',
+    ]);
+    highlights.forEach(({ cover, desktopProof, mobileProof }) => {
+      expect(cover.kind).toBe('screenshot');
+      expect(cover.roles).toContain('cover');
+      expect(cover.path).toMatch(/^\/projects\/.+\.png$/);
+      expect([cover.width, cover.height]).toEqual([1200, 630]);
+      expect(cover.alt.trim()).not.toBe('');
+      expect(desktopProof?.roles).toEqual(expect.arrayContaining(['desktop', 'gallery']));
+      expect(mobileProof?.roles).toContain('mobile');
+      expect(desktopProof?.path).toMatch(/^\/projects\/.+\.png$/);
+      expect(mobileProof?.path).toMatch(/^\/projects\/.+\.png$/);
+    });
   });
 });

@@ -3,6 +3,8 @@ type NavigationItem = {
   href: string;
 };
 
+export type FeaturedProjectSlug = 'echo-cosmic-energia' | 'axium' | 'dev-schedule';
+
 export const navigation: NavigationItem[] = [
   { label: 'Serviços', href: '/#servicos' },
   { label: 'Projetos', href: '/portfolio' },
@@ -16,98 +18,141 @@ export const legalNavigation: NavigationItem[] = [
 ];
 
 export const heroContent = {
-  eyebrow: 'Landing pages e sites institucionais',
+  eyebrow: 'Sites e soluções digitais para profissionais, especialistas e negócios.',
   title: 'Uma nova página para o seu negócio começa aqui.',
   description:
-    'Criamos sites claros, rápidos e sob medida para empresas e profissionais que precisam transmitir confiança e transformar visitas em novos contatos.',
+    'Estratégia, design e desenvolvimento para transformar ideias e serviços em experiências digitais profissionais, claras e preparadas para fortalecer sua marca e facilitar novos contatos.',
   primaryCta: { label: 'Solicitar orçamento', href: '/#contato' },
-  secondaryCta: { label: 'Conhecer projetos', href: '/portfolio' },
-};
-
-export const servicesSectionContent = {
-  eyebrow: 'O que a Repage cria',
-  title: 'Presença digital que acompanha a ambição do seu negócio.',
-  description:
-    'Do primeiro acesso ao próximo contato, cada projeto une estratégia, design e tecnologia para fazer sua marca ser compreendida, lembrada e escolhida.',
-  services: [
-    {
-      title: 'Landing pages',
-      description:
-        'Páginas diretas e estratégicas para campanhas, lançamentos, serviços e captação de novos contatos.',
-    },
-    {
-      title: 'Sites institucionais',
-      description:
-        'Sites que apresentam sua empresa com clareza, credibilidade e uma experiência à altura do seu negócio.',
-    },
-    {
-      title: 'Suporte e evolução',
-      description:
-        'Acompanhamento para manter seu site atualizado, rápido e pronto para os próximos passos da sua marca.',
-    },
-    {
-      title: 'Soluções sob medida',
-      description:
-        'E-commerce, áreas restritas, integrações, painéis e experiências digitais quando o projeto pede mais do que uma página.',
-    },
-  ],
+  secondaryCta: { label: 'Ver projetos', href: '/portfolio' },
 };
 
 export const featuredProjectsSectionContent = {
   eyebrow: 'Projetos selecionados',
-  title: 'Trabalho real, pensado para contextos diferentes.',
+  title: 'Trabalho real para necessidades diferentes.',
   description:
-    'Da presença institucional a experiências mais completas, cada projeto foi construído para comunicar com clareza e funcionar bem em qualquer tela.',
-  projects: [
-    { name: 'Echo Cosmic Energia', category: 'Site comercial e e-commerce' },
-    { name: 'Axium', category: 'Landing page empresarial' },
-    { name: 'DevSchedule', category: 'Plataforma de agendamento' },
-    { name: 'GreenTweet', category: 'Produto social full stack' },
+    'Uma seleção que reúne comércio digital, presença institucional e uma aplicação de agendamento.',
+  summaries: {
+    'echo-cosmic-energia':
+      'Experiência full stack com catálogo, loja, conteúdo editorial e diferentes pontos de contato em uma presença digital integrada.',
+    axium:
+      'Experiência institucional para uma empresa de serviços, com páginas especializadas e conteúdo editorial responsivo.',
+    'dev-schedule':
+      'Aplicação de agendamento com fluxo público por etapas e uma área administrativa demonstrativa.',
+  } satisfies Record<FeaturedProjectSlug, string>,
+  allProjectsCta: { label: 'Ver todos os projetos', href: '/portfolio' },
+};
+
+export const servicesSectionContent = {
+  eyebrow: 'O que a Repage desenvolve',
+  title: 'Uma solução digital começa pela necessidade, não pelo formato.',
+  description:
+    'Da ideia à publicação, cada projeto combina estratégia, design e desenvolvimento de acordo com o que o negócio realmente precisa.',
+  services: [
+    {
+      visual: 'landing',
+      title: 'Landing pages',
+      description:
+        'Para campanhas, lançamentos, eventos, produtos e serviços que precisam conduzir o visitante a uma ação principal clara.',
+      scope: 'Captação de leads · lançamento de produto · campanha / evento',
+      media: {
+        desktop: '/projects/a-alma-no-comando/alma-social.png',
+        mobile: '/projects/a-alma-no-comando/alma-social.png',
+        alt: 'Landing page A Alma no Comando com proposta principal e chamadas para ação.',
+        width: 1200,
+        height: 630,
+      },
+      details: ['Campanhas e lançamentos', 'Eventos e inscrições', 'Produtos e serviços', 'Captação de leads'],
+    },
+    {
+      visual: 'institutional',
+      title: 'Sites institucionais',
+      description:
+        'Para apresentar sua marca, organizar serviços e informações e construir uma presença digital profissional e confiável.',
+      scope: 'Apresentação da marca · serviços · conteúdo e contato',
+      media: {
+        desktop: '/projects/axium/axium-social.png',
+        mobile: '/projects/axium/axium-home-mobile.png',
+        alt: 'Home institucional da Axium com navegação, apresentação da marca e áreas de serviços.',
+        width: 1200,
+        height: 630,
+      },
+      details: ['Presença oficial', 'Posicionamento', 'Organização de serviços', 'Informações e canais de contato'],
+    },
+    {
+      visual: 'custom',
+      title: 'Soluções personalizadas',
+      description:
+        'Para necessidades que vão além de uma página: e-commerce, áreas restritas, painéis, agendamentos, integrações e aplicações web avaliadas caso a caso.',
+      scope: 'E-commerce · áreas restritas · agendamentos e integrações',
+      media: {
+        desktop: '/projects/dev-schedule/devschedule-admin-dashboard-desktop.png',
+        mobile: '/projects/dev-schedule/devschedule-admin-dashboard-mobile.png',
+        alt: 'Painel administrativo do DevSchedule com indicadores, filtros e gestão de agendamentos.',
+        width: 1440,
+        height: 900,
+      },
+      details: [
+        'E-commerce e áreas restritas',
+        'Painéis administrativos e sistemas internos',
+        'Agendamentos e fluxos específicos',
+        'Integrações, automações e aplicações web',
+      ],
+    },
+  ],
+  support: {
+    eyebrow: 'E depois da publicação?',
+    title: 'Suporte e evolução',
+    description:
+      'Depois da publicação, a Repage também pode continuar ao lado do projeto com atualizações, correções, refinamentos e novas evoluções avaliadas conforme a necessidade.',
+  },
+};
+
+export const valuePropositionContent = {
+  eyebrow: 'Por que Repage',
+  title: 'Clareza para quem chega. Estrutura para o que vem depois.',
+  description:
+    'A Repage conecta estratégia, direção visual e desenvolvimento para transformar necessidades reais em experiências digitais profissionais, claras e preparadas para evoluir.',
+  differentiators: [
+    'Atendimento direto com o responsável.',
+    'Condução integrada de estrutura, conteúdo, design e desenvolvimento.',
+    'Soluções avaliadas conforme a necessidade real.',
+    'Continuidade opcional depois da publicação.',
   ],
 };
 
 export const processSectionContent = {
   eyebrow: 'Como funciona',
-  title: 'Do primeiro briefing ao site no ar.',
+  title: 'Do primeiro alinhamento à publicação.',
   description:
-    'Um processo direto, com espaço para alinhamento, decisões bem pensadas e uma entrega que faz sentido para o seu negócio.',
+    'Um processo próximo e organizado para transformar contexto, objetivos e decisões em uma entrega clara.',
   steps: [
-    {
-      title: 'Entender o momento',
-      description:
-        'Conversamos sobre seu negócio, objetivo, público e referências para definir o que o site precisa resolver.',
-    },
-    {
-      title: 'Projetar e construir',
-      description:
-        'Transformamos estratégia em estrutura, visual e tecnologia, com acompanhamento durante o desenvolvimento.',
-    },
-    {
-      title: 'Publicar e evoluir',
-      description:
-        'Depois dos ajustes finais, o site vai ao ar pronto para crescer junto com a sua marca.',
-    },
+    { title: 'Conversa', description: 'Entender negócio, necessidade, objetivo, público e momento.' },
+    { title: 'Planejamento', description: 'Organizar estrutura, conteúdo, prioridades e caminho da solução.' },
+    { title: 'Criação', description: 'Transformar as decisões em direção visual e desenvolvimento.' },
+    { title: 'Ajustes', description: 'Revisar a entrega com validações objetivas e refinamentos necessários.' },
+    { title: 'Publicação', description: 'Preparar e disponibilizar a solução no ambiente definido.' },
+    { title: 'Evolução', description: 'Avaliar suporte, manutenção ou novas necessidades depois da entrega.' },
   ],
 };
 
 export const signatureSectionContent = {
-  eyebrow: 'A assinatura Repage',
-  title: 'Clareza para quem chega. Estrutura para quem cresce.',
+  eyebrow: 'Sobre a Repage',
+  title: 'Uma marca próxima, com responsabilidade direta.',
   description:
-    'A Repage combina estratégia, direção visual e desenvolvimento para criar experiências digitais que não param na primeira impressão.',
+    'A Repage é um estúdio de desenvolvimento web conduzido de forma próxima, unindo estrutura, conteúdo, direção visual e tecnologia para criar experiências digitais profissionais e preparadas para evoluir.',
   signature: 'Projetos conduzidos por Lukas Frick',
   signatureRole: 'Desenvolvimento e direção digital',
 };
 
 export const finalCtaSectionContent = {
-  eyebrow: 'Seu próximo site começa aqui',
-  title: 'Vamos criar uma presença digital à altura do seu negócio.',
-  description: 'O canal de contato está em preparação. Em breve, será possível enviar uma solicitação por aqui.',
+  eyebrow: 'Vamos conversar',
+  title: 'Uma nova página para o seu negócio pode começar por aqui.',
+  description:
+    'Conte o que você precisa construir ou evoluir. A Repage parte do contexto, objetivo e momento do seu negócio para organizar o próximo passo.',
 };
 
 export const siteFooterContent = {
-  description:
-    'Landing pages e sites institucionais para negócios que querem avançar no digital.',
+  description: 'Sites e soluções digitais para profissionais, especialistas e negócios.',
   signature: 'Projetos conduzidos por Lukas Frick',
   copyright: '© 2026 Repage. Todos os direitos reservados.',
 };

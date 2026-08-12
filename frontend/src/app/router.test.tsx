@@ -57,7 +57,7 @@ describe('public routes', () => {
   it('routes project and budget CTAs to real destinations without #briefing', () => {
     renderAt('/');
 
-    expect(screen.getByRole('link', { name: 'Conhecer projetos' })).toHaveAttribute('href', '/portfolio');
+    expect(screen.getByRole('link', { name: 'Ver projetos' })).toHaveAttribute('href', '/portfolio');
     const budgetCtas = screen.getAllByRole('link', { name: 'Solicitar orçamento' });
     expect(budgetCtas).not.toHaveLength(0);
     budgetCtas.forEach((link) => {
@@ -70,11 +70,110 @@ describe('public routes', () => {
     expect(within(contact as HTMLElement).queryByRole('button', { name: 'Solicitar orçamento' })).not.toBeInTheDocument();
   });
 
+  it('renders the definitive homepage structure from the typed project and media sources', () => {
+    renderAt('/');
+
+    const sections = [...document.querySelectorAll('main [data-home-section]')]
+      .map((section) => section.getAttribute('data-home-section'));
+    expect(sections).toEqual(['hero', 'projects', 'services', 'value', 'process', 'about', 'contact']);
+
+    const projectsSection = document.querySelector('[data-home-section="projects"]') as HTMLElement;
+    const projectHeadings = within(projectsSection).getAllByRole('heading', { level: 3 });
+    expect(projectHeadings.map((heading) => heading.textContent)).toEqual([
+      'EchoCosmicEnergia',
+      'Axium',
+      'DevSchedule',
+    ]);
+    expect(within(projectsSection).queryByText('Projeto pago')).not.toBeInTheDocument();
+    expect(within(projectsSection).queryByText('Projeto próprio')).not.toBeInTheDocument();
+    expect(within(projectsSection).queryByText('Desafio técnico')).not.toBeInTheDocument();
+    expect(within(projectsSection).queryByText('GreenTweet')).not.toBeInTheDocument();
+    [
+      ['echo-cosmic-energia', 'EchoCosmicEnergia'],
+      ['axium', 'Axium'],
+      ['dev-schedule', 'DevSchedule'],
+    ].forEach(([slug, title]) => {
+      const links = within(projectsSection).getAllByRole('link', { name: new RegExp(title, 'i') });
+      expect(links).toHaveLength(2);
+      links.forEach((link) => expect(link).toHaveAttribute('href', `/portfolio/${slug}`));
+    });
+    expect(within(projectsSection).getByRole('link', { name: 'Ver todos os projetos' })).toHaveAttribute(
+      'href',
+      '/portfolio',
+    );
+
+    const projectImages = within(projectsSection).getAllByRole('img');
+    expect(projectImages).toHaveLength(5);
+    projectImages.forEach((image) => {
+      expect(image).toHaveAttribute('src', expect.stringMatching(/^\/projects\/.+\.png$/));
+      expect(Number(image.getAttribute('width'))).toBeGreaterThan(0);
+      expect(Number(image.getAttribute('height'))).toBeGreaterThan(0);
+      expect(image).toHaveAccessibleName();
+    });
+    expect(document.querySelector('video')).not.toBeInTheDocument();
+
+    const heroSection = document.querySelector('[data-home-section="hero"]') as HTMLElement;
+    expect(heroSection.querySelector('img[src^="/projects/"]')).not.toBeInTheDocument();
+    expect(within(heroSection).getByText('Ideia')).toBeInTheDocument();
+    expect(within(heroSection).getByText('Estrutura')).toBeInTheDocument();
+    expect(within(heroSection).getByText('03 — Experiência digital')).toBeInTheDocument();
+
+    const servicesSection = document.querySelector('[data-home-section="services"]') as HTMLElement;
+    expect(within(servicesSection).getAllByRole('button')).toHaveLength(3);
+    within(servicesSection).getAllByRole('button').forEach((button) => {
+      expect(button).toHaveAttribute('aria-expanded', 'false');
+    });
+    expect(within(servicesSection).getByText(/Para campanhas, lançamentos/)).toBeVisible();
+    expect(within(servicesSection).getByText(/Para apresentar sua marca/)).toBeVisible();
+    expect(within(servicesSection).getByText(/Para necessidades que pedem mais/)).toBeVisible();
+    expect(within(servicesSection).getByRole('heading', { level: 3, name: 'Suporte e evolução' })).toBeInTheDocument();
+
+    const valueSection = document.querySelector('[data-home-section="value"]') as HTMLElement;
+    expect(within(valueSection).getAllByRole('listitem')).toHaveLength(4);
+
+    const processSection = document.querySelector('[data-home-section="process"]') as HTMLElement;
+    expect(within(processSection).getAllByRole('listitem')).toHaveLength(6);
+    expect(within(processSection).getAllByRole('heading', { level: 3 }).map((heading) => heading.textContent)).toEqual([
+      'Conversa',
+      'Planejamento',
+      'Criação',
+      'Ajustes',
+      'Publicação',
+      'Evolução',
+    ]);
+
+    const contactSection = document.querySelector('[data-home-section="contact"]') as HTMLElement;
+    expect(within(contactSection).queryByText(/em preparação|em breve/i)).not.toBeInTheDocument();
+    expect(within(contactSection).queryByRole('button')).not.toBeInTheDocument();
+  });
+
+  it('expands and collapses service details with accessible controls', async () => {
+    const user = userEvent.setup();
+    renderAt('/');
+
+    const customSolutions = screen.getByRole('button', { name: /Soluções personalizadas/ });
+    expect(customSolutions).toHaveAttribute('aria-expanded', 'false');
+    expect(screen.queryByText('Painéis administrativos e sistemas internos')).not.toBeInTheDocument();
+
+    customSolutions.focus();
+    await user.keyboard('{Enter}');
+
+    expect(customSolutions).toHaveAttribute('aria-expanded', 'true');
+    expect(screen.getByText('Painéis administrativos e sistemas internos')).toBeVisible();
+    expect(screen.getByRole('region', { name: /Soluções personalizadas/ })).toBeInTheDocument();
+
+    await user.click(customSolutions);
+    expect(customSolutions).toHaveAttribute('aria-expanded', 'false');
+    await waitFor(() => {
+      expect(screen.queryByText('Painéis administrativos e sistemas internos')).not.toBeInTheDocument();
+    });
+  });
+
   it('moves focus to the destination heading after a route change', async () => {
     const user = userEvent.setup();
     renderAt('/');
 
-    await user.click(screen.getByRole('link', { name: 'Conhecer projetos' }));
+    await user.click(screen.getByRole('link', { name: 'Ver projetos' }));
 
     const heading = screen.getByRole('heading', { level: 1, name: 'Projetos em preparação.' });
     expect(screen.getByTestId('location')).toHaveTextContent('/portfolio');
@@ -167,7 +266,7 @@ describe('public routes', () => {
     );
     expect(document.querySelector('meta[name="robots"]')).toHaveAttribute('content', 'index, follow');
 
-    await user.click(screen.getByRole('link', { name: 'Conhecer projetos' }));
+    await user.click(screen.getByRole('link', { name: 'Ver projetos' }));
 
     await waitFor(() => expect(document.title).toBe('Portfólio em preparação | Repage'));
     expect(document.querySelector('meta[name="robots"]')).toHaveAttribute('content', 'noindex, nofollow');

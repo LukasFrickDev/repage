@@ -15,7 +15,7 @@ export const Container = styled.div`
   display: grid;
   gap: ${layout.footerContentGap};
 
-  @media (min-width: ${breakpoints.content}) {
+  @media (min-width: ${breakpoints.laptop}) {
     grid-template-columns: minmax(16rem, 1.1fr) minmax(20rem, 0.9fr) minmax(16rem, 0.8fr);
     align-items: end;
   }
@@ -86,7 +86,7 @@ export const Navigation = styled.nav`
 `;
 
 export const Meta = styled.div`
-  @media (min-width: ${breakpoints.content}) { text-align: right; }
+  @media (min-width: ${breakpoints.laptop}) { text-align: right; }
 
   p {
     color: rgba(245, 242, 236, 0.76);
