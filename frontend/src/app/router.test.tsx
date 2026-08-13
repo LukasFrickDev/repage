@@ -54,6 +54,30 @@ describe('public routes', () => {
     expect(screen.getByRole('link', { name: 'Ver portfólio' })).toHaveAttribute('href', '/portfolio');
   });
 
+  it('renders the shared Echo case shell with factual content and next navigation', () => {
+    renderAt('/portfolio/echo-cosmic-energia');
+
+    const caseMain = within(screen.getByRole('main'));
+    expect(screen.getByRole('heading', { level: 1, name: 'EchoCosmicEnergia' })).toBeInTheDocument();
+    expect(caseMain.queryByText('Projeto pago')).not.toBeInTheDocument();
+    expect(caseMain.queryByText(/Lukas Frick/)).not.toBeInTheDocument();
+    expect(screen.getByText('Experiência full stack com catálogo, loja, conteúdo editorial e diferentes pontos de contato em uma presença digital integrada.')).toBeInTheDocument();
+    expect(screen.getByText('Uma presença digital integrada para reunir catálogo, loja, conteúdo editorial e diferentes pontos de contato.')).toBeInTheDocument();
+    expect(screen.getByText('O projeto combina comércio digital, conteúdo e serviços em uma mesma experiência pública.')).toBeInTheDocument();
+    expect(screen.getByText('Organizar diferentes frentes da experiência em uma estrutura clara e navegável.')).toBeInTheDocument();
+    expect(screen.getByText('Uma experiência full stack com catálogo, carrinho, checkout, pagamentos, loja virtual, blog, página de links e painel administrativo.')).toBeInTheDocument();
+    expect(screen.getAllByText('Estratégia inicial, estrutura, direção visual/design e desenvolvimento. O trabalho foi refinado e validado com o cliente.')).not.toHaveLength(0);
+    expect(screen.getByText('Catálogo')).toBeInTheDocument();
+    expect(screen.getByText('Checkout')).toBeInTheDocument();
+    expect(screen.getByText('React')).toBeInTheDocument();
+    expect(screen.getByRole('img', { name: 'Página inicial da Echo Cosmic Energia para compartilhamento social.' })).toHaveAttribute('src', '/projects/echo-cosmic-energia/echo-social.png');
+    expect(screen.getByRole('link', { name: 'Solicitar orçamento' })).toHaveAttribute('href', '/#contato');
+    expect(screen.getAllByRole('link', { name: 'Voltar ao portfólio' })).toHaveLength(2);
+    expect(screen.getAllByRole('link', { name: 'Voltar ao portfólio' })[0]).toHaveAttribute('href', '/portfolio');
+    expect(screen.getByRole('link', { name: /Axium/ })).toHaveAttribute('href', '/portfolio/axium');
+    expect(screen.getAllByRole('heading', { level: 1 })).toHaveLength(1);
+  });
+
   it('resets immediately when navigating to a new route without a hash', async () => {
     const user = userEvent.setup();
     renderAt('/');

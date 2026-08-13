@@ -72,7 +72,7 @@ Naturezas obrigatórias:
 
 DevSchedule e GreenTweet não são clientes.
 
-A natureza deve permanecer explícita na fonte tipada e pode aparecer editorialmente no portfólio e na abertura do case.
+`nature` permanece explícita na fonte tipada e no gate. `/portfolio` não usa `Projeto pago`, `Projeto próprio` ou `Desafio técnico` como classificação pública. Nos cases, a natureza pode ser explicada editorialmente quando necessário para manter a apresentação factual correta, especialmente em DevSchedule e GreenTweet.
 
 Não utilizar expressões que transformem projeto próprio ou desafio técnico em trabalho para cliente.
 
@@ -541,7 +541,9 @@ Direção de copy:
 
 **Descrição**
 
-> Trabalhos pagos, projetos próprios e desafios técnicos que mostram diferentes formas de combinar estrutura, design e desenvolvimento.
+> Sites institucionais, e-commerce, landing pages e aplicações web que mostram diferentes formas de combinar estrutura, design e desenvolvimento.
+
+Visualmente, esse único `h1` é dividido em três polos para a construção editorial: `Projetos reais`, `para contextos` e `diferentes.`. A divisão é visual/motion; semanticamente continua um único heading.
 
 ### 11.3 Listagem
 
@@ -561,7 +563,7 @@ Ordem obrigatória:
 Cada item possui:
 
 * mídia principal real;
-* natureza;
+* `projectType`;
 * título;
 * resumo;
 * principais serviços/capacidades;
@@ -592,21 +594,13 @@ Não usar autoplay.
 
 ### 11.4 Ritmo da grade
 
-Desktop pode utilizar grade estrutural de 12 colunas com três pares editoriais:
+Desktop/notebook usa uma sequência vertical única dos seis projetos, no mesmo eixo editorial, com mídia sempre à esquerda e conteúdo sempre à direita. A relação aproximada é 60/40, guiada pelo conteúdo; não há alternância esquerda/direita, hierarquia de importância entre projetos ou layouts independentes por projeto. Todos ocupam a mesma área estrutural de mídia, respeitando o enquadramento de cada cover.
 
-* EchoCosmicEnergia com maior presença + Axium;
-* DevSchedule + GreenTweet com maior presença;
-* A Alma no Comando + Alicerce da Alma com equilíbrio equivalente.
+A variação permanece em conteúdo, enquadramento, respiro, pequenos ajustes de escala e densidade editorial, não em zig-zag ou composições independentes.
 
-A diferença de escala deve ser moderada.
+Tablet reduz a relação lateral progressivamente antes de comprimir o conteúdo.
 
-Não criar hierarquia que pareça indicar maior importância comercial, melhor qualidade ou cliente mais relevante.
-
-Tablet reduz a assimetria progressivamente.
-
-Mobile usa sequência vertical única, preservando ordem e mídia.
-
-A variação de escala e ritmo deve servir à curadoria e à presença da mídia, sem transformar a listagem em uma sequência de molduras tipográficas vazias.
+Mobile usa sequência vertical, com mídia acima e conteúdo abaixo, preservando a mesma ordem dos seis projetos.
 
 ### 11.5 Referências visuais operacionais
 

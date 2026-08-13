@@ -58,7 +58,7 @@ export type DraftProject = ProjectBase & { publicationStatus: 'draft' };
 export type PublishedProject = ProjectBase & { publicationStatus: 'published' };
 export type Project = DraftProject | PublishedProject;
 
-const sharedParticipation = 'Lukas Frick conduziu estratégia inicial, estrutura, direção visual/design e desenvolvimento.';
+const sharedParticipation = 'Estratégia inicial, estrutura, direção visual/design e desenvolvimento.';
 
 export const projects = [
   {
@@ -122,7 +122,7 @@ export const projects = [
     context: 'O projeto explora um fluxo de serviço, calendário, disponibilidade, dados para agendamento e gestão visual do estado administrativo.',
     challenge: 'Construir uma jornada pública por etapas que também demonstrasse a visão administrativa do sistema.',
     solution: 'Um fluxo público de seleção de serviço, calendário, disponibilidade e dados, acompanhado por uma área administrativa demonstrativa.',
-    participation: 'Lukas Frick conduziu estratégia inicial, estrutura, direção visual/design e desenvolvimento no desafio técnico.',
+    participation: 'Estratégia inicial, estrutura, direção visual/design e desenvolvimento no desafio técnico.',
     services: ['Estratégia', 'Estrutura', 'Direção visual/design', 'Desenvolvimento'],
     capabilities: ['Seleção de serviço', 'Calendário', 'Disponibilidade', 'Dados para agendamento', 'Fluxo público', 'Área administrativa demonstrativa', 'Gestão visual do estado administrativo'],
     technologies: ['React', 'TypeScript', 'Vite', 'Styled Components', 'Django REST Framework', 'PostgreSQL', 'Docker'],
@@ -146,7 +146,7 @@ export const projects = [
     context: 'O projeto explora publicação, perfil e interação entre usuários em uma experiência autenticada demonstrativa.',
     challenge: 'Organizar diferentes estados de uma aplicação social em fluxos compreensíveis e demonstráveis.',
     solution: 'Uma aplicação com cadastro, autenticação JWT, perfis, publicações, curtidas, comentários, seguidores, notificações e busca.',
-    participation: 'Lukas Frick conduziu estratégia inicial, estrutura, direção visual/design e desenvolvimento no projeto próprio.',
+    participation: 'Estratégia inicial, estrutura, direção visual/design e desenvolvimento no projeto próprio.',
     services: ['Estratégia', 'Estrutura', 'Direção visual/design', 'Desenvolvimento'],
     capabilities: ['Cadastro', 'Autenticação JWT', 'Perfis', 'Publicações', 'Curtidas', 'Comentários', 'Seguidores', 'Notificações', 'Busca'],
     technologies: ['React', 'TypeScript', 'Vite', 'Django REST Framework', 'PostgreSQL'],

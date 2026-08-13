@@ -32,5 +32,10 @@ export const editorialMotion = {
     offset: ['start 92%', 'start 42%'] as ['start 92%', 'start 42%'],
     range: [0.08, 0.86],
     distance: 12,
+    media: {
+      range: [0.48, 0.98],
+      distance: 52,
+      mobileDistance: 28,
+    },
   },
 } as const;
