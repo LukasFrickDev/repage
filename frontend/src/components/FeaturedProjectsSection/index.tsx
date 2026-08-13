@@ -45,7 +45,7 @@ const echoHandoff = 0.32;
 const axiumHandoff = 0.58;
 
 const stageWindows: readonly StageWindow[] = [
-  { start: 0.07, settle: 0.15, exitStart: echoHandoff, end: echoHandoff + handoffTiming.duration },
+  { start: 0.13, settle: 0.205, exitStart: echoHandoff, end: echoHandoff + handoffTiming.duration },
   {
     start: echoHandoff - handoffTiming.overlapLead,
     settle: echoHandoff + handoffTiming.duration,
@@ -191,9 +191,9 @@ export function FeaturedProjectsSection() {
   const [activeProject, setActiveProject] = useState(-1);
   const trackRef = useRef<HTMLDivElement>(null);
   const progress = usePortfolioProgress(trackRef);
-  const introOpacity = useTransform(progress, [0, 0.075, 0.2], [1, 1, 0]);
-  const introY = useTransform(progress, [0, 0.075, 0.2], [0, -4, -112]);
-  const introScale = useTransform(progress, [0, 0.1, 0.2], [1, 1, 0.97]);
+  const introOpacity = useTransform(progress, [0, 0.12, 0.18], [1, 1, 0]);
+  const introY = useTransform(progress, [0, 0.12, 0.18], [0, -4, -112]);
+  const introScale = useTransform(progress, [0, 0.12, 0.18], [1, 1, 0.97]);
   const [echo, axium, devSchedule] = listHomepageFeaturedProjects();
   const isStatic = Boolean(prefersReducedMotion);
   const projects = [

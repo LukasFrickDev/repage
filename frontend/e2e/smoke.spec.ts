@@ -35,7 +35,7 @@ test('homepage renders its definitive structure without horizontal overflow', as
   ]);
 
   const featuredProjects = page.locator('[data-home-section="projects"]');
-  await expect(featuredProjects.getByRole('heading', { level: 3 })).toHaveText([
+  await expect(featuredProjects.locator('h3')).toHaveText([
     'EchoCosmicEnergia',
     'Axium',
     'DevSchedule',
@@ -45,7 +45,7 @@ test('homepage renders its definitive structure without horizontal overflow', as
   await expect(featuredProjects.getByText('Desafio técnico')).toHaveCount(0);
   await expect(featuredProjects.getByText('GreenTweet')).toHaveCount(0);
   const projectImages = featuredProjects.locator('img');
-  await expect(projectImages).toHaveCount(5);
+  await expect(projectImages).toHaveCount(6);
   for (let index = 0; index < await projectImages.count(); index += 1) {
     const image = projectImages.nth(index);
     await image.scrollIntoViewIfNeeded();
@@ -59,18 +59,14 @@ test('homepage renders its definitive structure without horizontal overflow', as
 
   await expect(page.locator('[data-home-section="hero"] img[src^="/projects/"]')).toHaveCount(0);
 
-  const serviceControls = page.locator('[data-home-section="services"] button[aria-controls^="service-panel-"]');
-  await expect(serviceControls).toHaveCount(3);
-  for (let index = 0; index < await serviceControls.count(); index += 1) {
-    await expect(serviceControls.nth(index)).toHaveAttribute('aria-expanded', 'false');
-  }
-  const customSolutionsControl = serviceControls.nth(2);
-  await customSolutionsControl.focus();
-  await page.keyboard.press('Enter');
-  await expect(customSolutionsControl).toHaveAttribute('aria-expanded', 'true');
-  await expect(page.getByText('Painéis administrativos e sistemas internos')).toBeVisible();
-  await customSolutionsControl.click();
-  await expect(customSolutionsControl).toHaveAttribute('aria-expanded', 'false');
+  const services = page.locator('[data-home-section="services"]');
+  const serviceOffers = services.locator('article');
+  await expect(serviceOffers.locator('h3')).toHaveText([
+    'Landing pages',
+    'Sites institucionais',
+    'Soluções personalizadas',
+  ]);
+  await expect(serviceOffers.getByText(/Para necessidades que vão além de uma página/)).toBeVisible();
   await expect(page.locator('[data-home-section="value"] li')).toHaveCount(4);
   await expect(page.locator('[data-home-section="process"] li')).toHaveCount(6);
 

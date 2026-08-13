@@ -123,7 +123,7 @@ export const MomentLabel = styled.div`
 
 export const StructureEntrance = styled(motion.div)`
   position: absolute;
-  z-index: 2;
+  z-index: 5;
   top: 28%;
   left: 27%;
   width: 42%;

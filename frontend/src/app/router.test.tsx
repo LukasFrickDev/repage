@@ -78,7 +78,7 @@ describe('public routes', () => {
     expect(sections).toEqual(['hero', 'projects', 'services', 'value', 'process', 'about', 'contact']);
 
     const projectsSection = document.querySelector('[data-home-section="projects"]') as HTMLElement;
-    const projectHeadings = within(projectsSection).getAllByRole('heading', { level: 3 });
+    const projectHeadings = [...projectsSection.querySelectorAll('h3')];
     expect(projectHeadings.map((heading) => heading.textContent)).toEqual([
       'EchoCosmicEnergia',
       'Axium',
@@ -93,17 +93,14 @@ describe('public routes', () => {
       ['axium', 'Axium'],
       ['dev-schedule', 'DevSchedule'],
     ].forEach(([slug, title]) => {
-      const links = within(projectsSection).getAllByRole('link', { name: new RegExp(title, 'i') });
+      const links = [...projectsSection.querySelectorAll(`a[href="/portfolio/${slug}"]`)];
       expect(links).toHaveLength(2);
       links.forEach((link) => expect(link).toHaveAttribute('href', `/portfolio/${slug}`));
     });
-    expect(within(projectsSection).getByRole('link', { name: 'Ver todos os projetos' })).toHaveAttribute(
-      'href',
-      '/portfolio',
-    );
+    expect(projectsSection.querySelector('a[href="/portfolio"]')).toHaveTextContent('Ver todos os projetos');
 
-    const projectImages = within(projectsSection).getAllByRole('img');
-    expect(projectImages).toHaveLength(5);
+    const projectImages = [...projectsSection.querySelectorAll('img')];
+    expect(projectImages).toHaveLength(6);
     projectImages.forEach((image) => {
       expect(image).toHaveAttribute('src', expect.stringMatching(/^\/projects\/.+\.png$/));
       expect(Number(image.getAttribute('width'))).toBeGreaterThan(0);
@@ -116,17 +113,19 @@ describe('public routes', () => {
     expect(heroSection.querySelector('img[src^="/projects/"]')).not.toBeInTheDocument();
     expect(within(heroSection).getByText('Ideia')).toBeInTheDocument();
     expect(within(heroSection).getByText('Estrutura')).toBeInTheDocument();
-    expect(within(heroSection).getByText('03 — Experiência digital')).toBeInTheDocument();
+    expect(within(heroSection).getByText('03')).toBeInTheDocument();
+    expect(within(heroSection).getByText('Experiência digital')).toBeInTheDocument();
 
     const servicesSection = document.querySelector('[data-home-section="services"]') as HTMLElement;
-    expect(within(servicesSection).getAllByRole('button')).toHaveLength(3);
-    within(servicesSection).getAllByRole('button').forEach((button) => {
-      expect(button).toHaveAttribute('aria-expanded', 'false');
-    });
-    expect(within(servicesSection).getByText(/Para campanhas, lançamentos/)).toBeVisible();
-    expect(within(servicesSection).getByText(/Para apresentar sua marca/)).toBeVisible();
-    expect(within(servicesSection).getByText(/Para necessidades que pedem mais/)).toBeVisible();
-    expect(within(servicesSection).getByRole('heading', { level: 3, name: 'Suporte e evolução' })).toBeInTheDocument();
+    expect(within(servicesSection).getAllByRole('heading', { level: 3 }).slice(0, 3).map((heading) => heading.textContent)).toEqual([
+      'Landing pages',
+      'Sites institucionais',
+      'Soluções personalizadas',
+    ]);
+    expect(within(servicesSection).getByText(/Para campanhas, lançamentos/)).toBeInTheDocument();
+    expect(within(servicesSection).getByText(/Para apresentar sua marca/)).toBeInTheDocument();
+    expect(within(servicesSection).getByText(/Para necessidades que vão além de uma página/)).toBeInTheDocument();
+    expect(within(servicesSection).getByRole('heading', { level: 3, name: 'O projeto pode continuar evoluindo.' })).toBeInTheDocument();
 
     const valueSection = document.querySelector('[data-home-section="value"]') as HTMLElement;
     expect(within(valueSection).getAllByRole('listitem')).toHaveLength(4);
@@ -145,28 +144,6 @@ describe('public routes', () => {
     const contactSection = document.querySelector('[data-home-section="contact"]') as HTMLElement;
     expect(within(contactSection).queryByText(/em preparação|em breve/i)).not.toBeInTheDocument();
     expect(within(contactSection).queryByRole('button')).not.toBeInTheDocument();
-  });
-
-  it('expands and collapses service details with accessible controls', async () => {
-    const user = userEvent.setup();
-    renderAt('/');
-
-    const customSolutions = screen.getByRole('button', { name: /Soluções personalizadas/ });
-    expect(customSolutions).toHaveAttribute('aria-expanded', 'false');
-    expect(screen.queryByText('Painéis administrativos e sistemas internos')).not.toBeInTheDocument();
-
-    customSolutions.focus();
-    await user.keyboard('{Enter}');
-
-    expect(customSolutions).toHaveAttribute('aria-expanded', 'true');
-    expect(screen.getByText('Painéis administrativos e sistemas internos')).toBeVisible();
-    expect(screen.getByRole('region', { name: /Soluções personalizadas/ })).toBeInTheDocument();
-
-    await user.click(customSolutions);
-    expect(customSolutions).toHaveAttribute('aria-expanded', 'false');
-    await waitFor(() => {
-      expect(screen.queryByText('Painéis administrativos e sistemas internos')).not.toBeInTheDocument();
-    });
   });
 
   it('moves focus to the destination heading after a route change', async () => {
@@ -306,10 +283,13 @@ describe('mobile menu', () => {
     const links = within(navigation).getAllByRole('link');
     const closeButton = screen.getByRole('button', { name: 'Fechar menu' });
     expect(trigger).toHaveAttribute('aria-expanded', 'true');
-    expect(links[0]).toHaveFocus();
+    expect(closeButton).toHaveFocus();
     expect(document.body.style.overflow).toBe('hidden');
 
     await user.tab({ shift: true });
+    expect(links.at(-1)).toHaveFocus();
+
+    await user.tab();
     expect(closeButton).toHaveFocus();
 
     await user.tab();

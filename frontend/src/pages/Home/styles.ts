@@ -48,6 +48,12 @@ export const Hero = styled.section`
     padding-top: 6.5rem;
     padding-bottom: 2rem;
   }
+
+  @media (min-width: ${breakpoints.laptop}) and (max-height: ${homepageTokens.hero.lowHeightMax}) {
+    min-height: 100svh;
+    padding-top: ${homepageTokens.hero.lowHeightPaddingTop};
+    padding-bottom: ${homepageTokens.hero.lowHeightPaddingBottom};
+  }
 `;
 
 export const BrandEntrance = styled.div`
@@ -166,6 +172,10 @@ export const HeroInner = styled.div`
   grid-template-columns: repeat(12, minmax(0, 1fr));
   align-items: center;
   min-height: clamp(33rem, 54vw, 46rem);
+
+  @media (min-width: ${breakpoints.laptop}) and (max-height: ${homepageTokens.hero.lowHeightMax}) {
+    min-height: ${homepageTokens.hero.lowHeightInnerMinHeight};
+  }
 `;
 
 export const Copy = styled.div`
@@ -282,10 +292,50 @@ const ctaBase = `
 
 export const PrimaryCta = styled.a`
   ${ctaBase}
-  border: 1px solid transparent;
-  background: linear-gradient(105deg, ${colors.highlight}, ${colors.neonBlue});
-  color: ${colors.background};
-  box-shadow: 0 1rem 2.5rem rgba(108, 99, 255, 0.2);
+  border: 1px solid rgba(145, 168, 255, 0.24);
+  border-radius: ${layout.radii.control};
+  background: linear-gradient(
+    108deg,
+    color-mix(in srgb, ${colors.highlight} 88%, ${colors.inkDeep}) 0%,
+    color-mix(in srgb, ${colors.highlight} 90%, ${colors.inkDeep}) 38%,
+    color-mix(in srgb, ${colors.neonBlue} 80%, ${colors.highlight}) 118%
+  );
+  background-position: left center;
+  background-size: 135% 100%;
+  color: ${colors.white};
+  font-weight: 670;
+  box-shadow: inset 0 1px rgba(245, 242, 236, 0.16), inset -1px 0 rgba(145, 168, 255, 0.16);
+  transition: background-position ${motionTokens.duration.fast} ${motionTokens.easing.standard}, border-color ${motionTokens.duration.fast} ${motionTokens.easing.standard}, box-shadow ${motionTokens.duration.fast} ${motionTokens.easing.standard}, filter ${motionTokens.duration.quick} ${motionTokens.easing.standard};
+
+  svg {
+    width: 0.92rem;
+    height: 0.92rem;
+  }
+
+  &:hover {
+    transform: none;
+    background-position: right center;
+    border-color: rgba(245, 242, 236, 0.28);
+    box-shadow: inset 0 1px rgba(245, 242, 236, 0.22), inset -1px 0 rgba(145, 168, 255, 0.22);
+  }
+
+  &:hover svg { transform: translateX(2.5px); }
+
+  &:active {
+    transform: none;
+    filter: brightness(0.94);
+    box-shadow: inset 0 2px 6px rgba(13, 21, 34, 0.24);
+  }
+
+  &:focus-visible {
+    outline: 2px solid ${colors.neonBlue};
+    outline-offset: 3px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+    svg { transition: none; }
+  }
 `;
 
 export const SecondaryCta = styled.a`

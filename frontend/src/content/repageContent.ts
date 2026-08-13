@@ -100,10 +100,24 @@ export const servicesSectionContent = {
     },
   ],
   support: {
-    eyebrow: 'E depois da publicação?',
-    title: 'Suporte e evolução',
+    eyebrow: 'Depois da publicação',
+    title: 'O projeto pode continuar evoluindo.',
     description:
       'Depois da publicação, a Repage também pode continuar ao lado do projeto com atualizações, correções, refinamentos e novas evoluções avaliadas conforme a necessidade.',
+    continuities: [
+      {
+        title: 'Atualizações',
+        description: 'Pequenos ajustes e melhorias em conteúdo, estrutura e interface.',
+      },
+      {
+        title: 'Correções',
+        description: 'Ajustes pontuais para manter a experiência clara e consistente.',
+      },
+      {
+        title: 'Novas evoluções',
+        description: 'Expansões e refinamentos avaliados conforme a necessidade do projeto.',
+      },
+    ],
   },
 };
 
@@ -112,11 +126,28 @@ export const valuePropositionContent = {
   title: 'Clareza para quem chega. Estrutura para o que vem depois.',
   description:
     'A Repage conecta estratégia, direção visual e desenvolvimento para transformar necessidades reais em experiências digitais profissionais, claras e preparadas para evoluir.',
+  differentiatorsBridge: 'Na prática, isso significa',
   differentiators: [
-    'Atendimento direto com o responsável.',
-    'Condução integrada de estrutura, conteúdo, design e desenvolvimento.',
-    'Soluções avaliadas conforme a necessidade real.',
-    'Continuidade opcional depois da publicação.',
+    {
+      title: 'Responsabilidade direta',
+      description:
+        'Você fala com quem conduz o projeto do primeiro alinhamento aos ajustes, reduzindo ruído e mantendo contexto e decisões no mesmo lugar.',
+    },
+    {
+      title: 'Condução integrada',
+      description:
+        'Estrutura, conteúdo, direção visual e desenvolvimento são pensados em conjunto para que a experiência funcione como um todo.',
+    },
+    {
+      title: 'Necessidade antes do formato',
+      description:
+        'A solução parte do objetivo, do contexto e do momento do negócio — não de um pacote pronto ou de um formato definido antes do problema.',
+    },
+    {
+      title: 'Continuidade quando fizer sentido',
+      description:
+        'A entrega pode terminar na publicação ou seguir com correções, atualizações e novas evoluções avaliadas conforme a necessidade.',
+    },
   ],
 };
 
@@ -137,18 +168,19 @@ export const processSectionContent = {
 
 export const signatureSectionContent = {
   eyebrow: 'Sobre a Repage',
-  title: 'Uma marca próxima, com responsabilidade direta.',
+  title: 'Uma marca independente, conduzida de perto.',
   description:
-    'A Repage é um estúdio de desenvolvimento web conduzido de forma próxima, unindo estrutura, conteúdo, direção visual e tecnologia para criar experiências digitais profissionais e preparadas para evoluir.',
+    'A Repage é um estúdio de desenvolvimento web que reúne estrutura, conteúdo, direção visual e tecnologia para transformar necessidades reais em experiências digitais profissionais e preparadas para evoluir.',
   signature: 'Projetos conduzidos por Lukas Frick',
   signatureRole: 'Desenvolvimento e direção digital',
 };
 
 export const finalCtaSectionContent = {
   eyebrow: 'Vamos conversar',
-  title: 'Uma nova página para o seu negócio pode começar por aqui.',
+  title: 'Sua próxima página pode começar por aqui.',
+  titleLines: ['Sua próxima página', 'pode começar por aqui.'],
   description:
-    'Conte o que você precisa construir ou evoluir. A Repage parte do contexto, objetivo e momento do seu negócio para organizar o próximo passo.',
+    'Conte o que você precisa construir ou evoluir. A Repage entende o contexto, os objetivos e o momento do seu negócio para definir o próximo passo.',
 };
 
 export const siteFooterContent = {

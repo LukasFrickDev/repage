@@ -1,11 +1,14 @@
 import { motion } from 'framer-motion';
 import styled from 'styled-components';
 import { breakpoints, colors, fonts, homepageTokens, layout } from '../../styles/theme';
+import { HomepageEditorialFrame } from '../HomepageEditorialFrame';
+
+type AnchorAlignment = 'start' | 'center' | 'end';
 
 export const Section = styled.section`
   position: relative;
   isolation: isolate;
-  overflow: hidden;
+  overflow: clip;
   padding: clamp(7rem, 12vw, 12rem) ${homepageTokens.sectionPaddingInline};
   background: ${colors.white};
   color: ${colors.background};
@@ -16,13 +19,12 @@ export const Container = styled.div`
   margin-inline: auto;
 `;
 
-export const Heading = styled.div`
+export const Heading = styled(HomepageEditorialFrame)`
   position: relative;
-  max-width: 63rem;
-  margin-bottom: clamp(5rem, 9vw, 9rem);
+  margin-bottom: ${homepageTokens.process.headingMarginBottom};
 `;
 
-export const Eyebrow = styled.p`
+export const Eyebrow = styled(motion.p)`
   margin-bottom: ${homepageTokens.eyebrowMarginBottom};
   color: ${colors.highlight};
   font-family: ${fonts.primary};
@@ -32,32 +34,92 @@ export const Eyebrow = styled.p`
   text-transform: uppercase;
 `;
 
-export const Title = styled.h2`
-  max-width: 13ch;
+export const Title = styled(motion.h2)`
+  max-width: 100%;
   font-family: ${fonts.heading};
-  font-size: clamp(3.2rem, 5.6vw, 6.2rem);
+  font-size: ${homepageTokens.process.introTitleSize};
   font-weight: 620;
   letter-spacing: -0.065em;
   line-height: 0.93;
-  text-wrap: balance;
-`;
 
-export const Description = styled.p`
-  max-width: 34rem;
-  margin: clamp(1.75rem, 3vw, 2.5rem) 0 0 auto;
-  color: rgba(16, 24, 39, 0.68);
-  font-family: ${fonts.primary};
-  font-size: ${homepageTokens.sectionCopySize};
-  line-height: 1.65;
-
-  @media (max-width: ${breakpoints.tabletMax}) {
-    margin-left: 0;
+  @media (max-width: ${breakpoints.contentMax}) {
+    font-size: ${homepageTokens.process.introTitleMobileSize};
   }
 `;
 
-export const Journey = styled.div`
+export const TitleLine = styled.span<{ $offset?: boolean }>`
+  width: fit-content;
+  max-width: 100%;
+  margin-left: ${({ $offset }) => $offset ? homepageTokens.process.introLineOffset : '0'};
+  display: block;
+  overflow: hidden;
+
+  @media (max-width: ${breakpoints.contentMax}) {
+    margin-left: ${({ $offset }) => $offset ? homepageTokens.process.introMobileLineOffset : '0'};
+  }
+`;
+
+export const TitleLineText = styled.span`
+  display: block;
+  white-space: nowrap;
+
+  @media (max-width: ${breakpoints.contentMax}) {
+    white-space: normal;
+    text-wrap: balance;
+  }
+`;
+
+export const Description = styled(motion.p)`
+  max-width: ${homepageTokens.process.introDescriptionMaxWidth};
+  margin: clamp(1.5rem, 2.4vw, 2.15rem) 0 0 ${homepageTokens.process.introDescriptionOffset};
+  color: rgba(16, 24, 39, 0.68);
+  font-family: ${fonts.primary};
+  font-size: ${homepageTokens.sectionCopySize};
+  font-weight: ${homepageTokens.process.introDescriptionWeight};
+  line-height: 1.65;
+
+  @media (max-width: ${breakpoints.contentMax}) {
+    margin-left: ${homepageTokens.process.introMobileLineOffset};
+  }
+`;
+
+export const ProcessJourneyTrack = styled.div`
   position: relative;
-  min-height: 38rem;
+
+  &::after {
+    content: '';
+    display: block;
+    height: ${homepageTokens.process.journeyTrackRunway};
+    pointer-events: none;
+  }
+
+  @media (max-width: ${breakpoints.contentMax}),
+    (max-height: 620px),
+    (prefers-reduced-motion: reduce) {
+    &::after {
+      display: none;
+    }
+  }
+`;
+
+export const ProcessJourneyStage = styled.div`
+  position: sticky;
+  top: ${homepageTokens.process.journeyStageTop};
+  width: min(100%, ${homepageTokens.process.journeyStageWidth});
+  height: ${homepageTokens.process.journeyStageHeight};
+  margin-inline: auto;
+
+  @media (max-width: ${breakpoints.contentMax}),
+    (max-height: 620px),
+    (prefers-reduced-motion: reduce) {
+    position: relative;
+    top: auto;
+  }
+
+  @media (max-width: ${breakpoints.contentMax}) {
+    width: min(100%, ${homepageTokens.process.mobileJourneyWidth});
+    height: ${homepageTokens.process.mobileJourneyHeight};
+  }
 `;
 
 export const DesktopTrajectory = styled.svg`
@@ -67,6 +129,7 @@ export const DesktopTrajectory = styled.svg`
   width: 100%;
   height: 100%;
   overflow: visible;
+  shape-rendering: geometricPrecision;
 
   @media (max-width: ${breakpoints.contentMax}) {
     display: none;
@@ -79,125 +142,146 @@ export const MobileTrajectory = styled.svg`
   @media (max-width: ${breakpoints.contentMax}) {
     position: absolute;
     z-index: 1;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    width: 6rem;
+    inset: 0;
+    width: 100%;
     height: 100%;
     display: block;
     overflow: visible;
+    shape-rendering: geometricPrecision;
   }
 `;
 
 export const BasePath = styled.path`
   fill: none;
-  stroke: rgba(16, 24, 39, 0.13);
-  stroke-width: 2;
+  stroke: rgba(16, 24, 39, 0.09);
+  stroke-width: ${homepageTokens.process.pathBaseWidth};
   stroke-linecap: round;
-  stroke-dasharray: 5 8;
+  stroke-linejoin: round;
+  stroke-dasharray: 4 9;
+  vector-effect: non-scaling-stroke;
 `;
 
 export const ProgressPath = styled(motion.path)`
   fill: none;
   stroke: ${colors.highlight};
-  stroke-width: 3;
+  stroke-width: ${homepageTokens.process.pathProgressWidth};
   stroke-linecap: round;
-  filter: drop-shadow(0 0 5px rgba(108, 99, 255, 0.22));
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
 `;
 
 export const Timeline = styled.ol`
-  position: relative;
+  position: absolute;
   z-index: 2;
-  min-height: 38rem;
+  inset: 0;
   margin: 0;
   padding: 0;
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  grid-template-rows: repeat(2, minmax(15rem, 1fr));
-  gap: 3rem clamp(2rem, 6vw, 7rem);
   list-style: none;
+`;
 
-  li:nth-child(1) { grid-area: 1 / 1; align-self: start; }
-  li:nth-child(2) { grid-area: 1 / 2; align-self: center; }
-  li:nth-child(3) { grid-area: 1 / 3; align-self: start; }
-  li:nth-child(4) { grid-area: 2 / 3; align-self: end; }
-  li:nth-child(5) { grid-area: 2 / 2; align-self: center; }
-  li:nth-child(6) { grid-area: 2 / 1; align-self: end; }
+export const Step = styled.li<{ $align: AnchorAlignment }>`
+  position: absolute;
+  top: var(--desktop-anchor-y);
+  left: var(--desktop-anchor-x);
+  width: ${homepageTokens.process.stepWidth};
 
   @media (max-width: ${breakpoints.contentMax}) {
-    min-height: 64rem;
-    display: block;
-
-    li:nth-child(n) {
-      min-height: 10.5rem;
-      margin-left: 0;
-      padding-left: 6.4rem;
-    }
-
-    li:nth-child(even) {
-      padding-left: 8rem;
-    }
+    top: var(--mobile-anchor-y);
+    left: var(--mobile-anchor-x);
+    width: calc(100% - var(--mobile-anchor-x));
   }
 `;
 
-export const Step = styled.li`
-  position: relative;
-  min-width: 0;
-  max-width: 21rem;
-  padding-top: 1.25rem;
-`;
-
-export const Marker = styled.span`
+export const MarkerAnchor = styled.span`
   position: absolute;
+  z-index: 2;
   top: 0;
   left: 0;
-  width: 1.2rem;
-  height: 1.2rem;
-  display: grid;
-  place-items: center;
-  border: 2px solid ${colors.highlight};
-  border-radius: 50%;
-  background: ${colors.white};
-  box-shadow: 0 0 0 0.5rem rgba(108, 99, 255, 0.08);
+  width: ${homepageTokens.process.markerSize};
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%);
 
-  i {
-    width: 0.32rem;
-    height: 0.32rem;
-    border-radius: 50%;
-    background: ${colors.highlight};
-  }
-
-  @media (max-width: ${breakpoints.contentMax}) {
-    left: 2.15rem;
+  @media (max-width: ${breakpoints.mobileMax}) {
+    top: clamp(2.9625rem, 12.5vw, 3.240625rem);
   }
 `;
 
-export const Number = styled.span`
+export const MarkerHalo = styled(motion.span)`
+  position: absolute;
+  z-index: 0;
+  inset: calc(${homepageTokens.process.markerHaloSize} * -1);
+  border: 1px solid rgba(108, 99, 255, 0.26);
+  border-radius: 50%;
+  opacity: 0.055;
+  pointer-events: none;
+`;
+
+export const Marker = styled(motion.span)`
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  border: ${homepageTokens.process.markerBorderWidth} solid ${colors.highlight};
+  border-radius: 50%;
+  background: ${colors.highlight};
+
+  i {
+    width: 30%;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: ${colors.white};
+  }
+`;
+
+export const StepDetails = styled(motion.div)`
+  --desktop-marker-content-gap: clamp(2.75rem, 4vw, 3.75rem);
+
+  position: absolute;
+  top: var(--desktop-content-offset-y);
+  left: var(--desktop-marker-content-gap);
+  width: 100%;
+  will-change: transform, opacity;
+
+  ${Step}[data-align='end'] & {
+    left: calc(-100% - var(--desktop-marker-content-gap));
+  }
+
+  @media (max-width: ${breakpoints.contentMax}) {
+    top: ${homepageTokens.process.markerContentGap};
+    left: 2rem !important;
+    width: calc(100% - 2rem);
+  }
+`;
+
+export const Number = styled(motion.span)`
   display: block;
-  margin-bottom: 1rem;
-  color: rgba(16, 24, 39, 0.16);
+  margin-bottom: 0.78rem;
+  color: rgba(16, 24, 39, 0.135);
   font-family: ${fonts.heading};
-  font-size: clamp(3.5rem, 6vw, 6rem);
+  font-size: ${homepageTokens.process.numberSize};
   font-weight: 620;
   letter-spacing: -0.08em;
   line-height: 0.82;
 `;
 
 export const StepContent = styled.div`
-  max-width: 20rem;
+  max-width: ${homepageTokens.process.stepCopyMaxWidth};
 `;
 
 export const StepTitle = styled.h3`
   font-family: ${fonts.heading};
-  font-size: clamp(1.4rem, 2vw, 1.9rem);
+  font-size: ${homepageTokens.process.stepTitleSize};
   font-weight: 650;
   letter-spacing: -0.04em;
+  line-height: 1.08;
 `;
 
 export const StepDescription = styled.p`
   margin-top: 0.75rem;
-  color: rgba(16, 24, 39, 0.68);
+  color: rgba(16, 24, 39, 0.7);
   font-family: ${fonts.primary};
-  font-size: 0.96rem;
-  line-height: 1.6;
+  font-size: ${homepageTokens.process.stepCopySize};
+  line-height: 1.58;
 `;

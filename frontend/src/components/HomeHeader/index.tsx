@@ -1,6 +1,6 @@
 import { ArrowRight, Menu, X } from 'lucide-react';
 import { useReducedMotion } from 'framer-motion';
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { KeyboardEvent } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { navigation, heroContent } from '../../content/repageContent';
@@ -14,6 +14,13 @@ export function HomeHeader() {
   const location = useLocation();
   const prefersReducedMotion = useReducedMotion();
   const closeMenu = () => setMenuOpen(false);
+  const isNavigationItemActive = (href: string) => {
+    const [path, hash] = href.split('#');
+    const targetPath = path || '/';
+
+    return location.pathname === targetPath
+      && (hash ? location.hash === `#${hash}` : location.hash === '');
+  };
 
   useEffect(() => {
     const updateHeader = () => setScrolled(window.scrollY > 16);
@@ -25,12 +32,6 @@ export function HomeHeader() {
   useEffect(() => {
     setMenuOpen(false);
   }, [location.hash, location.pathname]);
-
-  useLayoutEffect(() => {
-    if (!menuOpen) return;
-
-    mobilePanelRef.current?.querySelector<HTMLElement>('a')?.focus();
-  }, [menuOpen]);
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -129,7 +130,21 @@ export function HomeHeader() {
           ref={mobilePanelRef}
         >
           <nav aria-label="Navegação móvel">
-            {navigation.map((item) => <Link key={item.href} to={item.href} onClick={closeMenu}>{item.label}</Link>)}
+            {navigation.map((item) => {
+              const active = isNavigationItemActive(item.href);
+
+              return (
+                <Link
+                  key={item.href}
+                  to={item.href}
+                  className={active ? 'is-active' : undefined}
+                  aria-current={active ? 'location' : undefined}
+                  onClick={closeMenu}
+                >
+                  {item.label}
+                </Link>
+              );
+            })}
             <S.MobileCta to={heroContent.primaryCta.href} onClick={closeMenu}>
               <span>{heroContent.primaryCta.label}</span>
               <ArrowRight size={17} aria-hidden="true" />
