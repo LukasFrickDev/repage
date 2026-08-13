@@ -3,8 +3,9 @@
 * **Status:** in_progress
 * **Responsável:** Lukas Frick
 * **Data:** 7 de agosto de 2026
-* **Última revisão:** 10 de agosto de 2026
+* **Última revisão:** 12 de agosto de 2026
 * **Branch-base:** `main`
+* **Branch de implementação:** `feat/definitive-homepage`
 * **Entrega do roadmap:** 3 — Homepage definitiva
 * **Specs predecessoras:** `0001-frontend-foundation-and-routing.md` e `0002-project-content-and-media-preparation.md`
 * **Documentos relacionados:** `AGENTS.md`, `frontend/AGENTS.md`, `docs/PRODUCT.md`, `docs/ARCHITECTURE.md`, `docs/DESIGN_SYSTEM.md`, `docs/ROADMAP.md` e `docs/content/`
@@ -13,16 +14,17 @@
 
 As specs 0001 e 0002 estão implementadas e integradas à `main`.
 
-A branch `feat/definitive-homepage` já contém uma primeira implementação da 0003. Essa passagem consolidou conteúdo real, fonte tipada dos destaques, mídias da 0002, componentes, responsividade e testes. As validações técnicas passaram, mas a revisão humana rejeitou o resultado visual como conclusão da homepage definitiva.
+A branch `feat/definitive-homepage` contém a implementação em andamento da homepage definitiva. A primeira passagem da 0003 consolidou conteúdo real, fonte tipada dos destaques, mídias da 0002, componentes, responsividade e testes, mas a revisão humana concluiu que a direção visual ainda não representava suficientemente a Repage.
 
-O problema não é estrutural: a implementação atual preserva composição próxima demais da versão anterior, repete padrões entre seções, trata projetos como blocos semelhantes e não materializa suficientemente a narrativa, a assimetria, a variação de escala e a experiência mobile aprovadas no Design System.
+A revisão visual posterior avançou por checkpoints, preservando arquitetura, conteúdo válido, mídia aprovada e trabalho técnico existente. Até esta revisão documental, Hero, Projetos selecionados, Serviços, Suporte e evolução e Proposta de valor e diferenciais já receberam aprovação visual humana como direção e devem ser tratados como congelados durante a continuação da spec, salvo regressão, incompatibilidade técnica ou nova instrução explícita.
 
-Esta revisão:
+Esta revisão da spec:
 
-* preserva conteúdo, dados, mídia, acessibilidade, testes e arquitetura que continuam válidos;
-* reabre somente a camada visual e de experiência necessária para concluir a homepage;
-* não reabre Produto, Arquitetura, Design System, specs 0001/0002 ou mídia;
-* não antecipa portfólio final, cases, formulário ou backend.
+* reconcilia o documento com o estado visual já aprovado;
+* substitui orientações anteriores de composição que foram superadas durante a implementação;
+* preserva Produto, Arquitetura, Design System, specs 0001/0002 e mídia já aprovada;
+* mantém Processo, Sobre e Contato ainda abertos para refinamento;
+* não antecipa portfólio final, cases, formulário, backend, analytics, SEO completo ou deploy.
 
 ## 2. Objetivo
 
@@ -48,15 +50,15 @@ Ao final:
 
 * a homepage segue a ordem aprovada;
 * a copy temporária foi substituída por conteúdo final desta entrega;
-* a entrada e o hero estabelecem uma primeira impressão própria da Repage;
-* o hero não depende da identidade visual dos projetos;
+* a entrada e o Hero estabelecem uma primeira impressão própria da Repage;
+* o Hero não depende da identidade visual dos projetos;
 * EchoCosmicEnergia, Axium e DevSchedule são os três destaques;
 * os destaques derivam das fontes estruturadas e usam mídia real da 0002;
-* os projetos funcionam como três capítulos visuais, não como cards/layouts repetidos;
+* Projetos funciona como um palco compartilhado de portfólio, e não como cards ou blocos alternados;
 * natureza administrativa dos projetos permanece nos dados, mas não aparece como badge comercial;
-* Serviços apresenta três ofertas principais com o mesmo peso e exploração acessível;
-* Suporte e evolução aparece separadamente como continuidade;
-* Proposta de valor e diferenciais possuem linguagem visual própria;
+* Serviços apresenta três ofertas principais com o mesmo peso, copy clara, escopo rápido e mídia real;
+* Suporte e evolução aparece separadamente como continuidade pós-publicação;
+* Proposta de valor e diferenciais usam capítulo ink próprio, afirmação tipográfica forte e quatro argumentos finais construídos progressivamente;
 * Processo possui seis momentos apresentados como trajetória;
 * Sobre apresenta Repage e Lukas com presença visual intencional;
 * Contato possui conteúdo editorial final e não exibe ação falsa;
@@ -67,19 +69,64 @@ Ao final:
 
 ## 4. Estado atual relevante
 
-Na branch `feat/definitive-homepage`, antes desta revisão:
+### 4.1 Aprovado visualmente e congelado
 
-* ordem final, conteúdo real e três destaques já foram materializados;
-* destaques já derivam da fonte tipada e do manifesto de mídia;
+Na branch `feat/definitive-homepage`, os seguintes checkpoints já foram aprovados visualmente:
+
+* Hero;
+* transição Hero → Projetos;
+* introdução de Projetos;
+* palco sticky compartilhado de Projetos;
+* EchoCosmicEnergia, Axium e DevSchedule dentro do `ProjectStage`;
+* CTA de case e CTA geral de projetos;
+* composição mobile de Projetos;
+* Intro sticky de Serviços;
+* Landing pages;
+* Sites institucionais;
+* Soluções personalizadas;
+* escopos violetas dos serviços;
+* mídias reais e tratamento/frame das mídias de Serviços;
+* microinterações dos serviços;
+* Suporte e evolução como epílogo da seção;
+* mudança direta de superfície paper → ink na entrada de Proposta de valor;
+* abertura tipográfica `Clareza para quem chega. / Estrutura para o que vem depois.`;
+* descrição e ponte `Na prática, isso significa`;
+* quatro diferenciais finais em composição 2 × 2 no desktop e sequência vertical no mobile;
+* progressão reversível dos diferenciais e hold terminal curto antes de Processo.
+
+Essas áreas não devem ser redesenhadas novamente durante a continuação da 0003, salvo:
+
+* regressão concreta;
+* problema de acessibilidade;
+* incompatibilidade responsiva;
+* requisito novo;
+* instrução explícita de Lukas.
+
+### 4.2 Ainda pendente de revisão visual definitiva
+
+Continuam abertas:
+
+* Processo;
+* Sobre;
+* Contato;
+* integração e ritmo final entre todas as seções;
+* revisão final de responsividade;
+* revisão final de acessibilidade;
+* validações técnicas completas;
+* revisão humana final da homepage completa.
+
+### 4.3 Estado técnico
+
+Preservar a base técnica existente quando saudável.
+
 * os seis projetos continuam `draft`;
-* Proposta de valor, Processo, Sobre e Contato já existem;
-* testes de integração e Playwright já foram ampliados;
-* Playwright Test cobre sete configurações responsivas;
-* Instrument Sans continua carregada externamente pelo `index.html`;
-* Playwright MCP ficou indisponível, mas Playwright Test local passou;
-* a revisão humana posterior identificou que a direção visual ainda não atende o objetivo da spec.
-
-Preservar a base técnica existente quando saudável. Não reverter trabalho válido apenas para reconstruir a camada visual.
+* os destaques derivam de fonte tipada e mídia real;
+* testes automatizados já existem e devem ser ajustados quando a implementação final exigir;
+* Playwright Test local é a ferramenta preferencial para QA reproduzível;
+* indisponibilidade de navegador MCP não invalida Playwright Test local;
+* validação visual humana continua obrigatória;
+* Instrument Sans permanece a família principal;
+* nenhuma validação histórica substitui a rodada final de lint, typecheck, testes, build, E2E e diff.
 
 ## 5. Ordem obrigatória
 
@@ -99,7 +146,7 @@ Não alterar essa ordem.
 
 ## 6. Conteúdo e direção visual da homepage
 
-A homepage deve ser percebida como uma experiência contínua, não como seções independentes apenas empilhadas.
+A homepage deve ser percebida como experiência contínua, não como seções independentes apenas empilhadas.
 
 Ritmo de referência:
 
@@ -107,12 +154,18 @@ Ritmo de referência:
 
 Evitar como solução recorrente:
 
-* divisão `50 / 50`;
-* cards;
+* divisão `50 / 50` genérica;
+* cards repetidos;
 * separadores idênticos;
-* grid visível decorativo;
-* mesma animação ou composição em todas as seções;
-* desktop apenas empilhado no mobile.
+* grid visível apenas decorativo;
+* mesma animação em todas as seções;
+* sticky em todas as seções;
+* desktop apenas empilhado no mobile;
+* padding e densidade idênticos em toda a homepage.
+
+Decisões recorrentes devem usar tokens semânticos existentes antes de hardcodes locais.
+
+Quando uma decisão for específica de um capítulo da homepage, preferir `homepageTokens.<seção>` ou estrutura semântica equivalente. Alteração global só deve ocorrer quando o comportamento for realmente compartilhado.
 
 ### 6.1 Hero
 
@@ -144,41 +197,78 @@ Destino:
 
 `/portfolio`
 
-O hero deve comunicar atividade, público, transformação e ação sem restringir a Repage a landing pages e sites institucionais.
+O Hero comunica atividade, público, transformação e ação sem restringir a Repage a landing pages e sites institucionais.
 
 #### Entrada
 
-Pode existir uma assinatura curta de `Repage` antes do estado final do hero.
+Existe uma assinatura curta de marca antes do estado final do Hero.
 
 Deve:
 
 * executar uma vez;
-* ser curta e não funcionar como loader;
+* ser curta;
+* não funcionar como loader;
 * não bloquear navegação;
-* desembocar diretamente no hero;
+* desembocar diretamente no Hero;
 * ser removida ou simplificada em movimento reduzido.
 
-#### Composição
+#### Composição aprovada
 
-O hero deve ser 100% protagonizado pela identidade da Repage.
+O Hero é 100% protagonizado pela identidade da Repage.
 
-Não usar os três projetos como colagem, miniaturas ou palco principal.
-
-A headline permanece expressiva, mas deve dividir o peso visual com um palco proprietário da Repage. Esse palco deve representar:
+A headline divide o peso visual com um palco proprietário que materializa:
 
 `ideia → estrutura → experiência digital`
 
-Pode usar planos, recortes, linhas, superfícies e relações entre conteúdo, mídia e ação da própria linguagem Repage.
+A composição aprovada usa, de forma coerente com a identidade:
 
-Não deve:
+* planos;
+* curva/percurso;
+* superfícies;
+* estrutura inclinada;
+* acentos azul-violeta;
+* bloco claro de experiência digital;
+* asset real da marca Repage;
+* relação de profundidade coerente entre percurso e estrutura: quando a linha cruza a estrutura inclinada, o trecho correspondente passa visualmente por trás dela.
+
+O palco não deve:
 
 * inventar projeto real;
 * parecer dashboard genérico;
 * reproduzir página dobrada literalmente;
 * depender de identidades visuais externas;
-* virar ilustração ornamental sem função.
+* exibir colagem dos projetos;
+* virar ornamentação sem função.
 
-A transição para Projetos deve ter continuidade perceptível por ritmo, plano, linha, escala ou movimento simples, sem exigir que o palco do hero vire a mídia do primeiro projeto.
+A marca não deve ser duplicada de forma gratuita dentro do palco.
+
+#### Responsividade do Hero
+
+O Hero possui tratamento próprio para notebooks desktop com menor altura útil.
+
+Em viewport larga e baixa:
+
+* a composição pode subir moderadamente;
+* o espaço morto superior deve ser reduzido;
+* headline, palco e CTAs devem permanecer equilibrados;
+* CTAs não podem encostar no limite inferior;
+* essa adaptação deve permanecer específica do Hero.
+
+Não alterar gutter ou spacing global da homepage para corrigir altura de Hero.
+
+Tablet e mobile preservam tratamento próprio.
+
+#### Transição Hero → Projetos
+
+O Hero termina no final de sua própria composição.
+
+Não existe faixa, spacer ou estado intermediário dedicado no bottom do Hero.
+
+A linha horizontal e o pequeno marcador vertical usados na entrada seguinte pertencem ao topo de Projetos.
+
+A sequência é:
+
+`Hero termina → Projects começa imediatamente → linha/marcador → intro de Projetos`
 
 ### 6.2 Projetos selecionados
 
@@ -190,9 +280,7 @@ A transição para Projetos deve ter continuidade perceptível por ritmo, plano,
 
 > Trabalho real para necessidades diferentes.
 
-**Descrição**
-
-> Uma seleção que reúne comércio digital, presença institucional e uma aplicação de agendamento.
+A introdução pública prioriza eyebrow + headline forte. Copy auxiliar pode permanecer na fonte de conteúdo sem ser obrigada a competir visualmente com essa abertura.
 
 Ordem obrigatória:
 
@@ -228,45 +316,158 @@ Não exibir como badge ou rótulo comercial:
 
 A natureza permanece obrigatória nos dados para proteger veracidade.
 
-#### Composição
+#### Intro e ownership da transição
 
-Os três destaques devem funcionar como **três capítulos visuais**.
+A entrada de Projetos é parte da própria seção.
 
-Não implementar como:
+* linha horizontal + marcador vertical pertencem ao topo de Projetos;
+* não existe spacer autônomo entre Hero e Projetos;
+* a intro assume escala expressiva, abaixo do Hero e acima de uma section title convencional;
+* essa escala deve usar o token semântico compartilhado de intro imersiva quando aplicável, e não hardcode local.
 
-* três cards equivalentes;
-* três blocos `imagem | texto` apenas alternando lados;
-* o mesmo layout visual repetido com dados diferentes.
+A intro funciona como primeiro estado da experiência de portfólio.
 
-Cada capítulo pode adaptar enquadramento e composição à mídia real, preservando unidade pela linguagem Repage.
+Ela se estabelece, permanece legível por tempo suficiente e entrega o palco para EchoCosmicEnergia com overlap curto. A entrada de Echo não deve antecipar demais a saída da intro, e a intro não deve permanecer competindo com o primeiro projeto por um trecho longo de scroll.
 
-A mídia deve ser protagonista e legível, sem transformar a homepage em visualizador full-screen. Como referência, pode ocupar aproximadamente `60–70%` da composição quando adequado, sem valor rígido.
+#### Arquitetura aprovada do palco
 
-Direções possíveis, sem obrigar moldes artificiais:
+Os três destaques utilizam um **mesmo `ProjectStage` compartilhado**.
 
-* EchoCosmicEnergia: captura desktop ampla;
-* Axium: enquadramento, escala ou extrapolação diferente;
-* DevSchedule: interface principal com segunda evidência quando útil.
+Todos devem manter:
 
-Deve existir progressão clara equivalente a `01 / 03`, `02 / 03`, `03 / 03`.
+* mesma composição;
+* mesmos eixos principais;
+* mesma hierarquia;
+* mesma posição de nome, resumo e CTA;
+* mesmo padrão de mídia desktop principal + mídia mobile;
+* mesmo tratamento de browser frame;
+* mesmo tratamento de device frame;
+* mesma lógica de escala e movimento;
+* mesma relação entre mídia, texto e ações.
 
-A técnica pode usar `sticky`, transformação ou deslocamento desde que preserve scroll natural, conteúdo sempre disponível, fallback de movimento reduzido e funcionamento em viewport baixa.
+Não alternar lados entre os projetos.
 
-Cada destaque pode levar para `/portfolio/:slug`.
+Não criar background individual por projeto.
 
-A seção pode oferecer:
+Não criar layout específico para Echo, Axium ou DevSchedule.
+
+A unidade do portfólio vem do palco compartilhado; a diferença vem do conteúdo e da identidade das screenshots reais.
+
+O enquadramento interno de Projects deve preservar respiro lateral coerente com o restante da homepage sem alterar gutter/container global.
+
+Quando desktop + celular aparecem juntos, o conjunto completo deve ser centralizado pela sua área visual combinada, e não pelo browser frame isoladamente.
+
+#### Sticky e progressão
+
+Projetos utiliza uma única experiência sticky/pinned interna de portfólio.
+
+O scroll da página permanece natural.
+
+Não usar:
+
+* interceptação de wheel;
+* scroll hijacking;
+* `scroll-snap` rígido.
+
+A progressão deve fazer o visitante sentir que atravessa o portfólio dentro de um mesmo palco.
+
+Transições entre:
+
+`Echo → Axium → DevSchedule`
+
+devem ser sobrepostas e suaves, evitando:
+
+`projeto A desaparece completamente → vazio → projeto B aparece`.
+
+A intro e os projetos podem usar progresso local de scroll e transforms/springs quando isso preservar suavidade e desempenho.
+
+#### Mídias aprovadas para a homepage
+
+Usar as mídias preparadas na 0002 e aprovadas para esse palco:
+
+**EchoCosmicEnergia**
+
+* desktop principal: `/projects/echo-cosmic-energia/echo-social.png`
+* mobile: `/projects/echo-cosmic-energia/echo-home-mobile.png`
+
+**Axium**
+
+* desktop principal: `/projects/axium/axium-social.png`
+* mobile: `/projects/axium/axium-home-mobile.png`
+
+**DevSchedule**
+
+* desktop principal: `/projects/dev-schedule/devschedule-social.png`
+* mobile: `/projects/dev-schedule/devschedule-client-services-mobile.png`
+
+Não substituir DevSchedule pela tela de calendário como mídia principal da homepage.
+
+Não recapturar mídia nesta spec.
+
+#### Frames
+
+Desktop:
+
+* screenshot principal usa tratamento consistente de janela/browser;
+* chrome discreto;
+* moldura fina;
+* sombra controlada;
+* sem laptop físico;
+* sem URL falsa ou branding de navegador.
+
+Mobile:
+
+* screenshot usa frame de device/celular discreto;
+* bezel fino;
+* cantos coerentes;
+* hardware mínimo;
+* sem mockup fotorealista.
+
+O mesmo sistema de frame deve ser aplicado aos três projetos.
+
+#### Ações
+
+Cada projeto possui ação específica:
+
+> Ver case
+
+Destino:
+
+`/portfolio/:slug`
+
+A seção possui ação geral:
 
 > Ver todos os projetos
 
-Destino: `/portfolio`
+Destino:
 
-Não mencionar métricas, resultados comerciais ou participação não confirmada.
+`/portfolio`
+
+O CTA geral permanece dentro da experiência de Projetos, com hierarquia inferior a `Ver case`.
+
+No mobile:
+
+* `Ver case` ocupa a faixa superior à direita do bloco informativo do projeto, associado diretamente ao nome;
+* `Ver todos os projetos` permanece separado como ação geral e deve caber em uma única linha;
+* deve existir separação espacial suficiente entre a ação específica e a ação geral para que não pareçam redundantes ou concorrentes.
+
+Após DevSchedule, não manter bloco redundante de CTA fora do palco apenas para repetir `Ver todos os projetos`.
 
 #### Mobile
 
-No mobile, os projetos viram capítulos verticais próprios.
+Mobile preserva o mesmo sistema narrativo e a mesma identidade do `ProjectStage`, adaptando composição, escala e duração.
 
-Cada capítulo apresenta cedo progressão, mídia grande, nome, resumo e ação. Não reproduzir obrigatoriamente sticky desktop nem reduzir mídia a miniatura para manter texto ao lado.
+Não transformar automaticamente Projetos em três cards ou blocos independentes.
+
+A mídia deve continuar grande e legível.
+
+#### Movimento reduzido
+
+Com `prefers-reduced-motion`:
+
+* remover ou simplificar sticky/transforms narrativos;
+* manter os três projetos disponíveis e legíveis em estado estável;
+* preservar conteúdo, links, hierarquia e mídia.
 
 ### 6.3 Serviços
 
@@ -276,88 +477,292 @@ Cada capítulo apresenta cedo progressão, mídia grande, nome, resumo e ação.
 
 **Título**
 
-> Soluções digitais construídas para o momento do seu negócio.
+> Uma solução digital começa pela necessidade, não pelo formato.
 
 **Descrição**
 
-> Cada projeto parte da necessidade real para combinar estrutura, conteúdo, design e desenvolvimento na medida certa.
+> Da ideia à publicação, cada projeto combina estratégia, design e desenvolvimento de acordo com o que o negócio realmente precisa.
 
-As três ofertas principais possuem o mesmo peso.
+As três ofertas principais possuem o mesmo peso:
 
-A seção é comercialmente central e deve ser compreensível mesmo sem expansão.
+1. Landing pages;
+2. Sites institucionais;
+3. Soluções personalizadas.
 
-Usar **lista editorial interativa**, sem cards SaaS e sem `01 / 02 / 03` como hierarquia principal.
+Suporte e evolução permanece separado como continuidade pós-publicação.
 
-#### Landing pages
+A direção anterior de `lista editorial interativa` e expansão `+ / −` está **superada**.
 
-Estado fechado:
+Não reintroduzir accordion, lista numerada ou padrão editorial anterior.
 
-> Para campanhas, lançamentos, eventos, produtos, serviços e captação de leads com uma ação principal clara.
+#### Intro aprovada
 
-Na expansão podem aparecer campanhas, lançamentos, eventos, produtos, serviços, leads e inscrições.
+A seção começa em superfície paper imediatamente após Projetos, sem faixa vazia adicional criada pelo padding genérico da homepage.
 
-#### Sites institucionais
+O padding global da homepage não deve ser alterado por causa dessa exceção. Services controla internamente seu próprio spacing.
 
-Estado fechado:
+Somente a introdução de Serviços utiliza uma experiência sticky curta.
 
-> Para apresentar sua marca, organizar serviços, centralizar informações e fortalecer sua presença digital.
+Arquitetura conceitual:
 
-Na expansão podem aparecer presença oficial, posicionamento, organização de serviços, informações e canais de contato.
+`ServicesSection → IntroTrack → IntroStage sticky → Offers em fluxo normal`
 
-#### Soluções personalizadas
+A intro possui três momentos:
 
-Estado fechado:
+1. entrada progressiva;
+2. curto estado de leitura;
+3. saída lateral enquanto Landing pages assume a viewport.
 
-> Para necessidades que pedem mais: e-commerce, áreas restritas, painéis, agendamentos, integrações e aplicações web, avaliadas caso a caso.
+Desktop/notebook:
 
-A expansão deve deixar clara atuação além de sites e pode apresentar:
-
-* e-commerce;
-* áreas restritas;
-* painéis administrativos;
-* agendamento;
-* integrações;
-* automações;
-* sistemas internos;
-* aplicações web;
-* fluxos específicos.
-
-Não prometer capacidade irrestrita para qualquer sistema ou escala.
-
-#### Interação
-
-Usar controle de expansão preferencialmente `+` fechado e `−` expandido.
-
-Desktop:
-
-* hover pode melhorar a resposta, mas não ser necessário;
-* clique e teclado controlam a expansão;
-* foco é visível;
-* título, divisor e controle podem reagir discretamente.
+* eyebrow + headline formam o bloco principal;
+* apoio permanece próximo e legível;
+* a composição é um núcleo narrativo centralizado/equilibrado, sem espalhar os textos nas extremidades;
+* headline/eyebrow saem suavemente para a esquerda;
+* texto de apoio sai suavemente para a direita;
+* ambos fazem fade progressivo;
+* deslocamentos laterais são curtos e controlados.
 
 Mobile:
 
-* mesma informação acessível por toque;
-* alvo adequado;
-* sem dependência de hover.
+* eyebrow → headline → apoio em sequência vertical;
+* saída lateral é reduzida;
+* não pode existir overflow horizontal.
 
-Princípio de movimento:
+A intro pode usar aproximadamente uma viewport útil e track curto suficiente para a coreografia, sem transformar Services inteira em sticky.
 
-`scroll apresenta → interação permite explorar`
+#### Landing pages
 
-Não transformar cada serviço em uma viewport inteira.
+**Descrição**
+
+> Para campanhas, lançamentos, eventos, produtos e serviços que precisam conduzir o visitante a uma ação principal clara.
+
+**Escopo rápido**
+
+> Captação de leads · lançamento de produto · campanha / evento
+
+**Mídia**
+
+`/projects/a-alma-no-comando/alma-social.png`
+
+A mídia funciona como evidência do tipo de entrega, não como segundo portfólio.
+
+#### Sites institucionais
+
+**Descrição**
+
+> Para apresentar sua marca, organizar serviços e informações e construir uma presença digital profissional e confiável.
+
+**Escopo rápido**
+
+> Apresentação da marca · serviços · conteúdo e contato
+
+**Mídia desktop**
+
+`/projects/axium/axium-social.png`
+
+**Mídia mobile**
+
+`/projects/axium/axium-home-mobile.png`
+
+A escolha deve comunicar estrutura institucional, navegação, marca e organização de conteúdo.
+
+#### Soluções personalizadas
+
+**Descrição**
+
+> Para necessidades que vão além de uma página: e-commerce, áreas restritas, painéis, agendamentos, integrações e aplicações web avaliadas caso a caso.
+
+**Escopo rápido**
+
+> E-commerce · áreas restritas · agendamentos e integrações
+
+**Mídia desktop**
+
+`/projects/dev-schedule/devschedule-admin-dashboard-desktop.png`
+
+**Mídia mobile**
+
+`/projects/dev-schedule/devschedule-admin-dashboard-mobile.png`
+
+A oferta deve deixar clara atuação além de páginas e sites, sem prometer capacidade irrestrita para qualquer sistema ou escala.
+
+#### Composição das ofertas
+
+Os três serviços permanecem em fluxo normal.
+
+Não usar sticky para Landing pages, Sites institucionais ou Soluções personalizadas.
+
+Não criar:
+
+* uma viewport por serviço;
+* grandes cenas isoladas;
+* cards SaaS;
+* lista editorial;
+* tabela;
+* accordion.
+
+Cada oferta usa:
+
+* título com presença;
+* descrição principal legível;
+* escopo curto em violeta;
+* mídia real;
+* mesma família visual.
+
+Os três serviços possuem mesmo peso comercial, mas não precisam parecer três caixas idênticas.
+
+Em desktop/notebook, copy e mídia devem se relacionar pelo centro da composição, em vez de serem empurradas para as bordas externas. Landing pages e Soluções personalizadas preservam `copy | mídia`; Sites institucionais preserva `mídia | copy`, com respiro central suficiente para não comprimir texto e imagem.
+
+O enquadramento lateral das ofertas é local de Services e deve permanecer coerente com Projects sem alterar gutter/container global.
+
+A seção deve manter continuidade e respiro suficiente entre ofertas sem voltar ao excesso de scroll da primeira tentativa.
+
+#### Progressão e microinterações
+
+A revelação de cada serviço deve tratar copy e mídia como uma única composição.
+
+Direção aprovada:
+
+* Landing pages: copy entra discretamente da esquerda e mídia da direita;
+* Sites institucionais: mídia entra discretamente da esquerda e copy da direita;
+* Soluções personalizadas: repete a lógica de Landing pages;
+* título, descrição e escopo podem manter stagger curto dentro da copy;
+* mídia começa próxima da copy e conclui seu crop/clip reveal junto do fechamento da composição;
+* movimentos laterais são curtos;
+* entrada é reversível conforme o usuário desce e sobe;
+* não usar `once: true` como comportamento final.
+
+Priorizar:
+
+* `opacity`;
+* pequenos `translate`;
+* crop/clip reveal da mídia.
+
+O próximo serviço pode começar a ganhar presença antes de o anterior abandonar totalmente a área de leitura, mantendo continuidade.
+
+Não usar animação contínua sem função.
+
+#### Escopos violetas
+
+A camada de escopo em violeta é parte aprovada da hierarquia comercial.
+
+Ela:
+
+* não substitui a descrição;
+* funciona como leitura rápida;
+* deve permanecer mais destacada que body secundário;
+* não deve virar coleção de badges SaaS ou cápsulas pesadas.
+
+#### Mídia e `ServiceMediaFrame`
+
+As mídias reais usam um sistema visual compartilhado e mais leve que os browser/device frames de Projetos.
+
+Direção aprovada:
+
+* hairline/contorno sutil;
+* cantos consistentes;
+* sombra em camadas controlada;
+* sensação de superfície digital;
+* chrome de desktop discreto quando usado;
+* camada secundária/página de apoio sutil;
+* acento violeta lateral discreto e claramente secundário à imagem, sem formar grande faixa dominante;
+* reveal por crop/clip na entrada.
+
+Não usar:
+
+* laptop físico;
+* grande placa ink;
+* browser chrome pesado;
+* URL falsa;
+* glow;
+* mockup fotorealista.
+
+A mídia deve apoiar a clareza do serviço, não dominar a copy.
+
+#### Responsividade de Serviços
+
+Desktop e notebook preservam relação equilibrada entre texto e mídia.
+
+Mobile:
+
+* texto aparece antes da mídia;
+* escopo permanece legível;
+* reveal é mais curto;
+* a seção mantém densidade controlada;
+* não depende de hover.
+
+#### Movimento reduzido
+
+Com `prefers-reduced-motion`:
+
+* intro e ofertas permanecem completas e legíveis;
+* transforms narrativos podem ser removidos;
+* frames e mídia permanecem em estado estável;
+* nenhuma informação depende da animação.
 
 #### Suporte e evolução
 
-Apresentar separadamente como continuidade, com passagem editorial equivalente a:
+Suporte e evolução é um **epílogo de Serviços**, não uma quarta oferta.
 
-> E depois da publicação?
+**Eyebrow**
 
-Texto:
+> Depois da publicação
+
+**Headline**
+
+> O projeto pode continuar evoluindo.
+
+**Texto**
 
 > Depois da publicação, a Repage também pode continuar ao lado do projeto com atualizações, correções, refinamentos e novas evoluções avaliadas conforme a necessidade.
 
-Não tratar como quarta oferta principal nem como bloco lateral desconectado.
+O apoio deve possuir presença editorial real, com peso suficiente para não parecer legenda.
+
+Headline e apoio formam uma composição concentrada e equilibrada, sem grande vazio horizontal.
+
+O epílogo explicita três dimensões de continuidade:
+
+**Atualizações**
+
+> Pequenos ajustes e melhorias de conteúdo, estrutura e interface.
+
+**Correções**
+
+> Ajustes pontuais para manter a experiência consistente.
+
+**Novas evoluções**
+
+> Expansões e refinamentos avaliados conforme a necessidade.
+
+Esses três pontos:
+
+* devem ser menores e mais compactos que as três ofertas principais;
+* explicam semanticamente o que significa continuidade;
+* podem usar acentos violetas e conexão gráfica discreta;
+* não devem parecer três novos serviços ou planos.
+
+Não usar como conceito principal:
+
+* linha abstrata sem conteúdo;
+* páginas genéricas sem explicação;
+* screenshot;
+* browser frame;
+* headset;
+* engrenagem;
+* card SaaS.
+
+O epílogo permanece na superfície paper e fecha Services antes da próxima mudança de capítulo.
+
+Movimento:
+
+* leve;
+* sem sticky;
+* reversível com o scroll;
+* sequência perceptível `eyebrow → headline → apoio → Atualizações → Correções → Novas evoluções`;
+* os três pontos entram individualmente, com overlap curto e sem aparecer todos de uma vez;
+* pequenos deslocamentos + opacity;
+* sem animação contínua.
 
 ### 6.4 Proposta de valor e diferenciais
 
@@ -373,18 +778,130 @@ Não tratar como quarta oferta principal nem como bloco lateral desconectado.
 
 > A Repage conecta estratégia, direção visual e desenvolvimento para transformar necessidades reais em experiências digitais profissionais, claras e preparadas para evoluir.
 
-Diferenciais comprováveis:
+**Ponte**
 
-* atendimento direto com o responsável;
-* condução integrada de estrutura, conteúdo, design e desenvolvimento;
-* soluções avaliadas conforme a necessidade real;
-* continuidade opcional depois da publicação.
+> Na prática, isso significa
 
-A seção deve ter linguagem claramente diferente de Serviços, priorizando afirmação tipográfica forte, mudança de ritmo e diferenciais como sustentação editorial.
+#### Diferenciais finais
 
-Não repetir `título à esquerda + lista à direita`, não reutilizar a mesma interação dos Serviços e não transformar automaticamente cada diferencial em card.
+**Responsabilidade direta**
+
+> Você fala com quem conduz o projeto do primeiro alinhamento aos ajustes, reduzindo ruído e mantendo contexto e decisões no mesmo lugar.
+
+**Condução integrada**
+
+> Estrutura, conteúdo, direção visual e desenvolvimento são pensados em conjunto para que a experiência funcione como um todo.
+
+**Necessidade antes do formato**
+
+> A solução parte do objetivo, do contexto e do momento do negócio — não de um pacote pronto ou de um formato definido antes do problema.
+
+**Continuidade quando fizer sentido**
+
+> A entrega pode terminar na publicação ou seguir com correções, atualizações e novas evoluções avaliadas conforme a necessidade.
 
 Não usar promessa de resultado, garantia de qualidade ou superlativo vazio.
+
+#### Composição aprovada
+
+A seção começa diretamente após o epílogo paper de Services com mudança para superfície ink/azul-grafite, sem spacer ou divisor intermediário.
+
+O background:
+
+* permanece escuro;
+* pode usar poucos planos tonais grandes e muito sutis em azul-grafite/violeta para criar profundidade;
+* não usa grid, glow, ruído ou dobra de página literal;
+* não usa `R` gigante/watermark;
+* não depende de ilustração.
+
+A headline é um único `h2` semântico, visualmente construída em dois polos próximos:
+
+`Clareza para quem chega.`
+
+`Estrutura para o que vem depois.`
+
+A segunda frase pode deslocar-se horizontalmente de forma controlada, sem virar composição diagonal ou espalhada.
+
+A descrição permanece integrada à abertura, próxima da headline.
+
+Depois da descrição, `Na prática, isso significa` introduz os quatro argumentos.
+
+Desktop/notebook:
+
+* argumentos formam composição final 2 × 2;
+* duas colunas e duas linhas alinhadas;
+* conjunto compacto;
+* sem offsets editoriais que recriem escada/diagonal;
+* sem cards, backgrounds individuais ou bordas;
+* micro-sinal proprietário e discreto substitui marcador circular genérico;
+* o mesmo micro-sinal é usado nos quatro argumentos;
+* violeta permanece contido.
+
+Mobile:
+
+* argumentos seguem verticalmente em ordem 1 → 4;
+* não forçar 2 × 2;
+* preservar hierarquia e leitura;
+* reduzir amplitude dos deslocamentos laterais.
+
+#### Progressão aprovada
+
+A abertura usa progresso local de scroll, de forma contínua e reversível.
+
+Sequência:
+
+`Clareza`
+→
+`Estrutura`
+→
+`descrição`
+→
+`Na prática, isso significa`
+→
+`Responsabilidade direta`
+→
+`Condução integrada`
+→
+`Necessidade antes do formato`
+→
+`Continuidade quando fizer sentido`
+→
+`estado final`
+→
+`release para Processo`
+
+A headline usa reveal horizontal/máscara, opacity progressiva e deslocamento lateral pequeno. Não usar typewriter ou stagger por caractere.
+
+`Na prática, isso significa` também participa da progressão e não pode ficar estático aguardando os argumentos.
+
+Os argumentos entram individualmente:
+
+* 1 e 3: esquerda → posição final;
+* 2 e 4: direita → posição final.
+
+As entradas são reversíveis ao subir o scroll.
+
+Não usar sticky para toda a seção, track longo, snap, wheel interception ou scroll hijacking.
+
+Somente no final da progressão existe um **hold terminal curto**, suficiente para:
+
+* concluir os argumentos 3 e 4;
+* apresentar brevemente os quatro argumentos completos;
+* impedir que Processo invada a viewport antes de o último argumento terminar;
+* liberar naturalmente a próxima seção logo depois.
+
+O hold terminal não pode recriar palco vazio nem separar abertura e diferenciais em duas experiências.
+
+#### Movimento reduzido
+
+Com `prefers-reduced-motion`:
+
+* remover deslocamentos e reveals narrativos;
+* exibir headline, descrição, ponte e quatro argumentos em estado completo;
+* remover dependência do hold narrativo quando necessário;
+* preservar composição, conteúdo e leitura.
+
+**Status deste checkpoint:** aprovado visualmente e congelado.
 
 ### 6.5 Processo
 
@@ -413,13 +930,21 @@ Não prometer revisões ilimitadas.
 
 #### Trajetória
 
-A representação deve parecer um percurso conectado, não grid de seis cards.
+A representação deve parecer percurso conectado, não grid de seis cards.
 
 Usar linha ou percurso gráfico contínuo com curvas, mudança de direção, alternância ou variação de altura quando isso ajudar a leitura.
 
-Evitar timeline genérica apenas `ponto — linha reta — ponto`.
+Evitar timeline genérica apenas:
 
-Conforme a rolagem avança, o trecho percorrido pode ganhar destaque e a etapa atual assumir maior ênfase, mantendo anteriores e seguintes compreensíveis. A progressão não pode bloquear o scroll nem esconder conteúdo.
+`ponto — linha reta — ponto`
+
+Conforme a rolagem avança, o trecho percorrido pode ganhar destaque e a etapa atual assumir maior ênfase, mantendo anteriores e seguintes compreensíveis.
+
+A progressão:
+
+* não pode bloquear scroll;
+* não pode esconder conteúdo;
+* não precisa usar sticky prolongado.
 
 Hover/foco podem reforçar ponto, trecho e texto correspondente, sem seis animações independentes.
 
@@ -430,6 +955,10 @@ Em movimento reduzido, trajetória e conteúdo aparecem em estado estável.
 Criar trajetória própria, predominantemente vertical, com curvas suaves e texto próximo a cada etapa.
 
 Não substituir simplesmente por seis cards empilhados.
+
+A implementação atual é apenas base de refinamento. O percurso desktop, o alinhamento entre path e etapas e a progressão de fechamento ainda precisam de revisão visual. A solução mobile atual pode servir como referência de continuidade, mas também não está congelada.
+
+**Status deste checkpoint:** direção visual final ainda pendente de revisão humana.
 
 ### 6.6 Sobre
 
@@ -453,18 +982,32 @@ Não substituir simplesmente por seis cards empilhados.
 
 > Desenvolvimento e direção digital
 
-A seção deve reforçar confiança, esclarecer responsabilidade, humanizar a operação, manter a Repage como marca principal e funcionar como desaceleração intencional.
+A seção deve:
 
-Direção preferencial desta revisão:
+* reforçar confiança;
+* esclarecer responsabilidade;
+* humanizar a operação;
+* manter Repage como marca principal;
+* funcionar como desaceleração intencional.
 
-* superfície azul-grafite/azul já existente na identidade;
+Direção preferencial atual da spec:
+
+* superfície azul-grafite/azul existente na identidade;
 * versão branca da marca quando houver contraste adequado;
-* composição tipográfica mais expressiva;
+* composição tipográfica expressiva;
 * no máximo uma assinatura de movimento `R → Repage` por revelação, máscara, linha ou recorte.
 
 A solução final depende de aprovação visual humana e não autoriza criação de novo tom sem necessidade sistêmica.
 
-Não deve virar currículo, fingir equipe ampla, exigir fotografia, repetir `R` decorativamente ou usar loop de logo.
+Não deve:
+
+* virar currículo;
+* fingir equipe ampla;
+* exigir fotografia;
+* repetir `R` decorativamente;
+* usar loop de logo.
+
+**Status deste checkpoint:** direção visual final ainda pendente de revisão humana.
 
 ### 6.7 Contato
 
@@ -482,15 +1025,25 @@ Manter `id="contato"`.
 
 > Conte o que você precisa construir ou evoluir. A Repage parte do contexto, objetivo e momento do seu negócio para organizar o próximo passo.
 
-A seção finaliza conteúdo e composição, mas não implementa formulário.
+A seção finaliza conteúdo e composição, mas não implementa formulário nesta spec.
 
-Usar apenas ações com destino real já aprovado. Não criar campos falsos, submissão temporária, botão de envio falso, `mailto:` inventado ou WhatsApp não aprovado.
+Usar apenas ações com destino real já aprovado.
+
+Não criar:
+
+* campos falsos;
+* submissão temporária;
+* botão de envio falso;
+* `mailto:` inventado;
+* WhatsApp não aprovado.
 
 Remover “em preparação”, “em breve” e qualquer promessa de formulário funcional.
 
 Contato deve funcionar como encerramento comercial e receber movimento mínimo.
 
 A homepage ainda não é V1 pronta para lançamento enquanto a conversão funcional não existir.
+
+**Status deste checkpoint:** direção visual final ainda pendente de revisão humana.
 
 ### 6.8 Footer
 
@@ -506,12 +1059,7 @@ Footer permanece secundário ao encerramento de Contato.
 
 Os três destaques devem ser derivados da fonte tipada de projetos.
 
-Adicionar à estrutura atual somente o mínimo necessário para representar seleção e ordem.
-
-Contrato esperado:
-
-* projeto destacado;
-* ordem do destaque.
+A estrutura deve representar somente o mínimo necessário para seleção e ordem.
 
 Ordem obrigatória:
 
@@ -521,7 +1069,7 @@ Ordem obrigatória:
 
 Criar ou ajustar seletor para retornar exatamente esses três registros na ordem aprovada.
 
-Não manter uma segunda lista com nomes duplicados em `repageContent.ts`.
+Não manter segunda lista administrativa com nomes duplicados apenas para selecionar projetos.
 
 Copy editorial específica da homepage pode permanecer separada, indexada por slug, quando isso evitar antecipar o modelo completo dos cases.
 
@@ -531,31 +1079,37 @@ Não preencher ainda:
 * galeria editorial final;
 * SEO do case;
 * navegação anterior/próximo;
-* ordem dos seis projetos no portfólio final.
+* ordem final dos seis projetos no portfólio.
 
 Todos os seis projetos permanecem com:
 
 `publicationStatus: 'draft'`
 
-## 8. Mídia real e palco do Hero
+## 8. Mídia real
 
 Eliminar interfaces fictícias usadas como prova de projeto.
 
 ### Hero
 
-O hero não deve mais ser baseado nos três destaques.
+O Hero usa palco proprietário da Repage.
 
-Implementar palco proprietário da Repage conforme 6.1, usando a própria linguagem visual e recursos leves da stack existente. Não adquirir nova mídia, inventar interface de cliente ou adicionar dependência apenas para esse efeito.
+Não adquirir nova mídia, inventar interface de cliente ou adicionar dependência apenas para o efeito.
 
 ### Projetos selecionados
 
-Cada projeto deve possuir mídia real, nome, resumo e ação aplicável.
+Usar somente mídia real aprovada e preparada na 0002, conforme os caminhos registrados em 6.2.
 
 A natureza permanece na fonte estruturada, mas não aparece como badge comercial.
 
-Preferir ativos `cover` ou equivalentes do manifesto, sem duplicar caminhos. Usar alt já disponível como base.
+Alt deve derivar da fonte existente quando aplicável.
 
-O enquadramento deve privilegiar legibilidade da interface real, não uniformidade artificial entre os capítulos.
+### Serviços
+
+Services usa recortes reais já preparados na 0002 para demonstrar tipos de entrega, conforme 6.3.
+
+Não transformar Services em segundo Portfólio.
+
+Não recapturar, recomprimir ou substituir mídia aprovada apenas por preferência estética.
 
 ### Vídeos
 
@@ -563,68 +1117,117 @@ Não utilizar WebM na homepage nesta entrega.
 
 Os vídeos preparados permanecem para cases e experiências posteriores.
 
-Não recapturar, recomprimir, renomear ou substituir mídias aprovadas na 0002.
-
 ## 9. Movimento e microinterações
 
 Usar Framer Motion já existente quando necessário.
 
-Distribuição esperada:
+Distribuição consolidada:
 
-* Entrada: assinatura curta;
+* Entrada: assinatura curta da marca;
 * Hero: organização do palco;
-* Projetos: movimento narrativo;
-* Serviços: microinteração de exploração;
-* Proposta/diferenciais: revelação tipográfica leve, se útil;
+* Projetos: experiência sticky narrativa e progressão entre três projetos;
+* Serviços intro: sticky curto com entrada, estado de leitura e saída lateral;
+* Serviços ofertas: reveals coordenados e reversíveis de copy + mídia em fluxo normal;
+* Suporte e evolução: sequência editorial reversível do grupo principal e dos três pontos;
+* Proposta/diferenciais: abertura tipográfica scroll-driven, diferenciais laterais reversíveis e hold terminal curto;
 * Processo: progressão explicativa;
 * Sobre: no máximo uma assinatura de marca;
 * Contato: movimento mínimo.
 
-Movimento deve apresentar, orientar, conectar ou explicar. Não deve compensar composição fraca.
+Movimento deve:
 
-Não usar scroll hijacking, `scroll-snap` rígido, loop decorativo, máquina de escrever, partículas, WebGL, carrossel infinito, sticky prolongado, `fade-up` universal ou informação dependente de animação.
+* apresentar;
+* orientar;
+* conectar;
+* explicar.
 
-Priorizar `transform` e `opacity`.
+Não deve compensar composição fraca.
 
-Com `prefers-reduced-motion: reduce`, remover ou simplificar entrada, transformações narrativas e assinatura do Sobre; manter Hero, projetos, Serviços e Processo completos e operáveis em estado estável.
+Não usar:
+
+* scroll hijacking;
+* `scroll-snap` rígido;
+* loop decorativo;
+* máquina de escrever;
+* partículas;
+* WebGL;
+* carrossel infinito;
+* sticky prolongado sem função;
+* `fade-up` universal;
+* informação dependente de animação.
+
+Priorizar `transform`, `opacity` e crop/clip quando apropriado.
+
+Com `prefers-reduced-motion: reduce`:
+
+* remover ou simplificar entrada;
+* remover ou simplificar transformações narrativas;
+* manter conteúdo completo e estável;
+* preservar links, hierarquia, mídia e navegação.
 
 ## 10. Superfícies e identidade
 
 Preservar a identidade aprovada.
 
-Direção:
+Direção consolidada até o checkpoint atual:
 
 * Hero: escuro;
 * Projetos: escuro;
-* Serviços: claro;
-* Proposta/diferenciais: claro, com linguagem própria;
-* Processo: claro;
-* Sobre: preferencialmente azul-grafite/azul existente na identidade nesta revisão, sujeito à aprovação humana;
+* Serviços: paper/off-white;
+* Suporte e evolução: continuidade do paper de Serviços.
+
+Direção consolidada adicional:
+
+* Proposta/diferenciais: ink/azul-grafite, com profundidade tonal sutil e sem `R` gigante.
+
+Direção ainda aberta:
+
+* Processo: deve favorecer leitura da trajetória;
+* Sobre: preferencialmente azul-grafite/azul existente, sujeito à aprovação humana;
 * Contato: escuro.
 
-A alternância deve construir narrativa, não apenas trocar a cor do fundo.
+A alternância deve construir narrativa, não apenas trocar fundo.
 
-Grid estrutural permanece invisível por padrão. Grid visível exige função narrativa.
+Grid estrutural permanece invisível por padrão.
 
 Usar azul-violeta como destaque estratégico.
 
-Evitar template SaaS, bento grid automático, glassmorphism, glow permanente, card para cada conteúdo, repetição de `50 / 50`, gradientes excessivos, mesmos divisores, padding ou densidade em toda a homepage.
+Evitar:
 
-Usar tokens existentes e adicionar token somente por necessidade semântica real.
+* template SaaS;
+* bento grid automático;
+* glassmorphism;
+* glow permanente;
+* card para cada conteúdo;
+* repetição de `50 / 50`;
+* gradientes excessivos;
+* mesmos divisores;
+* mesmo padding em toda a homepage.
+
+### Tokens
+
+Usar tokens existentes antes de hardcode.
+
+Decisões já consolidadas:
+
+* container e gutter globais permanecem compartilhados;
+* ajustes do Hero por altura são específicos do Hero;
+* intro imersiva usa token semântico compartilhado quando aplicável;
+* Projetos concentra valores narrativos em `homepageTokens.projects`;
+* Serviços concentra valores próprios em `homepageTokens.services`;
+* exceções locais não devem alterar `sectionPaddingBlock` global sem necessidade sistêmica.
 
 ## 11. Tipografia
 
 Instrument Sans permanece como família principal.
 
-A implementação deve verificar o estado atual do carregamento.
-
 Não baixar, gerar ou versionar fonte automaticamente.
 
-Se arquivos locais devidamente licenciados não estiverem disponíveis no repositório:
+Se arquivos locais devidamente licenciados não estiverem disponíveis:
 
 * preservar Instrument Sans no mecanismo atual nesta entrega;
 * registrar no relatório que self-hosting continua requisito pré-lançamento já definido pelo Design System;
-* não tratar isso como autorização para trocar de família.
+* não trocar de família por conveniência.
 
 Não introduzir Clash Display nesta entrega sem:
 
@@ -633,11 +1236,15 @@ Não introduzir Clash Display nesta entrega sem:
 * acentuação validada;
 * comportamento mobile validado.
 
-Não criar dependência externa adicional de tipografia.
+Hierarquia consolidada:
+
+`Hero > intro imersiva de Projetos > headlines principais de seção > títulos internos`
+
+Serviços não deve criar segunda headline com escala equivalente ao Hero.
 
 ## 12. Responsividade
 
-Desktop e mobile devem ser tratados simultaneamente. Mobile não é apenas desktop empilhado.
+Desktop e mobile devem ser tratados simultaneamente.
 
 Validar:
 
@@ -651,39 +1258,45 @@ Validar:
 
 ### Desktop amplo
 
-* aproveitar espaço principalmente em mídia e composição;
+* aproveitar espaço principalmente em composição e mídia;
 * preservar largura de leitura;
 * não ampliar texto indefinidamente;
 * evitar vazio sem função.
 
 ### Notebook
 
-* reduzir sobreposição, extrapolação, sticky e gaps quando necessário;
-* preservar hierarquia e prova visual;
-* validar alturas menores.
+* preservar hierarquia;
+* validar altura útil;
+* Hero possui adaptação específica para notebook baixo;
+* sticky de Projetos e intro de Serviços não podem colidir com header ou viewport reduzida.
 
 ### Tablet
 
 * preservar intenção desktop enquanto funcionar;
-* migrar para soluções mobile antes de prejudicar leitura;
+* migrar para composição simplificada antes de prejudicar leitura;
 * não depender de hover.
 
 ### Mobile
 
-* mensagem e CTAs do hero aparecem cedo;
+* mensagem e CTAs do Hero aparecem cedo;
 * palco participa da primeira impressão sem dominar a altura;
-* projetos viram capítulos verticais com mídia grande;
-* Serviços funcionam por toque;
-* Processo recebe trajetória vertical própria;
-* Sobre preserva identidade com composição simplificada;
-* nenhum conteúdo depende de hover;
-* não comprimir desktop em coluna única sem revisão de hierarquia.
+* Projetos preserva o sistema narrativo e mídia grande;
+* CTA geral de Projetos permanece separado visualmente do CTA específico;
+* Intro de Serviços adapta a coreografia lateral;
+* ofertas de Serviços ficam em fluxo natural com texto antes da mídia;
+* escopos violetas continuam legíveis;
+* Suporte e evolução mantém leitura vertical clara;
+* Proposta de valor mantém headline, descrição e ponte legíveis e apresenta diferenciais em sequência vertical 1 → 4;
+* Processo recebe trajetória própria;
+* Sobre preserva identidade;
+* nenhum conteúdo depende de hover.
 
 ### Mobile compacto e horizontal
 
-* reavaliar títulos, palco, mídia, serviços expandidos, trajetória e assinatura;
-* reduzir alturas e gaps;
-* evitar `100vh` rígido e sticky inadequado;
+* reavaliar títulos, palco, mídia, sticky, trajetória e assinatura;
+* reduzir alturas e gaps quando necessário;
+* evitar `100vh` rígido onde barras dinâmicas causem problema;
+* preferir unidades de viewport adequadas;
 * manter rolagem natural;
 * preservar CTAs;
 * impedir overflow horizontal.
@@ -697,16 +1310,18 @@ Obrigatório:
 * heading principal único;
 * hierarquia coerente;
 * landmarks e skip link;
-* ordem lógica e foco visível;
+* ordem lógica;
+* foco visível;
 * destinos por hash focáveis;
 * contraste adequado;
 * links distinguíveis;
 * alt correto;
 * decoração ignorada por tecnologia assistiva;
 * conteúdo não dependente de hover ou movimento;
-* controles de Serviços com semântica e estado acessíveis;
+* nenhuma animação necessária para acessar copy;
 * nenhum projeto próprio ou desafio apresentado como cliente;
-* natureza preservada nos dados mesmo sem badge público.
+* natureza preservada nos dados mesmo sem badge público;
+* reduced motion funcional em Hero, Projetos, Serviços, Suporte e Proposta de valor.
 
 Mudança de layout não pode regredir menu mobile, foco ou restauração de scroll.
 
@@ -714,7 +1329,7 @@ Mudança de layout não pode regredir menu mobile, foco ou restauração de scro
 
 Na homepage:
 
-* palco do hero deve ser leve;
+* palco do Hero deve ser leve;
 * mídia dos projetos usa prioridade compatível com sua posição;
 * mídia posterior usa lazy loading quando adequado;
 * dimensões conhecidas evitam layout shift;
@@ -722,7 +1337,8 @@ Na homepage:
 * não carregar vídeos;
 * não carregar imagens de projetos ausentes;
 * evitar renderização duplicada;
-* não adicionar dependência visual ou custo contínuo de renderização sem necessidade.
+* não adicionar dependência visual ou custo contínuo de renderização sem necessidade;
+* sticky e transforms devem permanecer restritos aos capítulos onde têm função.
 
 ## 15. Metadados básicos
 
@@ -732,29 +1348,42 @@ Manter título, descrição e estado de indexação atual.
 
 SEO completo permanece fora de escopo.
 
-Não implementar canonical, Open Graph, Twitter Card, sitemap, JSON-LD ou prerender.
+Não implementar:
+
+* canonical;
+* Open Graph;
+* Twitter Card;
+* sitemap;
+* JSON-LD;
+* prerender.
 
 ## 16. Testes automatizados
 
-Preservar testes existentes e ajustar cobertura proporcional à mudança.
+Preservar testes existentes e ajustar cobertura proporcional às mudanças finais.
 
 Cobrir no mínimo:
 
 * ordem das seções;
 * exatamente três destaques, slugs e ordem;
-* natureza de DevSchedule preservada na fonte e ausência de apresentação como cliente;
+* natureza de DevSchedule preservada na fonte;
+* ausência de apresentação de DevSchedule como cliente;
 * ausência na homepage de badges `Projeto pago`, `Projeto próprio` e `Desafio técnico`;
 * ausência de GreenTweet entre os destaques;
 * destaques e mídia derivados das fontes tipadas;
-* links dos destaques;
-* três ofertas principais;
-* suporte separado;
-* controles de Serviços acessíveis e operáveis;
-* conteúdo essencial dos Serviços disponível sem hover;
+* links `Ver case`;
+* CTA `Ver todos os projetos`;
+* três ofertas principais de Serviços;
+* copies e escopos rápidos de Serviços;
+* mídias reais de Serviços;
+* Suporte e evolução separado;
+* continuidade explícita com Atualizações, Correções e Novas evoluções;
 * seis etapas do Processo;
 * anchors `servicos`, `processo`, `sobre` e `contato`;
-* ausência de texto temporário e ação falsa;
+* ausência de texto temporário;
+* ausência de ação falsa;
 * metadados básicos quando alterados.
+
+Não manter testes que exijam o antigo accordion `+ / −` de Serviços.
 
 Não usar snapshots extensos como substituto de comportamento.
 
@@ -764,19 +1393,31 @@ Testes automatizados não substituem aprovação visual.
 
 Executar o Playwright Test configurado no projeto.
 
-Usar preferencialmente Playwright MCP para inspeção visual quando houver navegador disponível. A indisponibilidade do MCP não invalida Playwright Test local nem substitui revisão humana.
+Playwright MCP pode apoiar quando houver navegador disponível, mas sua indisponibilidade não bloqueia QA local.
 
 Validar:
 
 * carregamento e entrada;
 * Hero e palco;
+* Hero em notebook de menor altura;
 * transição Hero → Projetos;
-* três capítulos e legibilidade das mídias;
-* progressão entre projetos;
-* Serviços fechados/expandidos, `+ / −`, teclado e foco;
-* Proposta/diferenciais;
+* linha/marcador pertencendo a Projects;
+* intro de Projetos;
+* palco sticky e progressão Echo → Axium → DevSchedule;
+* frames e legibilidade desktop/mobile;
+* CTAs de Projetos;
+* intro sticky de Serviços;
+* entrada, estado de leitura e saída lateral;
+* três ofertas e suas mídias;
+* reveals e reduced motion;
+* Suporte e evolução;
+* mudança paper → ink de Proposta de valor;
+* abertura `Clareza / Estrutura`, ponte e quatro diferenciais;
+* progressão reversível e hold terminal de Proposta de valor;
 * trajetória e fallback do Processo;
-* Sobre, Contato e footer;
+* Sobre;
+* Contato;
+* footer;
 * links, CTAs e âncoras;
 * voltar/avançar e reload com hash;
 * menus desktop/mobile;
@@ -795,35 +1436,35 @@ Viewports obrigatórios:
 * viewport baixa;
 * celular horizontal.
 
-Verificar regressão também em `/portfolio`, um `/portfolio/:slug`, `/privacidade`, `/cookies` e 404, sem redesenhá-los.
+Verificar regressão também em:
+
+* `/portfolio`;
+* um `/portfolio/:slug`;
+* `/privacidade`;
+* `/cookies`;
+* 404.
+
+Não redesenhar essas rotas dentro da 0003.
 
 ### Revisão humana obrigatória
-
-Avaliar a homepage como experiência completa em desktop e mobile.
 
 Confirmar:
 
 * primeira impressão própria da Repage;
-* hero equilibrado;
-* continuidade entre seções;
-* projetos percebidos como capítulos, não cards repetidos;
+* Hero equilibrado;
+* continuidade entre Hero e Projetos;
+* Projetos percebido como palco de portfólio compartilhado;
 * mídia grande e legível;
-* Serviços fortes e claros;
-* Diferenciais distintos de Serviços;
+* Serviços claro e comercialmente suficiente;
+* Suporte compreendido como continuidade;
+* Diferenciais distintos de Serviços e percebidos como um único capítulo ink;
 * Processo percebido como trajetória;
 * Sobre intencional;
 * ritmo variável;
 * ausência de sensação de template genérico;
 * qualidade equivalente em mobile.
 
-Se MCP estiver indisponível:
-
-* executar Playwright Test local;
-* registrar tentativa e erro exato;
-* realizar revisão humana no navegador local;
-* não declarar inspeção MCP realizada.
-
-**Registro histórico:** em 7 de agosto de 2026, o navegador MCP retornou `No browser is available` e descoberta vazia. Playwright Test local passou nos sete cenários. A revisão humana posterior rejeitou a composição visual como conclusão da spec, motivando esta revisão.
+Nunca declarar revisão visual humana concluída apenas porque Playwright passou.
 
 ## 18. Áreas provavelmente afetadas
 
@@ -833,20 +1474,17 @@ Principais:
 * `frontend/src/content/repageContent.ts`;
 * `frontend/src/components/FeaturedProjectsSection/`;
 * `frontend/src/components/ServicesSection/`;
+* `frontend/src/components/ValuePropositionSection/`;
 * `frontend/src/components/ProcessSection/`;
 * `frontend/src/components/SignatureSection/`;
 * `frontend/src/components/FinalCtaSection/`;
 * `frontend/src/components/PageExperience/`;
+* `frontend/src/styles/theme.ts`;
 * `frontend/src/data/projects/`;
 * testes relacionados;
 * `frontend/src/app/routeMetadata.ts` somente se necessário.
 
-Novas áreas possíveis:
-
-* seção de proposta de valor e diferenciais;
-* pequenos seletores de projetos/mídia.
-
-Não mover todas as seções para uma nova estrutura apenas para adequação estética da árvore.
+Não mover todas as seções para uma nova estrutura apenas por estética da árvore.
 
 Não realizar refatoração paralela.
 
@@ -861,7 +1499,7 @@ Não implementar:
 * player de vídeo;
 * navegação anterior/próximo;
 * publicação dos projetos;
-* alteração das mídias aprovadas;
+* alteração arbitrária das mídias aprovadas;
 * novas capturas;
 * backend;
 * Django;
@@ -894,17 +1532,20 @@ Mitigação:
 
 * identidade, natureza, slug, seleção e mídia derivam das fontes estruturadas;
 * copy editorial pode permanecer separada;
-* natureza não precisa ser badge público para proteger veracidade.
+* natureza não precisa ser badge público.
 
 ### Resultado tecnicamente correto, mas visualmente genérico
 
 Mitigação:
 
-* contrato visual explícito nesta spec;
-* capítulos de projeto em vez de layout repetido;
-* linguagens distintas para Serviços, Diferenciais e Processo;
+* contratos visuais explícitos;
+* Hero proprietário;
+* ProjectStage compartilhado;
+* Services com linguagem própria;
+* Support separado;
+* Diferenciais e Processo com linguagens distintas;
 * aprovação visual humana obrigatória;
-* não aceitar lint, testes ou build como evidência suficiente de direção visual.
+* não aceitar lint/test/build como evidência suficiente de direção visual.
 
 ### Excesso visual
 
@@ -912,16 +1553,17 @@ Mitigação:
 
 * composição antes de efeitos;
 * prova real antes de ornamentação;
-* hierarquia dominante por seção;
+* uma hierarquia dominante por capítulo;
 * movimento com função;
-* evitar cards, grids e animações repetitivos.
+* evitar cards, grids e animações repetitivos;
+* sticky somente onde sua função foi explicitamente aprovada.
 
 ### Homepage pesada
 
 Mitigação:
 
 * não usar WebM;
-* hero leve;
+* Hero leve;
 * carregar somente mídia necessária;
 * preservar dimensões;
 * lazy loading onde adequado;
@@ -932,11 +1574,13 @@ Mitigação:
 Mitigação:
 
 * composição própria para mobile;
-* Serviços por toque;
-* trajetória mobile específica;
+* ProjectStage adaptado;
+* intro de Services adaptada;
+* ofertas de Services em fluxo natural;
+* trajetória mobile específica no Processo;
 * viewport baixa e horizontal;
 * não depender de hover;
-* revisão humana também em mobile.
+* revisão humana em mobile.
 
 ### Escopo avançar para cases
 
@@ -944,7 +1588,7 @@ Mitigação:
 
 * links podem apontar às rotas existentes;
 * conteúdo final dos cases permanece na 0004;
-* capítulos da homepage não antecipam galeria ou case completo.
+* homepage não antecipa galeria ou case completo.
 
 ### Contato ainda sem formulário
 
@@ -953,7 +1597,7 @@ Mitigação:
 * finalizar conteúdo e composição;
 * não renderizar controle falso;
 * usar somente destinos reais;
-* manter conversão funcional para a entrega 5;
+* manter conversão funcional para entrega posterior;
 * não considerar a homepage isoladamente pronta para lançamento.
 
 ## 21. Documentação afetada
@@ -961,21 +1605,23 @@ Mitigação:
 Durante esta revisão:
 
 * manter esta mesma `0003-definitive-homepage.md`;
-* alterar status para `in_progress`;
-* atualizar `docs/specs/README.md` para `in_progress`;
+* manter status `in_progress`;
 * não criar `0003.1`;
 * não alterar sequência ou escopo do roadmap;
-* atualizar `docs/ROADMAP.md` somente se ele espelhar status ou se surgir mudança real.
+* atualizar `docs/specs/README.md` somente quando necessário para refletir status;
+* atualizar `docs/ROADMAP.md` somente se houver mudança real de status ou escopo.
 
 Ao concluir:
 
 * mudar spec e índice para `implemented`;
 * registrar referência da PR/commit quando disponível;
-* atualizar roadmap somente quando aplicável.
+* atualizar roadmap quando aplicável.
 
 Não criar nova página no Notion.
 
-`docs/DESIGN_SYSTEM.md` permanece sistêmico. Alterá-lo apenas se esta revisão consolidar mudança realmente global; a preferência de superfície do Sobre nesta spec, isoladamente, não exige reescrita do Design System.
+`docs/DESIGN_SYSTEM.md` permanece sistêmico.
+
+Alterá-lo apenas se a implementação consolidar mudança realmente global.
 
 ## 22. Validações obrigatórias
 
@@ -1003,11 +1649,11 @@ Além disso:
 * verificar ausência de segredos ou dados pessoais;
 * realizar revisão visual humana em desktop e mobile.
 
-Validações da primeira implementação são histórico e devem ser repetidas após alterações que possam afetá-las.
+Validações históricas devem ser repetidas após alterações que possam afetá-las.
 
 ## 23. Critérios de aceite
 
-Após esta revisão, os critérios permanecem abertos até nova implementação e validação.
+Os critérios permanecem abertos enquanto a spec estiver `in_progress`.
 
 ### Conteúdo, dados e escopo
 
@@ -1019,28 +1665,53 @@ Após esta revisão, os critérios permanecem abertos até nova implementação 
 * [ ] Nenhum WebM é carregado.
 * [ ] Projetos continuam `draft`.
 * [ ] Portfólio/cases finais não foram antecipados.
-* [ ] Mídias da 0002 não foram recapturadas ou alteradas.
+* [ ] Mídias da 0002 não foram recapturadas ou alteradas fora das decisões aprovadas.
 
 ### Hero e Projetos
 
 * [ ] Hero comunica atividade, público, transformação e ação.
-* [ ] Hero é protagonizado pela Repage, não por colagem dos projetos.
-* [ ] Headline e palco possuem hierarquia equilibrada.
-* [ ] Palco comunica `ideia → estrutura → experiência digital` sem fingir projeto real.
-* [ ] Transição Hero → Projetos possui continuidade perceptível.
-* [ ] Projetos são percebidos como três capítulos e não cards/layouts repetidos.
-* [ ] Mídia é grande e legível sem full-screen desnecessário.
-* [ ] Existe progressão clara entre os três capítulos.
-* [ ] Mobile apresenta capítulos próprios com mídia relevante.
+* [ ] Hero é protagonizado pela Repage.
+* [ ] Palco comunica `ideia → estrutura → experiência digital`.
+* [ ] Hero funciona em desktop alto e notebook de menor altura.
+* [ ] Hero termina sem spacer adicional dedicado à transição.
+* [ ] Linha/marcador pertencem à entrada de Projetos.
+* [ ] Projetos utiliza um palco compartilhado e não três layouts alternados.
+* [ ] Echo, Axium e DevSchedule compartilham mesma composição, hierarquia e sistema de frames.
+* [ ] Transições entre projetos possuem overlap e continuidade.
+* [ ] Mídia é grande e legível.
+* [ ] `Ver case` funciona por projeto.
+* [ ] `Ver todos os projetos` permanece disponível com hierarquia inferior.
+* [ ] Mobile preserva o sistema narrativo e não reduz projetos a cards.
+* [ ] Reduced motion mantém todos os projetos acessíveis em estado estável.
 
-### Serviços e diferenciais
+### Serviços e Suporte
 
-* [ ] Três ofertas principais possuem peso equivalente e são compreensíveis fechadas.
-* [ ] Expansão de Serviços funciona por clique, teclado e toque.
-* [ ] Microinterações não dependem de hover.
-* [ ] Soluções personalizadas comunica a atuação além de sites sem prometer capacidade irrestrita.
-* [ ] Suporte aparece como continuidade, não quarta oferta.
-* [ ] Diferenciais possui linguagem visual distinta de Serviços.
+* [ ] Três ofertas principais possuem peso equivalente.
+* [ ] Intro de Services funciona como sticky curto, sem transformar as ofertas em sticky.
+* [ ] Headline e apoio da intro possuem leitura equilibrada.
+* [ ] Saída lateral da intro entrega naturalmente Landing pages.
+* [ ] Landing pages comunica conversão e usa mídia real aprovada.
+* [ ] Sites institucionais comunica presença institucional e usa mídia real aprovada.
+* [ ] Soluções personalizadas comunica atuação além de sites sem prometer capacidade irrestrita.
+* [ ] Escopos violetas permanecem legíveis.
+* [ ] Mídias usam sistema compartilhado de frame leve e não repetem Projects literalmente.
+* [ ] Progressão `título → descrição → escopo → mídia` funciona sem depender de hover.
+* [ ] Mobile mantém leitura e densidade adequadas.
+* [ ] Suporte aparece como epílogo, não quarta oferta.
+* [ ] Suporte explicita Atualizações, Correções e Novas evoluções.
+* [ ] Support não depende de ilustração abstrata para comunicar continuidade.
+
+### Diferenciais
+
+* [ ] Proposta de valor utiliza headline, descrição e ponte aprovadas.
+* [ ] Os quatro argumentos finais são Responsabilidade direta, Condução integrada, Necessidade antes do formato e Continuidade quando fizer sentido.
+* [ ] Diferenciais permanecem comprováveis.
+* [ ] A seção usa superfície ink própria e permanece visualmente distinta de Services.
+* [ ] Desktop conclui os argumentos em composição 2 × 2 alinhada, sem cards.
+* [ ] Mobile apresenta os quatro argumentos em sequência vertical.
+* [ ] Entradas laterais são individuais e reversíveis.
+* [ ] Hold terminal conclui o quarto argumento antes da entrada de Processo.
+* [ ] Reduced motion mantém todo o conteúdo disponível em estado estável.
 
 ### Processo, Sobre e Contato
 
@@ -1081,11 +1752,12 @@ Após esta revisão, os critérios permanecem abertos até nova implementação 
 A spec está pronta quando:
 
 * a homepage apresenta a experiência comercial e visual aprovada;
-* hero estabelece identidade própria da Repage;
-* três destaques usam mídia real em capítulos coerentes;
+* Hero estabelece identidade própria da Repage;
+* três destaques usam mídia real dentro do `ProjectStage` compartilhado;
 * natureza administrativa não é usada como rótulo comercial;
-* Serviços explica com clareza as três ofertas e a amplitude de Soluções personalizadas;
-* Diferenciais possui linguagem própria;
+* Serviços explica com clareza as três ofertas e sua amplitude;
+* Suporte aparece como continuidade pós-publicação;
+* Diferenciais possui linguagem ink própria, quatro argumentos finais e progressão aprovada;
 * Processo funciona como trajetória narrativa;
 * Sobre e Contato estão finalizados dentro do escopo;
 * desktop e mobile possuem acabamento equivalente e composição intencional;
@@ -1094,7 +1766,7 @@ A spec está pronta quando:
 * nenhuma entrega posterior foi antecipada;
 * validações obrigatórias foram executadas;
 * bloqueios de ferramenta foram registrados sem inferência;
-* revisão visual humana foi aprovada;
+* revisão visual humana final foi aprovada;
 * diff foi revisado;
-* spec está `in_progress`;
-* implementação está pronta para commit e PR sob controle de Lukas.
+* spec foi alterada de `in_progress` para `implemented`;
+* implementação está pronta para PR/merge sob controle de Lukas.
