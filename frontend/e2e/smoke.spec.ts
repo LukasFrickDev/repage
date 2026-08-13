@@ -12,7 +12,7 @@ function collectBrowserIssues(page: Page): string[] {
   return issues;
 }
 
-test('homepage renders its main heading without horizontal overflow', async ({ page }) => {
+test('homepage renders its definitive structure without horizontal overflow', async ({ page }) => {
   const issues = collectBrowserIssues(page);
 
   await page.goto('/');
@@ -21,6 +21,83 @@ test('homepage renders its main heading without horizontal overflow', async ({ p
   await expect(page.getByRole('heading', { level: 1 }).first()).toHaveText(
     'Uma nova página para o seu negócio começa aqui.',
   );
+
+  expect(await page.locator('main [data-home-section]').evaluateAll((sections) => (
+    sections.map((section) => section.getAttribute('data-home-section'))
+  ))).toEqual([
+    'hero',
+    'projects',
+    'services',
+    'value',
+    'process',
+    'about',
+    'contact',
+  ]);
+
+  const featuredProjects = page.locator('[data-home-section="projects"]');
+  await expect(featuredProjects.locator('h3')).toHaveText([
+    'EchoCosmicEnergia',
+    'Axium',
+    'DevSchedule',
+  ]);
+  await expect(featuredProjects.getByText('Projeto pago')).toHaveCount(0);
+  await expect(featuredProjects.getByText('Projeto próprio')).toHaveCount(0);
+  await expect(featuredProjects.getByText('Desafio técnico')).toHaveCount(0);
+  await expect(featuredProjects.getByText('GreenTweet')).toHaveCount(0);
+  const projectImages = featuredProjects.locator('img');
+  await expect(projectImages).toHaveCount(6);
+  for (let index = 0; index < await projectImages.count(); index += 1) {
+    const image = projectImages.nth(index);
+    await image.scrollIntoViewIfNeeded();
+    await expect.poll(() => image.evaluate((media) => (
+      (media as HTMLImageElement).complete
+      && (media as HTMLImageElement).naturalWidth > 0
+      && (media as HTMLImageElement).naturalHeight > 0
+    ))).toBe(true);
+  }
+  await expect(page.locator('video')).toHaveCount(0);
+
+  await expect(page.locator('[data-home-section="hero"] img[src^="/projects/"]')).toHaveCount(0);
+
+  const services = page.locator('[data-home-section="services"]');
+  const serviceOffers = services.locator('article');
+  await expect(serviceOffers.locator('h3')).toHaveText([
+    'Landing pages',
+    'Sites institucionais',
+    'Soluções personalizadas',
+  ]);
+  await expect(serviceOffers.getByText(/Para necessidades que vão além de uma página/)).toBeVisible();
+  await expect(page.locator('[data-home-section="value"] li')).toHaveCount(4);
+  await expect(page.locator('[data-home-section="process"] li')).toHaveCount(6);
+
+  const heroBudgetLink = page.locator('[data-home-section="hero"]').getByRole('link', { name: 'Solicitar orçamento' });
+  await heroBudgetLink.click();
+  await expect(page).toHaveURL(/\/#contato$/);
+  await expect(page.locator('#contato')).toBeFocused();
+
+  const hasHorizontalOverflow = await page.evaluate(
+    () => document.documentElement.scrollWidth > window.innerWidth,
+  );
+  expect(hasHorizontalOverflow).toBe(false);
+  expect(issues).toEqual([]);
+});
+
+test('homepage remains usable with reduced motion and the mobile menu', async ({ page }) => {
+  const issues = collectBrowserIssues(page);
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/');
+
+  await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+
+  const viewport = page.viewportSize();
+  if (viewport && viewport.width < 900) {
+    await page.getByRole('button', { name: 'Abrir menu' }).click();
+    const mobileNavigation = page.getByRole('navigation', { name: 'Navegação móvel' });
+    await expect(mobileNavigation).toBeVisible();
+    await mobileNavigation.getByRole('link', { name: 'Como funciona' }).click();
+    await expect(page).toHaveURL(/\/#processo$/);
+    await expect(page.locator('#processo')).toBeFocused();
+  }
 
   const hasHorizontalOverflow = await page.evaluate(
     () => document.documentElement.scrollWidth > window.innerWidth,
@@ -35,6 +112,8 @@ test('temporary portfolio routes remain noindex without publishing a final case'
   for (const route of [
     { path: '/portfolio', heading: 'Projetos em preparação.' },
     { path: '/portfolio/axium', heading: 'Axium' },
+    { path: '/privacidade', heading: 'Política de Privacidade em preparação.' },
+    { path: '/cookies', heading: 'Política de Cookies em preparação.' },
     { path: '/rota-inexistente', heading: 'Página não encontrada.' },
   ]) {
     await page.goto(route.path);

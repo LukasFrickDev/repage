@@ -1,97 +1,102 @@
-import { useReducedMotion } from 'framer-motion';
-import { useEffect, useState } from 'react';
-import type { MouseEvent } from 'react';
+import { useReducedMotion, useScroll, useSpring, useTransform } from 'framer-motion';
+import { useRef } from 'react';
 import { signatureSectionContent } from '../../content/repageContent';
 import * as S from './styles';
 
-const ease = [0.22, 1, 0.36, 1] as const;
-
 export function SignatureSection() {
-  const prefersReducedMotion = useReducedMotion();
-  const [canUsePointer, setCanUsePointer] = useState(false);
-
-  useEffect(() => {
-    const pointerQuery = window.matchMedia('(min-width: 1100px) and (hover: hover) and (pointer: fine)');
-    const updatePointerCapability = () => setCanUsePointer(pointerQuery.matches);
-
-    updatePointerCapability();
-    pointerQuery.addEventListener('change', updatePointerCapability);
-
-    return () => pointerQuery.removeEventListener('change', updatePointerCapability);
-  }, []);
-
-  const resetLightPosition = (element: HTMLDivElement) => {
-    element.style.setProperty('--pointer-x', '0px');
-    element.style.setProperty('--pointer-y', '0px');
-  };
-
-  const handlePointerMove = (event: MouseEvent<HTMLDivElement>) => {
-    if (!canUsePointer || prefersReducedMotion) return;
-
-    const bounds = event.currentTarget.getBoundingClientRect();
-    const horizontal = (event.clientX - bounds.left) / bounds.width - 0.5;
-    const vertical = (event.clientY - bounds.top) / bounds.height - 0.5;
-
-    event.currentTarget.style.setProperty('--pointer-x', `${horizontal * 10}px`);
-    event.currentTarget.style.setProperty('--pointer-y', `${vertical * 10}px`);
-  };
+  const prefersReducedMotion = Boolean(useReducedMotion());
+  const sectionRef = useRef<HTMLElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ['start 90%', 'center 50%'],
+  });
+  const progress = useSpring(scrollYProgress, { stiffness: 120, damping: 30, mass: 0.28 });
+  const eyebrowOpacity = useTransform(progress, [0, 0.12, 0.2], [0, 0.72, 1]);
+  const eyebrowX = useTransform(progress, [0, 0.2], [-6, 0]);
+  const titleOpacity = useTransform(progress, [0.06, 0.2, 0.36], [0, 0.84, 1]);
+  const titleY = useTransform(progress, [0.06, 0.38], [8, 0]);
+  const titleMaskPosition = useTransform(progress, [0.06, 0.4], ['0 100%', '0 0%']);
+  const descriptionOpacity = useTransform(progress, [0.32, 0.56], [0, 1]);
+  const descriptionX = useTransform(progress, [0.32, 0.56], [8, 0]);
+  const logoOpacity = useTransform(progress, [0, 0.34, 0.55, 0.82], [0.08, 0.1, 0.46, 1]);
+  const logoScale = useTransform(progress, [0, 0.34, 0.55, 0.82], [0.86, 0.86, 0.92, 1]);
+  const logoX = useTransform(progress, [0, 0.34, 0.82], [10, 9, 0]);
+  const signatureOpacity = useTransform(progress, [0.45, 0.72], [0, 1]);
+  const signatureX = useTransform(progress, [0.45, 0.72], [9, 0]);
+  const backPlaneY = useTransform(progress, [0, 1], [-3, 2]);
+  const mainPlaneX = useTransform(progress, [0, 1], [2, -2]);
+  const traceX = useTransform(progress, [0, 1], [-2, 2]);
 
   return (
-    <S.Section id="sobre" aria-labelledby="signature-title" tabIndex={-1}>
-      <S.Container>
-        <S.Content
-          initial={prefersReducedMotion ? false : { opacity: 0, y: 16 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.4 }}
-          transition={{ duration: 0.6, ease }}
-        >
-          <S.Eyebrow>{signatureSectionContent.eyebrow}</S.Eyebrow>
-          <S.Title id="signature-title">{signatureSectionContent.title}</S.Title>
-          <S.Description>{signatureSectionContent.description}</S.Description>
-
-          <S.Signature>
-            <S.SignatureMark aria-hidden="true" />
-            <span>
-              <S.SignatureName>{signatureSectionContent.signature}</S.SignatureName>
-              <S.SignatureRole>{signatureSectionContent.signatureRole}</S.SignatureRole>
-            </span>
-          </S.Signature>
+    <S.Section
+      ref={sectionRef}
+      id="sobre"
+      data-home-section="about"
+      aria-labelledby="signature-title"
+      tabIndex={-1}
+    >
+      <S.Composition>
+        <S.Content>
+          <S.Eyebrow
+            style={prefersReducedMotion ? undefined : { opacity: eyebrowOpacity, x: eyebrowX }}
+          >
+            {signatureSectionContent.eyebrow}
+          </S.Eyebrow>
+          <S.Title
+            id="signature-title"
+            style={prefersReducedMotion ? undefined : {
+              maskPosition: titleMaskPosition,
+              opacity: titleOpacity,
+              y: titleY,
+            }}
+          >
+            {signatureSectionContent.title}
+          </S.Title>
+          <S.Description
+            style={prefersReducedMotion ? undefined : {
+              opacity: descriptionOpacity,
+              x: descriptionX,
+            }}
+          >
+            {signatureSectionContent.description}
+          </S.Description>
         </S.Content>
 
-        <S.Identity
-          aria-hidden="true"
-          onMouseMove={canUsePointer && !prefersReducedMotion ? handlePointerMove : undefined}
-          onMouseLeave={canUsePointer && !prefersReducedMotion
-            ? (event) => resetLightPosition(event.currentTarget)
-            : undefined}
-          initial={prefersReducedMotion ? false : { opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true, amount: 0.35 }}
-          transition={{ duration: 0.55, delay: 0.12, ease }}
-        >
-          <S.TechnicalGrid />
-          <S.Plane $position="top" />
-          <S.Plane $position="bottom" />
+        <S.BrandField aria-hidden="true">
+          <S.BrandPlane
+            $position="back"
+            style={prefersReducedMotion ? undefined : { y: backPlaneY }}
+          />
+          <S.BrandPlane
+            $position="main"
+            style={prefersReducedMotion ? undefined : { x: mainPlaneX }}
+          />
+          <S.BrandTrace style={prefersReducedMotion ? undefined : { x: traceX }} />
 
-          <S.Trace $position="first" />
-          <S.Trace $position="second" />
-          <S.Trace $position="third" />
-
-          <S.SymbolField
-            initial={prefersReducedMotion ? false : { opacity: 0, x: 18 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true, amount: 0.3 }}
-            transition={{ duration: 0.62, delay: 0.2, ease }}
+          <S.BrandStage
+            style={prefersReducedMotion ? undefined : {
+              opacity: logoOpacity,
+              scale: logoScale,
+              x: logoX,
+            }}
           >
-            <img src="/brands/logo-offwhiote.svg" alt="" />
-          </S.SymbolField>
+            <S.BrandLogo src="/brands/logo-offwhiote.svg" alt="" />
+          </S.BrandStage>
+        </S.BrandField>
 
-          <S.SignalPoint $position="one" />
-          <S.SignalPoint $position="two" />
-          <S.SignalPoint $position="three" />
-          <S.EdgeNotation><i /><i /><i /></S.EdgeNotation>
-        </S.Identity>
-      </S.Container>
+        <S.Signature
+          style={prefersReducedMotion ? undefined : {
+            opacity: signatureOpacity,
+            x: signatureX,
+          }}
+        >
+          <S.SignatureMark aria-hidden="true" />
+          <span>
+            <S.SignatureName>{signatureSectionContent.signature}</S.SignatureName>
+            <S.SignatureRole>{signatureSectionContent.signatureRole}</S.SignatureRole>
+          </span>
+        </S.Signature>
+      </S.Composition>
     </S.Section>
   );
 }

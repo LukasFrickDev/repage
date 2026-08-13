@@ -1,5 +1,5 @@
 import { createGlobalStyle } from 'styled-components';
-import { colors, fonts, withAlpha } from './theme';
+import { breakpoints, colors, fonts, withAlpha } from './theme';
 
 const GlobalStyles = createGlobalStyle`
   * { box-sizing: border-box; }
@@ -21,7 +21,12 @@ const GlobalStyles = createGlobalStyle`
   :where(section[id], main[id]) { scroll-margin-top: 6rem; }
   ::selection { background: ${withAlpha(colors.violet, 0.32)}; color: ${colors.paper}; }
   :focus-visible { outline: 3px solid ${colors.neonBlue}; outline-offset: 4px; }
-  :where(section[id], main[id])[tabindex='-1']:focus-visible { outline-offset: -5px; }
+  @media (max-width: ${breakpoints.mobileMax}) {
+    :where(section[id], main[id])[tabindex='-1']:focus,
+    :where(section[id], main[id])[tabindex='-1']:focus-visible {
+      outline: none;
+    }
+  }
   @media (prefers-reduced-motion: reduce) {
     * { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; transition-duration: 0.01ms !important; }
   }

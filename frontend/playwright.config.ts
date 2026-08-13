@@ -4,6 +4,7 @@ export default defineConfig({
   testDir: './e2e',
   outputDir: './test-results',
   fullyParallel: true,
+  workers: 4,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 1,
   reporter: [['list'], ['html', { outputFolder: './playwright-report', open: 'never' }]],
@@ -20,8 +21,12 @@ export default defineConfig({
     reuseExistingServer: true,
   },
   projects: [
-    { name: 'desktop', use: { ...devices['Desktop Chrome'] } },
-    { name: 'tablet', use: { ...devices['iPad (gen 7)'] } },
-    { name: 'mobile', use: { ...devices['iPhone 13'] } },
+    { name: 'wide', use: { ...devices['Desktop Chrome'], viewport: { width: 1600, height: 1000 } } },
+    { name: 'notebook', use: { ...devices['Desktop Chrome'], viewport: { width: 1280, height: 800 } } },
+    { name: 'tablet', use: { ...devices['Desktop Chrome'], viewport: { width: 900, height: 1100 } } },
+    { name: 'mobile', use: { ...devices['iPhone 13'], viewport: { width: 390, height: 844 } } },
+    { name: 'compact', use: { ...devices['iPhone 13'], viewport: { width: 360, height: 740 } } },
+    { name: 'low-height', use: { ...devices['Desktop Chrome'], viewport: { width: 1366, height: 640 } } },
+    { name: 'landscape', use: { ...devices['Desktop Chrome'], viewport: { width: 844, height: 390 } } },
   ],
 });

@@ -36,15 +36,17 @@ Conflitos reais devem ser relatados e corrigidos.
 
 ## Status atual
 
-Última consolidação: **5 de agosto de 2026**.
+Última consolidação: **13 de agosto de 2026**.
 
 Estado conhecido:
 
 - baseline em `main`;
 - frontend React/TypeScript/Vite/Styled Components existente;
 - Framer Motion disponível;
-- homepage como implementação principal;
-- roteamento completo, backend, banco e formulário persistido ainda não materializados;
+- Entregas 1, 2 e 3 concluídas, incluindo a homepage definitiva;
+- roteamento público já materializado;
+- Entrega 4 — Portfólio e seis cases — como próxima entrega;
+- backend, banco, formulário persistido e demais entregas posteriores ainda pendentes;
 - arquitetura-alvo documentada.
 
 Não confundir arquitetura aprovada com funcionalidade já implementada.

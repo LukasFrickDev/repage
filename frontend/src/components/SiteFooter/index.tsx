@@ -5,25 +5,27 @@ import * as S from './styles';
 
 export function SiteFooter() {
   return (
-    <S.Footer>
+    <S.Footer data-home-section="footer">
       <S.Container>
-        <S.BrandBlock>
-          <S.Brand to="/" aria-label="Repage, ir para a página inicial">
-            <img src="/brands/logo-offwhiote.svg" alt="" />
-            <span>{siteConfig.brand.name}</span>
-          </S.Brand>
-          <S.BrandDescription>{siteFooterContent.description}</S.BrandDescription>
-        </S.BrandBlock>
+        <S.MainBand>
+          <S.BrandBlock>
+            <S.Brand to="/" aria-label="Repage, ir para a página inicial">
+              <img src="/brands/logo-offwhiote.svg" alt="" />
+              <span>{siteConfig.brand.name}</span>
+            </S.Brand>
+            <S.BrandDescription>{siteFooterContent.description}</S.BrandDescription>
+          </S.BrandBlock>
 
-        <S.Navigation aria-label="Navegação do rodapé">
-          {navigation.map((item) => <Link key={item.href} to={item.href}>{item.label}</Link>)}
-          {legalNavigation.map((item) => <Link key={item.href} to={item.href}>{item.label}</Link>)}
-        </S.Navigation>
+          <S.Navigation aria-label="Navegação do rodapé">
+            {navigation.map((item) => <Link key={item.href} to={item.href}>{item.label}</Link>)}
+            {legalNavigation.map((item) => <Link key={item.href} to={item.href}>{item.label}</Link>)}
+          </S.Navigation>
+        </S.MainBand>
 
-        <S.Meta>
+        <S.BottomBand>
           <p>{siteFooterContent.signature}</p>
           <small>{siteFooterContent.copyright}</small>
-        </S.Meta>
+        </S.BottomBand>
       </S.Container>
     </S.Footer>
   );

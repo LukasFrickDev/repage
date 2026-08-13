@@ -1,105 +1,219 @@
 import { motion } from 'framer-motion';
-import styled, { css, keyframes } from 'styled-components';
-import { breakpoints, colors, fonts, homepageTokens, layout } from '../../styles/theme';
-
-const traceFlow = keyframes`
-  from { background-position: 180% 50%; }
-  to { background-position: -80% 50%; }
-`;
+import styled, { css } from 'styled-components';
+import { breakpoints, colors, fonts, homepageTokens } from '../../styles/theme';
+import { HomepageEditorialFrame } from '../HomepageEditorialFrame';
 
 export const Section = styled.section`
   position: relative;
   isolation: isolate;
-  overflow: hidden;
-  padding: ${homepageTokens.sectionPaddingBlock} ${homepageTokens.sectionPaddingInline};
-  border-top: 1px solid rgba(145, 168, 255, 0.12);
-  background:
-    radial-gradient(circle at 86% 28%, rgba(108, 99, 255, 0.1), transparent 30%),
-    ${colors.background};
+  overflow: clip;
+  padding: clamp(6rem, 8vw, 8rem) ${homepageTokens.sectionPaddingInline};
+  display: grid;
+  align-items: center;
+  background: ${colors.backgroundSecondary};
   color: ${colors.white};
 `;
 
-export const Container = styled.div`
+export const Composition = styled(HomepageEditorialFrame)`
   position: relative;
-  width: ${layout.containerWidth};
-  margin-inline: auto;
-  display: grid;
-  align-items: center;
-  gap: ${homepageTokens.signature.contentGap};
-
-  @media (min-width: ${breakpoints.tablet}) {
-    grid-template-columns: minmax(0, 0.95fr) minmax(18rem, 0.75fr);
-  }
-`;
-
-export const Content = styled(motion.div)`
-  position: relative;
-  z-index: 3;
-  max-width: 45rem;
-
-  @media (max-width: ${breakpoints.tabletMax}) {
-    &::before {
-      content: '';
-      position: absolute;
-      z-index: -1;
-      inset: -2rem -1rem;
-      background: linear-gradient(90deg, rgba(16, 24, 39, 0.98), rgba(16, 24, 39, 0.88) 70%, transparent);
-      pointer-events: none;
-    }
-  }
-`;
-
-export const Eyebrow = styled.p`
+  min-height: clamp(27rem, 34vw, 32rem);
   display: flex;
-  align-items: center;
-  gap: 0.7rem;
+  flex-direction: column;
+  justify-content: center;
+
+  @media (max-width: ${breakpoints.contentMax}) {
+    min-height: 0;
+    justify-content: flex-start;
+  }
+`;
+
+export const Content = styled.div`
+  position: relative;
+  z-index: 2;
+  width: min(100%, ${homepageTokens.signature.contentMaxWidth});
+
+  @media (min-width: ${breakpoints.content}) and (max-width: ${breakpoints.laptopMax}) {
+    width: min(100%, ${homepageTokens.signature.contentNotebookMaxWidth});
+  }
+`;
+
+export const Eyebrow = styled(motion.p)`
   margin-bottom: ${homepageTokens.eyebrowMarginBottom};
-  color: ${colors.neonBlue};
+  color: ${colors.highlight};
   font-family: ${fonts.primary};
   font-size: ${homepageTokens.eyebrowSize};
   font-weight: 650;
   letter-spacing: ${homepageTokens.eyebrowTracking};
   text-transform: uppercase;
+`;
 
-  &::before {
-    content: '';
-    width: 1.75rem;
-    height: 1px;
-    background: linear-gradient(90deg, ${colors.highlight}, ${colors.neonBlue});
+export const Title = styled(motion.h2)`
+  max-width: 100%;
+  font-family: ${fonts.heading};
+  font-size: ${homepageTokens.signature.titleSize};
+  font-weight: 610;
+  letter-spacing: -0.06em;
+  line-height: 0.96;
+  text-wrap: balance;
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 48%, transparent 54%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 0%, #000 48%, transparent 54%, transparent 100%);
+  -webkit-mask-size: 100% 220%;
+  mask-size: 100% 220%;
+  -webkit-mask-position: 0 0;
+  mask-position: 0 0;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+
+  @media (max-width: ${breakpoints.contentMax}) {
+    font-size: ${homepageTokens.signature.titleMobileSize};
   }
 `;
 
-export const Title = styled.h2`
-  max-width: 12ch;
-  font-family: ${fonts.heading};
-  font-size: ${homepageTokens.sectionTitleSize};
-  font-weight: 650;
-  letter-spacing: ${homepageTokens.sectionTitleTracking};
-  line-height: ${homepageTokens.sectionTitleLineHeight};
-  text-wrap: balance;
-`;
-
-export const Description = styled.p`
-  max-width: 38rem;
-  margin-top: ${homepageTokens.sectionCopyMarginTop};
-  color: ${colors.textSecondary};
+export const Description = styled(motion.p)`
+  max-width: ${homepageTokens.signature.copyMaxWidth};
+  margin-top: clamp(1.75rem, 2.8vw, 2.5rem);
+  color: rgba(245, 242, 236, 0.76);
   font-family: ${fonts.primary};
-  font-size: ${homepageTokens.sectionCopySize};
-  line-height: ${homepageTokens.sectionCopyLineHeight};
+  font-size: clamp(1.02rem, 1.18vw, 1.12rem);
+  font-weight: ${homepageTokens.signature.copyWeight};
+  line-height: 1.68;
 `;
 
-export const Signature = styled.div`
+export const BrandField = styled(motion.div)`
+  position: absolute;
+  z-index: 1;
+  top: 50%;
+  left: ${homepageTokens.signature.logoOffset};
+  width: ${homepageTokens.signature.logoWidth};
+  aspect-ratio: 1;
+  translate: 0 -50%;
+  pointer-events: none;
+
+  &::before {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    inset: -2% -10% -4% -1%;
+    background: radial-gradient(
+      ellipse at 54% 49%,
+      rgba(108, 99, 255, 0.17),
+      rgba(145, 168, 255, 0.065) 38%,
+      transparent 73%
+    );
+  }
+
+  @media (min-width: ${breakpoints.content}) and (max-width: ${breakpoints.laptopMax}) {
+    left: 64%;
+  }
+
+  @media (max-width: ${breakpoints.contentMax}) {
+    position: relative;
+    top: auto;
+    left: 14%;
+    width: ${homepageTokens.signature.logoMobileWidth};
+    margin-top: clamp(2.75rem, 10vw, 4rem);
+    translate: none;
+  }
+
+  @media (max-width: ${breakpoints.mobileMax}) {
+    left: auto;
+    margin-inline: auto;
+    margin-top: clamp(1.75rem, 7vw, 2.25rem);
+  }
+`;
+
+export const BrandStage = styled(motion.div)`
+  position: absolute;
+  z-index: 2;
+  top: 50%;
+  left: 50%;
+  width: 52%;
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  transform-origin: center;
+
+  @media (max-width: ${breakpoints.contentMax}) {
+    width: 54%;
+  }
+`;
+
+export const BrandLogo = styled.img`
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: contain;
+`;
+
+export const BrandPlane = styled(motion.span)<{ $position: 'back' | 'main' }>`
+  position: absolute;
+  z-index: 0;
+  border: 1px solid rgba(145, 168, 255, 0.105);
+
+  ${({ $position }) => ({
+    back: css`
+      top: 12%;
+      left: 18%;
+      width: 78%;
+      height: 70%;
+      background: linear-gradient(132deg, rgba(108, 99, 255, 0.105), rgba(145, 168, 255, 0.035));
+      clip-path: polygon(11% 0, 100% 6%, 96% 87%, 87% 100%, 0 94%, 0 14%);
+      rotate: -1.4deg;
+    `,
+    main: css`
+      top: 19%;
+      left: 5%;
+      width: 84%;
+      height: 70%;
+      background: linear-gradient(122deg, rgba(145, 168, 255, 0.045), rgba(108, 99, 255, 0.085));
+      clip-path: polygon(8% 3%, 100% 0, 100% 82%, 91% 100%, 0 95%, 0 18%);
+      rotate: 0.8deg;
+    `,
+  })[$position]}
+
+  @media (max-width: ${breakpoints.contentMax}) {
+    opacity: 0.72;
+  }
+`;
+
+export const BrandTrace = styled(motion.span)`
+  position: absolute;
+  z-index: 1;
+  top: 39%;
+  left: -1%;
+  width: 90%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(145, 168, 255, 0.38), rgba(108, 99, 255, 0.16), transparent);
+  transform-origin: center;
+  rotate: -8deg;
+
+  @media (max-width: ${breakpoints.contentMax}) {
+    opacity: 0.65;
+  }
+`;
+
+export const Signature = styled(motion.div)`
+  position: relative;
+  z-index: 2;
+  width: fit-content;
   margin-top: ${homepageTokens.signature.signatureMarginTop};
   display: flex;
   align-items: center;
-  gap: 0.9rem;
+  gap: 1rem;
+
+  @media (max-width: ${breakpoints.contentMax}) {
+    margin-top: clamp(1.5rem, 6vw, 2.25rem);
+  }
+
+  @media (max-width: ${breakpoints.mobileMax}) {
+    margin-top: clamp(1rem, 4vw, 1.25rem);
+  }
 `;
 
 export const SignatureMark = styled.span`
   width: 2px;
-  height: 2.8rem;
+  height: 3.5rem;
   flex: 0 0 auto;
-  background: linear-gradient(${colors.highlight}, ${colors.neonBlue});
+  background: ${colors.highlight};
 `;
 
 export const SignatureName = styled.strong`
@@ -107,154 +221,16 @@ export const SignatureName = styled.strong`
   color: ${colors.white};
   font-family: ${fonts.primary};
   font-size: ${homepageTokens.signature.nameSize};
-  font-weight: 620;
+  font-weight: 600;
   line-height: 1.35;
 `;
 
 export const SignatureRole = styled.span`
   display: block;
-  margin-top: 0.2rem;
-  color: rgba(185, 192, 204, 0.68);
+  margin-top: 0.3rem;
+  color: rgba(245, 242, 236, 0.68);
   font-family: ${fonts.primary};
   font-size: ${homepageTokens.signature.roleSize};
-  line-height: 1.35;
-`;
-
-export const Identity = styled(motion.div)`
-  --pointer-x: 0px;
-  --pointer-y: 0px;
-  position: relative;
-  z-index: 1;
-  width: 100%;
-  max-width: 43rem;
-  justify-self: end;
-  aspect-ratio: 1.08 / 1;
-  overflow: hidden;
-  border-left: 1px solid rgba(145, 168, 255, 0.15);
-  border-right: 1px solid rgba(145, 168, 255, 0.08);
-  background: linear-gradient(135deg, rgba(24, 34, 53, 0.78), rgba(16, 24, 39, 0.22));
-
-  @media (max-width: ${breakpoints.tabletMax}) {
-    position: absolute;
-    z-index: 1;
-    top: -8%;
-    right: -38vw;
-    width: min(130vw, 34rem);
-    height: 116%;
-    max-width: none;
-    aspect-ratio: auto;
-    filter: opacity(0.38);
-    border: 0;
-    pointer-events: none;
-  }
-`;
-
-export const TechnicalGrid = styled.div`
-  position: absolute;
-  inset: 0;
-  background:
-    linear-gradient(rgba(145, 168, 255, 0.08) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(145, 168, 255, 0.08) 1px, transparent 1px);
-  background-size: 12.5% 12.5%;
-  mask-image: linear-gradient(90deg, transparent, #000 28%, #000);
-`;
-
-export const Plane = styled.div<{ $position: 'top' | 'bottom' }>`
-  position: absolute;
-  border: 1px solid rgba(145, 168, 255, 0.16);
-  background: linear-gradient(120deg, rgba(108, 99, 255, 0.08), rgba(145, 168, 255, 0.025));
-
-  ${({ $position }) => $position === 'top' ? css`
-    top: 11%; right: 4%; width: 44%; height: 16%;
-    clip-path: polygon(10% 0, 100% 0, 100% 100%, 0 100%, 0 38%);
-  ` : css`
-    right: 18%; bottom: 8%; width: 35%; height: 13%;
-    clip-path: polygon(0 0, 88% 0, 100% 36%, 100% 100%, 0 100%);
-  `}
-`;
-
-export const Trace = styled.span<{ $position: 'first' | 'second' | 'third' }>`
-  position: absolute;
-  z-index: 2;
-  height: 1px;
-  background: linear-gradient(90deg, rgba(108, 99, 255, 0.08), ${colors.neonBlue}, rgba(145, 168, 255, 0.06));
-  background-size: 220% 100%;
-  animation: ${traceFlow} 12s linear infinite;
-
-  ${({ $position }) => ({
-    first: css`top: 31%; left: 4%; width: 68%;`,
-    second: css`top: 58%; right: 0; width: 54%; animation-delay: -4s;`,
-    third: css`bottom: 19%; left: 11%; width: 47%; animation-delay: -8s;`,
-  })[$position]}
-
-  @media (prefers-reduced-motion: reduce) { animation: none; }
-`;
-
-export const SymbolField = styled(motion.div)`
-  position: absolute;
-  z-index: 1;
-  top: 9%;
-  right: -9%;
-  width: 76%;
-  aspect-ratio: 1;
-  display: grid;
-  place-items: center;
-  border-left: 1px solid rgba(108, 99, 255, 0.18);
-  background:
-    radial-gradient(circle at 52% 48%, rgba(108, 99, 255, 0.18), transparent 54%),
-    linear-gradient(90deg, rgba(145, 168, 255, 0.035), transparent);
-  clip-path: polygon(8% 0, 100% 0, 100% 100%, 0 100%, 0 8%);
-
-  img {
-    width: 76%;
-    height: 76%;
-    opacity: 0.82;
-    filter: drop-shadow(0 0 30px rgba(108, 99, 255, 0.24));
-  }
-
-  @media (max-width: ${breakpoints.tabletMax}) {
-    top: 8%;
-    right: -5%;
-    width: 86%;
-    opacity: 0.72;
-  }
-`;
-
-export const SignalPoint = styled.span<{ $position: 'one' | 'two' | 'three' }>`
-  position: absolute;
-  z-index: 4;
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: ${colors.neonBlue};
-  box-shadow: 0 0 0 4px rgba(145, 168, 255, 0.08), 0 0 16px rgba(145, 168, 255, 0.78);
-  transition: transform 300ms ease;
-
-  ${({ $position }) => ({
-    one: css`top: 30.5%; left: 25%; transform: translate3d(var(--pointer-x), var(--pointer-y), 0);`,
-    two: css`top: 57.5%; right: 19%; transform: translate3d(calc(0px - var(--pointer-x)), calc(0px - var(--pointer-y)), 0);`,
-    three: css`bottom: 18.5%; left: 42%; transform: translate3d(var(--pointer-y), calc(0px - var(--pointer-x)), 0);`,
-  })[$position]}
-
-  @media (max-width: ${breakpoints.signaturePointerMax}) { transition: none; }
-  @media (prefers-reduced-motion: reduce) { transform: none; transition: none; }
-`;
-
-export const EdgeNotation = styled.div`
-  position: absolute;
-  z-index: 3;
-  right: 4%;
-  bottom: 4%;
-  display: flex;
-  gap: 5px;
-
-  i {
-    display: block;
-    width: ${homepageTokens.signature.notationWidth};
-    height: 3px;
-    background: rgba(185, 192, 204, 0.18);
-  }
-
-  i:nth-child(2) { width: 9px; background: ${colors.highlight}; }
-  i:nth-child(3) { width: 5px; background: ${colors.neonBlue}; }
+  font-weight: 480;
+  line-height: 1.4;
 `;
