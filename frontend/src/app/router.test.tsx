@@ -78,6 +78,52 @@ describe('public routes', () => {
     expect(screen.getAllByRole('heading', { level: 1 })).toHaveLength(1);
   });
 
+  it('renders Echo inline gallery groups from typed media without videos or other case assets', () => {
+    renderAt('/portfolio/echo-cosmic-energia');
+
+    const gallery = within(screen.getByRole('main')).getByRole('region', { name: 'O trabalho em uso.' });
+    expect(within(gallery).getByText('DESKTOP')).toBeInTheDocument();
+    expect(within(gallery).getByText('MOBILE')).toBeInTheDocument();
+    expect(within(gallery).getAllByRole('img')).toHaveLength(6);
+    expect(within(gallery).getAllByRole('img').map((image) => image.getAttribute('src'))).toEqual([
+      '/projects/echo-cosmic-energia/echo-social.png',
+      '/projects/echo-cosmic-energia/echo-store-desktop.png',
+      '/projects/echo-cosmic-energia/echo-articles-desktop.png',
+      '/projects/echo-cosmic-energia/echo-business-services-desktop.png',
+      '/projects/echo-cosmic-energia/echo-home-mobile.png',
+      '/projects/echo-cosmic-energia/echo-links-mobile.png',
+    ]);
+    expect(within(gallery).getAllByRole('img').every((image) => image.getAttribute('alt'))).toBe(true);
+    gallery.querySelectorAll('figure').forEach((figure) => {
+      const visual = figure.querySelector(':scope > span, :scope > img');
+      const caption = figure.querySelector(':scope > figcaption');
+      expect(visual).toBeInTheDocument();
+      expect(caption).toBeInTheDocument();
+      expect(visual?.contains(caption)).toBe(false);
+      expect(caption?.textContent?.trim()).not.toBe('');
+    });
+    expect(gallery.querySelectorAll('[data-project-browser-frame]')).toHaveLength(4);
+    expect(gallery.querySelectorAll('[data-project-phone-frame]')).toHaveLength(2);
+    expect(gallery.querySelector('[data-gallery-group="GERAL"]')).not.toBeInTheDocument();
+    expect(gallery.querySelector('[data-gallery-group="DESKTOP"] img[src$="echo-social.png"]')).toBeInTheDocument();
+    expect(gallery.querySelector('[data-gallery-group="MOBILE"] img[src$="echo-social.png"]')).not.toBeInTheDocument();
+    expect(gallery.querySelectorAll('figure p')).toHaveLength(0);
+    expect(screen.getByRole('img', { name: 'Página inicial da Echo Cosmic Energia para compartilhamento social.' })).toHaveAttribute('src', '/projects/echo-cosmic-energia/echo-social.png');
+    expect(screen.queryByRole('link', { name: 'Mídia principal de EchoCosmicEnergia' })).not.toBeInTheDocument();
+    expect(screen.getByRole('main').querySelector('video')).not.toBeInTheDocument();
+  });
+
+  it('renders the shared case gallery for all public project routes', () => {
+    ['axium', 'dev-schedule', 'green-tweet', 'a-alma-no-comando', 'alicerce-da-alma'].forEach((slug) => {
+      const { unmount } = renderAt(`/portfolio/${slug}`);
+      const gallery = within(screen.getByRole('main')).getByRole('region', { name: 'O trabalho em uso.' });
+      expect(within(gallery).getByText('DESKTOP')).toBeInTheDocument();
+      expect(within(gallery).getByText('MOBILE')).toBeInTheDocument();
+      expect(within(gallery).getAllByRole('img').length).toBeGreaterThan(0);
+      unmount();
+    });
+  });
+
   it('resets immediately when navigating to a new route without a hash', async () => {
     const user = userEvent.setup();
     renderAt('/');

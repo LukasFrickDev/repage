@@ -20,37 +20,15 @@ export const Intro = styled.header`
   background: ${colors.ink};
   color: ${colors.paper};
 
-  &::before {
-    content: '';
-    position: absolute;
-    z-index: -1;
-    right: -6rem;
-    bottom: -12rem;
-    width: min(38rem, 50vw);
-    aspect-ratio: 1;
-    border: 1px solid rgba(145, 168, 255, 0.16);
-    border-radius: 50%;
-    box-shadow: 0 0 0 5rem rgba(108, 99, 255, 0.025), 0 0 0 10rem rgba(108, 99, 255, 0.018);
-  }
-
   @media (max-width: ${breakpoints.tabletMax}) {
     min-height: 24rem;
     padding-top: 6.5rem;
   }
 `;
 
-export const IntroSignal = styled.span`
-  position: absolute;
-  top: 0;
-  left: ${layout.containerPaddingInline};
-  width: min(16rem, 28vw);
-  height: 5.5rem;
-  border-left: 1px solid rgba(145, 168, 255, 0.35);
-  border-bottom: 1px solid rgba(145, 168, 255, 0.18);
-  opacity: 0.72;
-`;
-
 export const IntroInner = styled.div`
+  position: relative;
+  z-index: 1;
   width: ${layout.containerWidth};
   margin-inline: auto;
 `;

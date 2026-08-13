@@ -7,6 +7,7 @@ import { findReadinessBySlug } from '../../data/projects/projectReadiness';
 import { ProjectBrowserFrame } from '../../components/ProjectBrowserFrame';
 import { ProjectCaseLink } from '../../components/ProjectCaseLink';
 import { PrimaryCta } from '../../components/PrimaryCta';
+import { EditorialInkBackdrop } from '../../components/EditorialInkBackdrop';
 import { useTitleReveal } from '../../components/TitleReveal/useTitleReveal';
 import { useEditorialReveal } from '../../components/EditorialMotion/useEditorialReveal';
 import { editorialMotion } from '../../styles/editorialMotion';
@@ -28,7 +29,7 @@ export function PortfolioPage() {
   return (
     <S.Page aria-labelledby="portfolio-title">
       <S.Intro>
-        <S.IntroSignal aria-hidden="true" />
+        <EditorialInkBackdrop />
         <S.IntroInner ref={introRef}>
           <S.Eyebrow style={titleReveal.prefersReducedMotion ? undefined : titleReveal.eyebrow}>Portfólio</S.Eyebrow>
           <S.Title id="portfolio-title" data-route-heading tabIndex={-1}>

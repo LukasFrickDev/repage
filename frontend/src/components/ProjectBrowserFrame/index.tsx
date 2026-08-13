@@ -8,20 +8,23 @@ type ProjectBrowserFrameProps = {
   height: number;
   loading?: 'eager' | 'lazy';
   listing?: boolean;
+  gallery?: boolean;
 };
 
-const Frame = styled.span<{ $listing: boolean }>`
+const Frame = styled.span<{ $listing: boolean; $gallery: boolean }>`
   position: ${({ $listing }) => ($listing ? 'relative' : 'absolute')};
   z-index: 1;
   ${({ $listing }) => ($listing ? 'width: 100%;' : `left: calc(50% - ${homepageTokens.projects.mediaCompositionShift});`)}
-  ${({ $listing }) => ($listing ? `aspect-ratio: ${homepageTokens.projects.browser.aspectRatio};` : `top: 50%; height: ${homepageTokens.projects.browser.height}; max-width: ${homepageTokens.projects.browser.maxWidth}; aspect-ratio: ${homepageTokens.projects.browser.aspectRatio};`)}
+  ${({ $listing, $gallery }) => ($listing
+    ? ($gallery ? 'aspect-ratio: auto;' : `aspect-ratio: ${homepageTokens.projects.browser.aspectRatio};`)
+    : `top: 50%; height: ${homepageTokens.projects.browser.height}; max-width: ${homepageTokens.projects.browser.maxWidth}; aspect-ratio: ${homepageTokens.projects.browser.aspectRatio};`)}
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  background: ${colors.inkDeep};
-  border: 1px solid rgba(245, 242, 236, 0.18);
-  border-radius: clamp(0.55rem, 0.9vw, 0.85rem);
-  box-shadow: 0 2rem 5rem rgba(4, 8, 17, 0.34);
+  background: ${({ $gallery }) => ($gallery ? '#101827' : colors.inkDeep)};
+  border: ${({ $gallery }) => ($gallery ? '1px solid rgba(16, 24, 39, 0.72)' : '1px solid rgba(245, 242, 236, 0.18)')};
+  border-radius: ${({ $gallery }) => ($gallery ? 'clamp(0.7rem, 1vw, 1rem)' : 'clamp(0.55rem, 0.9vw, 0.85rem)')};
+  box-shadow: ${({ $gallery }) => ($gallery ? '0 1.5rem 3.75rem rgba(4, 8, 17, 0.28), 0 0 0 0.2rem rgba(16, 24, 39, 0.08)' : '0 2rem 5rem rgba(4, 8, 17, 0.34)')};
   ${({ $listing }) => ($listing ? '' : 'transform: translate(-50%, -50%);')}
   transition: transform 360ms ease;
 
@@ -36,15 +39,15 @@ const Frame = styled.span<{ $listing: boolean }>`
   @media (prefers-reduced-motion: reduce) { transition: none; }
 `;
 
-const Bar = styled.span`
+const Bar = styled.span<{ $gallery: boolean }>`
   flex: 0 0 clamp(1.85rem, 2.6vw, 2.35rem);
   padding-inline: clamp(0.55rem, 1vw, 0.85rem);
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
   gap: 0.75rem;
-  background: ${colors.inkHeader};
-  border-bottom: 1px solid rgba(245, 242, 236, 0.12);
+  background: ${({ $gallery }) => ($gallery ? '#202b3d' : colors.inkHeader)};
+  border-bottom: 1px solid ${({ $gallery }) => ($gallery ? 'rgba(245, 242, 236, 0.18)' : 'rgba(245, 242, 236, 0.12)')};
 
   @media (max-width: ${breakpoints.tabletMax}) { flex-basis: 1.5rem; }
 `;
@@ -73,36 +76,37 @@ const AddressHint = styled.span`
   grid-column: 2;
   justify-self: center;
   width: min(52%, 18rem);
-  height: 0.48rem;
-  border: 1px solid rgba(245, 242, 236, 0.12);
+  height: 0.62rem;
+  border: 1px solid rgba(245, 242, 236, 0.18);
   border-radius: 999px;
-  background: rgba(245, 242, 236, 0.035);
+  background: rgba(245, 242, 236, 0.09);
 `;
 
-const Viewport = styled.span`
+const Viewport = styled.span<{ $gallery: boolean }>`
   min-height: 0;
-  flex: 1;
+  flex: ${({ $gallery }) => ($gallery ? '0 0 auto' : '1')};
   display: block;
   overflow: hidden;
+  ${({ $gallery }) => ($gallery ? 'aspect-ratio: 16 / 10;' : '')}
 `;
 
-const Image = styled.img`
+const Image = styled.img<{ $gallery: boolean }>`
   width: 100%;
-  height: 100%;
+  height: ${({ $gallery }) => ($gallery ? '100%' : '100%')};
   display: block;
   object-fit: cover;
-  object-position: center;
+  object-position: ${({ $gallery }) => ($gallery ? 'top center' : 'center')};
 `;
 
-export function ProjectBrowserFrame({ listing = false, ...imageProps }: ProjectBrowserFrameProps) {
+export function ProjectBrowserFrame({ listing = false, gallery = false, ...imageProps }: ProjectBrowserFrameProps) {
   return (
-    <Frame $listing={listing}>
-      <Bar aria-hidden="true">
+    <Frame $listing={listing} $gallery={gallery} data-project-browser-frame={gallery ? '' : undefined}>
+      <Bar $gallery={gallery} aria-hidden="true">
         <WindowControls><i /><i /><i /></WindowControls>
         <AddressHint />
       </Bar>
-      <Viewport>
-        <Image {...imageProps} />
+      <Viewport $gallery={gallery}>
+        <Image $gallery={gallery} {...imageProps} />
       </Viewport>
     </Frame>
   );

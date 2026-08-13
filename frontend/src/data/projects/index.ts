@@ -13,6 +13,7 @@ export type ProjectPublicationStatus = 'draft' | 'published';
 export const PROJECT_TYPES = [
   'Site institucional · E-commerce',
   'Site institucional',
+  'Site institucional · Landing pages',
   'Aplicação web · Full stack',
   'Landing page',
 ] as const;
@@ -36,8 +37,8 @@ type ProjectBase = {
   nature: ProjectNature;
   projectType: ProjectType;
   publicationStatus: ProjectPublicationStatus;
-  portfolioOrder: 1 | 2 | 3 | 4 | 5 | 6;
-  featuredOrder?: 1 | 2 | 3;
+  portfolioOrder: number;
+  featuredOrder?: number;
   summary: string;
   overview: string;
   context: string;
@@ -81,7 +82,7 @@ export const projects = [
     publicUrl: 'https://echocosmicenergia.com.br/',
     media: {
       cover: '/projects/echo-cosmic-energia/echo-social.png',
-      gallery: ['/projects/echo-cosmic-energia/echo-store-desktop.png', '/projects/echo-cosmic-energia/echo-articles-desktop.png', '/projects/echo-cosmic-energia/echo-business-services-desktop.png', '/projects/echo-cosmic-energia/echo-home-mobile.png', '/projects/echo-cosmic-energia/echo-links-mobile.png'],
+      gallery: ['/projects/echo-cosmic-energia/echo-social.png', '/projects/echo-cosmic-energia/echo-store-desktop.png', '/projects/echo-cosmic-energia/echo-articles-desktop.png', '/projects/echo-cosmic-energia/echo-business-services-desktop.png', '/projects/echo-cosmic-energia/echo-home-mobile.png', '/projects/echo-cosmic-energia/echo-links-mobile.png'],
     },
     routeMetadata: { title: 'EchoCosmicEnergia — case | Repage', description: 'Case da EchoCosmicEnergia, com comércio digital, conteúdo e diferentes pontos de contato.' },
   },
@@ -89,7 +90,7 @@ export const projects = [
     title: 'Axium',
     slug: 'axium',
     nature: 'paid',
-    projectType: 'Site institucional',
+    projectType: 'Site institucional · Landing pages',
     publicationStatus: 'published',
     portfolioOrder: 2,
     featuredOrder: 2,
@@ -101,11 +102,11 @@ export const projects = [
     participation: `${sharedParticipation} O trabalho foi refinado e validado com o cliente.`,
     services: ['Estratégia', 'Estrutura', 'Direção visual/design', 'Desenvolvimento frontend'],
     capabilities: ['Experiência institucional', 'Páginas de serviços', 'Conteúdo editorial', 'Formulário', 'Registro de lead', 'Integração com RD Station', 'Analytics', 'Preparação/uso de Ads conforme evidência'],
-    technologies: [],
+    technologies: ['React', 'TypeScript', 'Styled Components'],
     publicUrl: 'https://projeto-lukasfrick-axiumdh.vercel.app/',
     media: {
       cover: '/projects/axium/axium-social.png',
-      gallery: ['/projects/axium/axium-nr01-desktop.png', '/projects/axium/axium-nr01-mobile.png', '/projects/axium/axium-blog-desktop.png', '/projects/axium/axium-blog-mobile.png', '/projects/axium/axium-home-mobile.png'],
+      gallery: ['/projects/axium/axium-social.png', '/projects/axium/axium-nr01-desktop.png', '/projects/axium/axium-nr01-mobile.png', '/projects/axium/axium-blog-desktop.png', '/projects/axium/axium-blog-mobile.png', '/projects/axium/axium-home-mobile.png'],
     },
     routeMetadata: { title: 'Axium — case | Repage', description: 'Case da Axium, com experiência institucional, serviços e conteúdo editorial responsivo.' },
   },
@@ -129,7 +130,7 @@ export const projects = [
     publicUrl: 'https://projetolukasfrick-devschedule.vercel.app/',
     media: {
       cover: '/projects/dev-schedule/devschedule-social.png',
-      gallery: ['/projects/dev-schedule/devschedule-client-services-mobile.png', '/projects/dev-schedule/devschedule-client-calendar-desktop.png', '/projects/dev-schedule/devschedule-client-calendar-mobile.png', '/projects/dev-schedule/devschedule-client-availability-desktop.png', '/projects/dev-schedule/devschedule-client-availability-mobile.png', '/projects/dev-schedule/devschedule-client-data-desktop.png', '/projects/dev-schedule/devschedule-client-data-mobile.png', '/projects/dev-schedule/devschedule-admin-dashboard-desktop.png', '/projects/dev-schedule/devschedule-admin-dashboard-mobile.png'],
+      gallery: ['/projects/dev-schedule/devschedule-social.png', '/projects/dev-schedule/devschedule-client-services-mobile.png', '/projects/dev-schedule/devschedule-client-calendar-desktop.png', '/projects/dev-schedule/devschedule-client-calendar-mobile.png', '/projects/dev-schedule/devschedule-client-availability-desktop.png', '/projects/dev-schedule/devschedule-client-availability-mobile.png', '/projects/dev-schedule/devschedule-client-data-desktop.png', '/projects/dev-schedule/devschedule-client-data-mobile.png', '/projects/dev-schedule/devschedule-admin-dashboard-desktop.png', '/projects/dev-schedule/devschedule-admin-dashboard-mobile.png'],
       videos: ['/projects/dev-schedule/videos/devschedule-client-desktop.webm', '/projects/dev-schedule/videos/devschedule-admin-desktop.webm'],
     },
     routeMetadata: { title: 'DevSchedule — case | Repage', description: 'Case do DevSchedule, desafio técnico de agendamento com fluxo público e administração demonstrativa.' },
@@ -153,7 +154,7 @@ export const projects = [
     publicUrl: 'https://greentweet.vercel.app/',
     media: {
       cover: '/projects/green-tweet/greentweet-social.png',
-      gallery: ['/projects/green-tweet/greentweet-feed-posts-mobile.png', '/projects/green-tweet/greentweet-profile-desktop.png', '/projects/green-tweet/greentweet-profile-mobile.png', '/projects/green-tweet/greentweet-notifications-desktop.png', '/projects/green-tweet/greentweet-notifications-mobile.png', '/projects/green-tweet/greentweet-demo-profile-desktop.png', '/projects/green-tweet/greentweet-demo-profile-mobile.png', '/projects/green-tweet/greentweet-comments-desktop.png', '/projects/green-tweet/greentweet-comments-mobile.png'],
+      gallery: ['/projects/green-tweet/greentweet-social.png', '/projects/green-tweet/greentweet-feed-posts-mobile.png', '/projects/green-tweet/greentweet-profile-desktop.png', '/projects/green-tweet/greentweet-profile-mobile.png', '/projects/green-tweet/greentweet-notifications-desktop.png', '/projects/green-tweet/greentweet-notifications-mobile.png', '/projects/green-tweet/greentweet-demo-profile-desktop.png', '/projects/green-tweet/greentweet-demo-profile-mobile.png', '/projects/green-tweet/greentweet-comments-desktop.png', '/projects/green-tweet/greentweet-comments-mobile.png'],
       videos: ['/projects/green-tweet/videos/greentweet-tour-desktop.webm'],
     },
     routeMetadata: { title: 'GreenTweet — case | Repage', description: 'Case do GreenTweet, projeto próprio full stack inspirado em uma rede social.' },
@@ -177,7 +178,7 @@ export const projects = [
     publicUrl: 'https://www.aalmanocomando.com.br/',
     media: {
       cover: '/projects/a-alma-no-comando/alma-social.png',
-      gallery: ['/projects/a-alma-no-comando/alma-home-mobile.png', '/projects/a-alma-no-comando/alma-method-desktop.png', '/projects/a-alma-no-comando/alma-book-desktop.png', '/projects/a-alma-no-comando/alma-manifesto-desktop.png', '/projects/a-alma-no-comando/alma-manifesto-mobile.png'],
+      gallery: ['/projects/a-alma-no-comando/alma-social.png', '/projects/a-alma-no-comando/alma-home-mobile.png', '/projects/a-alma-no-comando/alma-method-desktop.png', '/projects/a-alma-no-comando/alma-book-desktop.png', '/projects/a-alma-no-comando/alma-manifesto-desktop.png', '/projects/a-alma-no-comando/alma-manifesto-mobile.png'],
     },
     routeMetadata: { title: 'A Alma no Comando — case | Repage', description: 'Case de A Alma no Comando, landing page responsiva organizada em seções editoriais.' },
   },
@@ -196,11 +197,11 @@ export const projects = [
     participation: `${sharedParticipation} O trabalho foi refinado e validado com o cliente.`,
     services: ['Estratégia', 'Estrutura', 'Direção visual/design', 'Desenvolvimento'],
     capabilities: ['Abertura', 'Serviços', 'Diferenciais', 'Conteúdo institucional'],
-    technologies: [],
+    technologies: ['React', 'TypeScript', 'Styled Components'],
     publicUrl: 'https://www.alicercedaalma.com.br/',
     media: {
       cover: '/projects/alicerce-da-alma/alicerce-social.png',
-      gallery: ['/projects/alicerce-da-alma/alicerce-home-mobile.png', '/projects/alicerce-da-alma/alicerce-services-desktop.png', '/projects/alicerce-da-alma/alicerce-services-mobile.png', '/projects/alicerce-da-alma/alicerce-differentials-desktop.png', '/projects/alicerce-da-alma/alicerce-differentials-mobile.png'],
+      gallery: ['/projects/alicerce-da-alma/alicerce-social.png', '/projects/alicerce-da-alma/alicerce-home-mobile.png', '/projects/alicerce-da-alma/alicerce-services-desktop.png', '/projects/alicerce-da-alma/alicerce-services-mobile.png', '/projects/alicerce-da-alma/alicerce-differentials-desktop.png', '/projects/alicerce-da-alma/alicerce-differentials-mobile.png'],
     },
     routeMetadata: { title: 'Alicerce da Alma — case | Repage', description: 'Case do Alicerce da Alma, experiência institucional responsiva com serviços e diferenciais.' },
   },

@@ -11,6 +11,8 @@ export const Page = styled.section`
 export const Intro = styled.header`
   position: relative;
   z-index: 1;
+  min-height: calc(100svh - 1.25rem);
+  display: flex;
   background: ${colors.ink};
   color: ${colors.paper};
   padding: clamp(4.5rem, 7vw, 6.5rem) ${layout.containerPaddingInline} 0;
@@ -19,17 +21,41 @@ export const Intro = styled.header`
     position: absolute;
     z-index: -1;
     right: 0;
-    bottom: -2.75rem;
+    bottom: 0;
     left: 0;
     height: 2.75rem;
     content: '';
     background: linear-gradient(${colors.ink}, ${colors.inkDeep});
   }
+
+  @media (max-width: ${breakpoints.tabletMax}) {
+    min-height: 0;
+    display: block;
+  }
 `;
 
 export const IntroInner = styled.div`
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
   width: min(100%, 78rem);
   margin-inline: auto;
+`;
+
+export const IntroMain = styled.div`
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  transform: translateY(-3%);
+
+  @media (max-width: ${breakpoints.tabletMax}) {
+    flex: initial;
+    transform: none;
+  }
 `;
 
 export const BackLink = styled(Link)`
@@ -176,6 +202,89 @@ export const DeliveryColumns = styled.div`
 export const DeliveryColumn = styled.div`
   display: grid;
   gap: 2.5rem;
+`;
+
+export const Gallery = styled.section`
+  max-width: 68rem;
+  margin: 0 auto clamp(5rem, 9vw, 8rem);
+`;
+
+export const GalleryEyebrow = styled.p`
+  color: ${colors.highlight};
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+`;
+
+export const GalleryTitle = styled.h2`
+  max-width: 17ch;
+  margin-top: 0.75rem;
+  font-family: ${fonts.heading};
+  font-size: clamp(2rem, 3.5vw, 4rem);
+  font-weight: 620;
+  letter-spacing: -0.065em;
+  line-height: 0.96;
+`;
+
+export const GalleryGroup = styled(motion.div)`
+  margin-top: clamp(2.5rem, 5vw, 4.5rem);
+`;
+
+export const GalleryLabel = styled.p`
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: ${colors.highlight};
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+`;
+
+export const GalleryGrid = styled.div<{ $variant: 'desktop' | 'mobile' }>`
+  margin-top: 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: ${({ $variant }) => ($variant === 'mobile' ? 'flex-start' : 'center')};
+  gap: ${({ $variant }) => ($variant === 'mobile' ? 'clamp(1rem, 3vw, 2rem)' : 'clamp(1.5rem, 3vw, 3rem)')};
+  padding-inline: ${({ $variant }) => ($variant === 'mobile' ? 'clamp(1rem, 5vw, 3rem)' : '0')};
+  @media (max-width: ${breakpoints.tabletMax}) {
+    gap: ${({ $variant }) => ($variant === 'mobile' ? '1rem' : '2.5rem')};
+    flex-direction: column;
+    align-items: center;
+    padding-inline: 0;
+  }
+`;
+
+export const GalleryFigure = styled.figure<{ $variant: 'desktop' | 'mobile' }>`
+  min-width: 0;
+  margin: 0;
+  flex: ${({ $variant }) => ($variant === 'mobile' ? '0 1 clamp(7rem, 18%, 12rem)' : '0 1 calc(50% - 1.5rem)')};
+  max-width: ${({ $variant }) => ($variant === 'mobile' ? '12rem' : '32rem')};
+  @media (max-width: ${breakpoints.tabletMax}) {
+    flex-basis: auto;
+    width: ${({ $variant }) => ($variant === 'mobile' ? 'min(100%, 11rem)' : '100%')};
+    max-width: ${({ $variant }) => ($variant === 'mobile' ? '12rem' : 'none')};
+  }
+`;
+
+export const GalleryImage = styled.img`
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: clamp(0.5rem, 0.8vw, 0.75rem);
+  box-shadow: 0 1.5rem 3rem rgba(16, 24, 39, 0.12);
+  transition: transform 240ms ease, box-shadow 240ms ease;
+  figure:hover &, figure:focus-within & { transform: scale(1.008); box-shadow: 0 1.75rem 3.25rem rgba(16, 24, 39, 0.16); }
+  @media (prefers-reduced-motion: reduce) { transition: none; }
+`;
+
+export const GalleryCaption = styled.figcaption`
+  margin-top: 0.75rem;
+  color: ${colors.graphite};
+  font-size: 0.78rem;
+  line-height: 1.45;
 `;
 
 export const CopyBlock = styled.div`

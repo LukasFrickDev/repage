@@ -1,11 +1,12 @@
-import { ArrowLeft, ArrowRight, ExternalLink } from 'lucide-react';
-import { useMotionValueEvent } from 'framer-motion';
+import { ArrowLeft, ArrowRight, ExternalLink, Monitor, Smartphone } from 'lucide-react';
 import { Link, useParams } from 'react-router-dom';
-import { useRef, useState } from 'react';
+import { useRef } from 'react';
 import type { ReactNode } from 'react';
 import { getCaseMetadata, routeMetadata, useRouteMetadata } from '../../app/routeMetadata';
 import { PrimaryCta } from '../../components/PrimaryCta';
+import { EditorialInkBackdrop } from '../../components/EditorialInkBackdrop';
 import { ProjectBrowserFrame } from '../../components/ProjectBrowserFrame';
+import { ProjectPhoneFrame } from '../../components/ProjectPhoneFrame';
 import { useEditorialReveal } from '../../components/EditorialMotion/useEditorialReveal';
 import { useTitleReveal } from '../../components/TitleReveal/useTitleReveal';
 import { findPublicProjectNeighbors, findPublicProjectBySlug } from '../../data/projects/publication';
@@ -38,19 +39,18 @@ export function CasePage() {
     throw new Error(`Case público sem cover no manifesto: ${project.slug}.`);
   }
 
-  return <CaseExperience key={project.slug} project={project} cover={cover} neighbors={neighbors} />;
+  return <CaseExperience key={project.slug} project={project} neighbors={neighbors} />;
 }
 
 type CaseExperienceProps = {
   project: NonNullable<ReturnType<typeof findPublicProjectBySlug>>;
-  cover: NonNullable<ReturnType<typeof findReadinessBySlug>>['assets'][number];
   neighbors: ReturnType<typeof findPublicProjectNeighbors>;
 };
 
-function CaseExperience({ project, cover, neighbors }: CaseExperienceProps) {
+function CaseExperience({ project, neighbors }: CaseExperienceProps) {
   return (
     <S.Page>
-      <CaseIntro project={project} cover={cover} />
+      <CaseIntro project={project} />
       <S.Body>
         <CaseChapter eyebrow="Visão e problema" title="O que precisava ser organizado.">
           <S.FeaturedCopy>{project.overview}</S.FeaturedCopy>
@@ -67,6 +67,8 @@ function CaseExperience({ project, cover, neighbors }: CaseExperienceProps) {
             <ListBlock title="Serviços e capacidades" items={project.services} bordered={false} />
           </S.CopyPair>
         </CaseChapter>
+
+        <CaseGallery project={project} />
 
         <CaseChapter eyebrow="O que foi entregue" title="Uma experiência construída para o contexto." compactAfter>
           <S.DeliveryColumns>
@@ -86,61 +88,101 @@ function CaseExperience({ project, cover, neighbors }: CaseExperienceProps) {
   );
 }
 
-type CaseIntroProps = {
+type CaseGalleryProps = {
   project: NonNullable<ReturnType<typeof findPublicProjectBySlug>>;
-  cover: NonNullable<ReturnType<typeof findReadinessBySlug>>['assets'][number];
 };
 
-function CaseIntro({ project, cover }: CaseIntroProps) {
-  const introRef = useRef<HTMLDivElement>(null);
-  const mediaRef = useRef<HTMLAnchorElement>(null);
-  const reveal = useTitleReveal(introRef, { trigger: 'mount' });
-  const [introTextReady, setIntroTextReady] = useState(reveal.prefersReducedMotion);
-  const mediaReveal = useEditorialReveal(mediaRef, 'media', { trigger: 'route', start: introTextReady });
+function CaseGallery({ project }: CaseGalleryProps) {
+  const readiness = findReadinessBySlug(project.slug);
+  const assets = project.media.gallery.map((path) => readiness?.assets.find((asset) => asset.path === path));
 
-  useMotionValueEvent(reveal.description.opacity, 'change', (value) => {
-    if (value >= 0.99) setIntroTextReady(true);
-  });
+  if (assets.some((asset) => !asset || asset.kind !== 'screenshot')) {
+    throw new Error(`Galeria pública inválida no manifesto: ${project.slug}.`);
+  }
+
+  const galleryAssets = assets as NonNullable<typeof assets[number]>[];
+  const desktopAssets = galleryAssets.filter((asset) => asset.roles.includes('desktop'));
+  const mobileAssets = galleryAssets.filter((asset) => asset.roles.includes('mobile'));
+
+  if (!desktopAssets.length && !mobileAssets.length) return null;
+
+  return (
+    <S.Gallery aria-labelledby="case-gallery-title">
+      <S.GalleryEyebrow>Prova visual</S.GalleryEyebrow>
+      <S.GalleryTitle id="case-gallery-title">O trabalho em uso.</S.GalleryTitle>
+      {desktopAssets.length ? <GalleryGroup label="DESKTOP" assets={desktopAssets} /> : null}
+      {mobileAssets.length ? <GalleryGroup label="MOBILE" assets={mobileAssets} /> : null}
+    </S.Gallery>
+  );
+}
+
+function GalleryGroup({ label, assets }: { label: 'DESKTOP' | 'MOBILE'; assets: readonly NonNullable<ReturnType<typeof findReadinessBySlug>>['assets'][number][] }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const reveal = useEditorialReveal(ref);
+
+  return (
+    <S.GalleryGroup data-gallery-group={label} ref={ref} style={reveal.prefersReducedMotion ? undefined : reveal.style}>
+      <S.GalleryLabel>
+        {label === 'DESKTOP' ? <Monitor size={14} strokeWidth={1.8} aria-hidden="true" /> : <Smartphone size={14} strokeWidth={1.8} aria-hidden="true" />}
+        {label}
+      </S.GalleryLabel>
+      <S.GalleryGrid $variant={label === 'MOBILE' ? 'mobile' : 'desktop'}>
+        {assets.map((asset) => (
+          <S.GalleryFigure key={asset.path} $variant={label === 'MOBILE' ? 'mobile' : 'desktop'}>
+            {asset.roles.includes('mobile') ? (
+              <ProjectPhoneFrame src={asset.path} alt={asset.alt} width={asset.width} height={asset.height} />
+            ) : (
+              <ProjectBrowserFrame src={asset.path} alt={asset.alt} width={asset.width} height={asset.height} listing gallery />
+            )}
+            <S.GalleryCaption>{asset.description}</S.GalleryCaption>
+          </S.GalleryFigure>
+        ))}
+      </S.GalleryGrid>
+    </S.GalleryGroup>
+  );
+}
+
+type CaseIntroProps = {
+  project: NonNullable<ReturnType<typeof findPublicProjectBySlug>>;
+};
+
+function CaseIntro({ project }: CaseIntroProps) {
+  const introRef = useRef<HTMLDivElement>(null);
+  const reveal = useTitleReveal(introRef, { trigger: 'mount' });
 
   return (
     <S.Intro>
+      <EditorialInkBackdrop compact />
       <S.IntroInner ref={introRef}>
         <S.BackLink to="/portfolio"><ArrowLeft size={16} aria-hidden="true" /> Voltar ao portfólio</S.BackLink>
-        <S.IntroMeta style={reveal.prefersReducedMotion ? undefined : reveal.eyebrow}>
-          <span>Case</span>
-          <span>{project.projectType}</span>
-        </S.IntroMeta>
-        <S.Title id="case-title" data-route-heading tabIndex={-1}>
-          <S.TitlePole style={reveal.prefersReducedMotion ? undefined : reveal.first}>
-            <S.TitlePoleText style={reveal.prefersReducedMotion ? undefined : reveal.firstText}>{project.title}</S.TitlePoleText>
-          </S.TitlePole>
-        </S.Title>
-        <S.Lead style={reveal.prefersReducedMotion ? undefined : reveal.description}>{project.summary}</S.Lead>
-        <S.Participation style={reveal.prefersReducedMotion ? undefined : reveal.description}>{project.participation}</S.Participation>
-        {project.publicUrl ? (
-          <S.ExternalLink
-            style={reveal.prefersReducedMotion ? undefined : reveal.description}
-            href={project.publicUrl}
-            target="_blank"
-            rel="noreferrer"
-          >
-            Ver projeto publicado <ExternalLink size={16} aria-hidden="true" />
-          </S.ExternalLink>
-        ) : null}
-        <S.CoverLink
-          ref={mediaRef}
-          style={mediaReveal.prefersReducedMotion ? undefined : {
-            ...mediaReveal.style,
-          }}
-          to={`/portfolio/${project.slug}`}
-          aria-label={`Mídia principal de ${project.title}`}
-        >
-          <ProjectBrowserFrame src={cover.path} alt={cover.alt} width={cover.width} height={cover.height} listing />
-        </S.CoverLink>
+        <S.IntroMain>
+          <S.IntroMeta style={reveal.prefersReducedMotion ? undefined : reveal.eyebrow}>
+            <span>Case</span>
+            <span>{project.projectType}</span>
+          </S.IntroMeta>
+          <S.Title id="case-title" data-route-heading tabIndex={-1}>
+            <S.TitlePole style={reveal.prefersReducedMotion ? undefined : reveal.first}>
+              <S.TitlePoleText style={reveal.prefersReducedMotion ? undefined : reveal.firstText}>{project.title}</S.TitlePoleText>
+            </S.TitlePole>
+          </S.Title>
+          <S.Lead style={reveal.prefersReducedMotion ? undefined : reveal.description}>{project.summary}</S.Lead>
+          <S.Participation style={reveal.prefersReducedMotion ? undefined : reveal.description}>{project.participation}</S.Participation>
+          {project.publicUrl ? (
+            <S.ExternalLink
+              style={reveal.prefersReducedMotion ? undefined : reveal.description}
+              href={project.publicUrl}
+              target="_blank"
+              rel="noreferrer"
+            >
+              Ver projeto publicado <ExternalLink size={16} aria-hidden="true" />
+            </S.ExternalLink>
+          ) : null}
+        </S.IntroMain>
       </S.IntroInner>
     </S.Intro>
   );
 }
+
 
 function CaseChapter({ eyebrow, title, children, compactAfter = false }: { eyebrow: string; title: string; children: ReactNode; compactAfter?: boolean }) {
   const chapterRef = useRef<HTMLElement>(null);

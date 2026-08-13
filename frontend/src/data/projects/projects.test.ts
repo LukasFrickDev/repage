@@ -29,7 +29,7 @@ describe('project data', () => {
     expect(listProjects().map((project) => project.portfolioOrder)).toEqual([1, 2, 3, 4, 5, 6]);
     expect(listProjects().map((project) => project.projectType)).toEqual([
       'Site institucional · E-commerce',
-      'Site institucional',
+      'Site institucional · Landing pages',
       'Aplicação web · Full stack',
       'Aplicação web · Full stack',
       'Landing page',
@@ -92,6 +92,28 @@ describe('project data', () => {
       expect(cover?.width).toBeGreaterThan(0);
       expect(cover?.height).toBeGreaterThan(0);
     });
+  });
+
+  it('resolves every selected case gallery asset from the matching readiness manifest', () => {
+    listPublicProjects().forEach((project) => {
+      const readiness = projectReadinessManifest.find(({ slug }) => slug === project.slug);
+      const assets = project.media.gallery.map((path) => readiness?.assets.find((asset) => asset.path === path));
+
+      expect(assets).toHaveLength(project.media.gallery.length);
+      assets.forEach((asset) => {
+        expect(asset?.kind).toBe('screenshot');
+        if (asset?.path === project.media.cover) expect(asset.roles).toContain('social');
+        expect(asset?.alt.trim()).not.toBe('');
+        expect(asset?.width).toBeGreaterThan(0);
+        expect(asset?.height).toBeGreaterThan(0);
+      });
+    });
+  });
+
+  it('fills the two confirmed technology gaps without inferring Vite', () => {
+    expect(findProjectBySlug('axium')?.technologies).toEqual(['React', 'TypeScript', 'Styled Components']);
+    expect(findProjectBySlug('alicerce-da-alma')?.technologies).toEqual(['React', 'TypeScript', 'Styled Components']);
+    expect(findProjectBySlug('axium')?.technologies).not.toContain('Vite');
   });
 
   it('rejects malformed public URLs even when they start with https://', () => {

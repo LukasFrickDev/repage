@@ -4,7 +4,7 @@ import { findReadinessBySlug, projectReadinessManifest } from './projectReadines
 import type { ProjectReadiness } from './projectReadiness';
 
 const REQUIRED_CONTENT_FIELDS = ['summary', 'overview', 'context', 'challenge', 'solution', 'participation'] as const;
-const VALID_PORTFOLIO_ORDERS = [1, 2, 3, 4, 5, 6] as const;
+const isPositiveOrder = (value: number): boolean => Number.isInteger(value) && value > 0;
 
 export function getProjectPublicabilityErrors(
   project: Project,
@@ -29,9 +29,10 @@ export function getProjectPublicabilityErrors(
   if (!project.media.cover) errors.push('Cover ausente.');
   if (!project.media.gallery.length) errors.push('Galeria ausente.');
   if (!project.routeMetadata.title.trim() || !project.routeMetadata.description.trim()) errors.push('Metadados básicos ausentes.');
-  if (!VALID_PORTFOLIO_ORDERS.includes(project.portfolioOrder)) errors.push('portfolioOrder inválida.');
+  if (!isPositiveOrder(project.portfolioOrder)) errors.push('portfolioOrder inválida.');
   if (duplicateSlugs) errors.push('Slug duplicado.');
   if (duplicateOrders) errors.push('portfolioOrder duplicada.');
+  if (project.featuredOrder !== undefined && !isPositiveOrder(project.featuredOrder)) errors.push('featuredOrder inválida.');
   if (!readiness) {
     errors.push('Manifesto de prontidão ausente.');
     return errors;
