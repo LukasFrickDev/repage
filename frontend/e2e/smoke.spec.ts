@@ -106,20 +106,25 @@ test('homepage remains usable with reduced motion and the mobile menu', async ({
   expect(issues).toEqual([]);
 });
 
-test('temporary portfolio routes remain noindex without publishing a final case', async ({ page }) => {
+test('public routes expose the expected indexing metadata', async ({ page }) => {
   const issues = collectBrowserIssues(page);
 
   for (const route of [
-    { path: '/portfolio', heading: 'Projetos em preparação.' },
-    { path: '/portfolio/axium', heading: 'Axium' },
-    { path: '/privacidade', heading: 'Política de Privacidade em preparação.' },
-    { path: '/cookies', heading: 'Política de Cookies em preparação.' },
-    { path: '/rota-inexistente', heading: 'Página não encontrada.' },
+    { path: '/portfolio', heading: 'Projetos reais para contextos diferentes.', robots: 'index, follow' },
+    { path: '/portfolio/axium', heading: 'Axium', robots: 'index, follow' },
+    { path: '/portfolio/echo-cosmic-energia', heading: 'EchoCosmicEnergia', robots: 'index, follow' },
+    { path: '/portfolio/dev-schedule', heading: 'DevSchedule', robots: 'index, follow' },
+    { path: '/portfolio/green-tweet', heading: 'GreenTweet', robots: 'index, follow' },
+    { path: '/portfolio/a-alma-no-comando', heading: 'A Alma no Comando', robots: 'index, follow' },
+    { path: '/portfolio/alicerce-da-alma', heading: 'Alicerce da Alma', robots: 'index, follow' },
+    { path: '/privacidade', heading: 'Política de Privacidade em preparação.', robots: 'noindex, nofollow' },
+    { path: '/cookies', heading: 'Política de Cookies em preparação.', robots: 'noindex, nofollow' },
+    { path: '/rota-inexistente', heading: 'Página não encontrada.', robots: 'noindex, nofollow' },
   ]) {
     await page.goto(route.path);
 
-    await expect(page.getByRole('heading', { level: 1 })).toHaveText(route.heading);
-    await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', 'noindex, nofollow');
+    await expect(page.getByRole('heading', { level: 1 })).toHaveAccessibleName(route.heading);
+    await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', route.robots);
   }
 
   expect(issues).toEqual([]);
