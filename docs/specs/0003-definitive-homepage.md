@@ -1,6 +1,6 @@
 # 0003 — Homepage definitiva
 
-* **Status:** in_progress
+* **Status:** implemented
 * **Responsável:** Lukas Frick
 * **Data:** 7 de agosto de 2026
 * **Última revisão:** 12 de agosto de 2026
@@ -14,17 +14,17 @@
 
 As specs 0001 e 0002 estão implementadas e integradas à `main`.
 
-A branch `feat/definitive-homepage` contém a implementação em andamento da homepage definitiva. A primeira passagem da 0003 consolidou conteúdo real, fonte tipada dos destaques, mídias da 0002, componentes, responsividade e testes, mas a revisão humana concluiu que a direção visual ainda não representava suficientemente a Repage.
+A branch `feat/definitive-homepage` contém a implementação final da homepage definitiva. A entrega consolidou conteúdo real, fonte tipada dos destaques, mídias da 0002, componentes, responsividade, movimento e testes, seguida de aprovação visual humana da homepage completa.
 
 A revisão visual posterior avançou por checkpoints, preservando arquitetura, conteúdo válido, mídia aprovada e trabalho técnico existente. Até esta revisão documental, Hero, Projetos selecionados, Serviços, Suporte e evolução e Proposta de valor e diferenciais já receberam aprovação visual humana como direção e devem ser tratados como congelados durante a continuação da spec, salvo regressão, incompatibilidade técnica ou nova instrução explícita.
 
-Esta revisão da spec:
+Esta revisão final da spec:
 
 * reconcilia o documento com o estado visual já aprovado;
 * substitui orientações anteriores de composição que foram superadas durante a implementação;
 * preserva Produto, Arquitetura, Design System, specs 0001/0002 e mídia já aprovada;
-* mantém Processo, Sobre e Contato ainda abertos para refinamento;
-* não antecipa portfólio final, cases, formulário, backend, analytics, SEO completo ou deploy.
+* registra Processo, Sobre, Contato e Footer conforme implementados;
+* mantém fora de escopo desta entrega o portfólio final, cases, formulário funcional, backend, analytics, SEO completo e deploy.
 
 ## 2. Objetivo
 
@@ -102,18 +102,9 @@ Essas áreas não devem ser redesenhadas novamente durante a continuação da 00
 * requisito novo;
 * instrução explícita de Lukas.
 
-### 4.2 Ainda pendente de revisão visual definitiva
+### 4.2 Resultado final aprovado
 
-Continuam abertas:
-
-* Processo;
-* Sobre;
-* Contato;
-* integração e ritmo final entre todas as seções;
-* revisão final de responsividade;
-* revisão final de acessibilidade;
-* validações técnicas completas;
-* revisão humana final da homepage completa.
+Processo, Sobre, Contato, Footer, integração entre capítulos, responsividade, acessibilidade e ritmo final foram revisados e aprovados visualmente. A homepage completa recebeu validação humana independente das validações automatizadas.
 
 ### 4.3 Estado técnico
 
@@ -124,7 +115,7 @@ Preservar a base técnica existente quando saudável.
 * testes automatizados já existem e devem ser ajustados quando a implementação final exigir;
 * Playwright Test local é a ferramenta preferencial para QA reproduzível;
 * indisponibilidade de navegador MCP não invalida Playwright Test local;
-* validação visual humana continua obrigatória;
+* validação visual humana foi concluída em desktop e mobile;
 * Instrument Sans permanece a família principal;
 * nenhuma validação histórica substitui a rodada final de lint, typecheck, testes, build, E2E e diff.
 
@@ -545,7 +536,7 @@ A intro pode usar aproximadamente uma viewport útil e track curto suficiente pa
 
 `/projects/a-alma-no-comando/alma-social.png`
 
-A mídia funciona como evidência do tipo de entrega, não como segundo portfólio.
+A mídia desktop/horizontal é a fonte principal compartilhada do serviço; no mobile, o recorte e a escala se adaptam sem trocar a natureza da composição. A mídia funciona como evidência do tipo de entrega, não como segundo portfólio.
 
 #### Sites institucionais
 
@@ -557,13 +548,9 @@ A mídia funciona como evidência do tipo de entrega, não como segundo portfól
 
 > Apresentação da marca · serviços · conteúdo e contato
 
-**Mídia desktop**
+**Mídia desktop/horizontal**
 
 `/projects/axium/axium-social.png`
-
-**Mídia mobile**
-
-`/projects/axium/axium-home-mobile.png`
 
 A escolha deve comunicar estrutura institucional, navegação, marca e organização de conteúdo.
 
@@ -577,13 +564,9 @@ A escolha deve comunicar estrutura institucional, navegação, marca e organiza�
 
 > E-commerce · áreas restritas · agendamentos e integrações
 
-**Mídia desktop**
+**Mídia desktop/horizontal**
 
 `/projects/dev-schedule/devschedule-admin-dashboard-desktop.png`
-
-**Mídia mobile**
-
-`/projects/dev-schedule/devschedule-admin-dashboard-mobile.png`
 
 A oferta deve deixar clara atuação além de páginas e sites, sem prometer capacidade irrestrita para qualquer sistema ou escala.
 
@@ -940,11 +923,12 @@ Evitar timeline genérica apenas:
 
 Conforme a rolagem avança, o trecho percorrido pode ganhar destaque e a etapa atual assumir maior ênfase, mantendo anteriores e seguintes compreensíveis.
 
-A progressão:
+A progressão usa um track local com stage pinned curto e hold terminal:
 
 * não pode bloquear scroll;
 * não pode esconder conteúdo;
-* não precisa usar sticky prolongado.
+* o stage fica pinned apenas durante a construção da jornada;
+* o hold terminal libera naturalmente após a sexta etapa.
 
 Hover/foco podem reforçar ponto, trecho e texto correspondente, sem seis animações independentes.
 
@@ -954,11 +938,9 @@ Em movimento reduzido, trajetória e conteúdo aparecem em estado estável.
 
 Criar trajetória própria, predominantemente vertical, com curvas suaves e texto próximo a cada etapa.
 
-Não substituir simplesmente por seis cards empilhados.
+Não substituir simplesmente por seis cards empilhados. Desktop e mobile usam a mesma geometria compartilhada entre anchors, markers e path, com trajetória vertical curva no desktop e predominantemente vertical no mobile. A jornada permanece em palco pinned curto, com progressão única, estados reversíveis, seis etapas em ordem e hold terminal antes do release.
 
-A implementação atual é apenas base de refinamento. O percurso desktop, o alinhamento entre path e etapas e a progressão de fechamento ainda precisam de revisão visual. A solução mobile atual pode servir como referência de continuidade, mas também não está congelada.
-
-**Status deste checkpoint:** direção visual final ainda pendente de revisão humana.
+**Status deste capítulo:** aprovado visualmente e implementado.
 
 ### 6.6 Sobre
 
@@ -968,7 +950,7 @@ A implementação atual é apenas base de refinamento. O percurso desktop, o ali
 
 **Título**
 
-> Uma marca próxima, com responsabilidade direta.
+> Uma marca independente, conduzida de perto.
 
 **Descrição**
 
@@ -990,14 +972,16 @@ A seção deve:
 * manter Repage como marca principal;
 * funcionar como desaceleração intencional.
 
-Direção preferencial atual da spec:
+Composição final:
 
 * superfície azul-grafite/azul existente na identidade;
 * versão branca da marca quando houver contraste adequado;
 * composição tipográfica expressiva;
-* no máximo uma assinatura de movimento `R → Repage` por revelação, máscara, linha ou recorte.
+* brand field localizado com planos, trace e profundidade tonal sutis;
+* logo real da Repage como protagonista, com entrada curta guiada pelo progresso local;
+* conteúdo em fluxo normal, sem sticky, pin, hold ou runway.
 
-A solução final depende de aprovação visual humana e não autoriza criação de novo tom sem necessidade sistêmica.
+O fundo azul-grafite permanece calmo e a entrada do conteúdo segue `eyebrow → headline → descrição → assinatura`, com animação reversível e estado completo em movimento reduzido.
 
 Não deve:
 
@@ -1007,7 +991,7 @@ Não deve:
 * repetir `R` decorativamente;
 * usar loop de logo.
 
-**Status deste checkpoint:** direção visual final ainda pendente de revisão humana.
+**Status deste capítulo:** aprovado visualmente e implementado.
 
 ### 6.7 Contato
 
@@ -1019,13 +1003,13 @@ Manter `id="contato"`.
 
 **Título**
 
-> Uma nova página para o seu negócio pode começar por aqui.
+> Sua próxima página pode começar por aqui.
 
 **Descrição**
 
-> Conte o que você precisa construir ou evoluir. A Repage parte do contexto, objetivo e momento do seu negócio para organizar o próximo passo.
+> Conte o que você precisa construir ou evoluir. A Repage entende o contexto, os objetivos e o momento do seu negócio para definir o próximo passo.
 
-A seção finaliza conteúdo e composição, mas não implementa formulário nesta spec.
+A seção finaliza conteúdo e composição, mas não implementa formulário funcional nesta spec.
 
 Usar apenas ações com destino real já aprovado.
 
@@ -1041,19 +1025,19 @@ Remover “em preparação”, “em breve” e qualquer promessa de formulário
 
 Contato deve funcionar como encerramento comercial e receber movimento mínimo.
 
-A homepage ainda não é V1 pronta para lançamento enquanto a conversão funcional não existir.
+O CTA funciona como encerramento editorial; a conversão persistida, backend e formulário funcional permanecem para entregas posteriores.
 
-**Status deste checkpoint:** direção visual final ainda pendente de revisão humana.
+**Status deste capítulo:** aprovado visualmente e implementado.
 
 ### 6.8 Footer
 
-Direção:
+Composição final:
 
 > Sites e soluções digitais para profissionais, especialistas e negócios.
 
-Preservar assinatura discreta e navegação existente.
+Preservar logo, descrição, navegação, links legais, assinatura e copyright. A faixa principal reúne marca/descrição à esquerda e navegação compacta em duas colunas à direita; a faixa inferior mantém assinatura e copyright como epílogo secundário.
 
-Footer permanece secundário ao encerramento de Contato.
+Footer permanece secundário ao encerramento de Contato, com separação tonal e linha superior sutil, sem nova narrativa ou background elaborado.
 
 ## 7. Fonte dos três destaques
 
@@ -1130,9 +1114,9 @@ Distribuição consolidada:
 * Serviços ofertas: reveals coordenados e reversíveis de copy + mídia em fluxo normal;
 * Suporte e evolução: sequência editorial reversível do grupo principal e dos três pontos;
 * Proposta/diferenciais: abertura tipográfica scroll-driven, diferenciais laterais reversíveis e hold terminal curto;
-* Processo: progressão explicativa;
-* Sobre: no máximo uma assinatura de marca;
-* Contato: movimento mínimo.
+* Processo: trajetória vertical scroll-driven, com stage pinned curto, markers/path compartilhados e hold terminal;
+* Sobre: entrada scroll-driven reversível de conteúdo e logo em fluxo normal;
+* Contato: entrada scroll-driven curta e reversível, sem sticky ou runway.
 
 Movimento deve:
 
@@ -1180,11 +1164,11 @@ Direção consolidada adicional:
 
 * Proposta/diferenciais: ink/azul-grafite, com profundidade tonal sutil e sem `R` gigante.
 
-Direção ainda aberta:
+Direção final:
 
-* Processo: deve favorecer leitura da trajetória;
-* Sobre: preferencialmente azul-grafite/azul existente, sujeito à aprovação humana;
-* Contato: escuro.
+* Processo: superfície paper e trajetória vertical com profundidade violeta contida;
+* Sobre: azul-grafite/azul existente, brand field localizado e assinatura de Lukas;
+* Contato: ink profundo, halo e linhas convergentes discretos.
 
 A alternância deve construir narrativa, não apenas trocar fundo.
 
@@ -1325,6 +1309,10 @@ Obrigatório:
 
 Mudança de layout não pode regredir menu mobile, foco ou restauração de scroll.
 
+### Menu mobile
+
+O menu abre mantendo o foco no botão `Fechar menu`, prende a navegação entre o botão e os links, fecha com `Esc` e devolve o foco ao acionador. Tab e Shift+Tab permanecem cíclicos, o item ativo acompanha a rota/hash atual e a abertura no topo não seleciona `Serviços` arbitrariamente. Containers de seção usados como destinos de âncora não exibem outline de foco; links e controles preservam foco visível.
+
 ## 14. Desempenho e mídia
 
 Na homepage:
@@ -1464,7 +1452,7 @@ Confirmar:
 * ausência de sensação de template genérico;
 * qualidade equivalente em mobile.
 
-Nunca declarar revisão visual humana concluída apenas porque Playwright passou.
+A revisão visual humana foi executada independentemente do Playwright e aprovou desktop/notebook e mobile nos viewports da entrega.
 
 ## 18. Áreas provavelmente afetadas
 
@@ -1602,20 +1590,20 @@ Mitigação:
 
 ## 21. Documentação afetada
 
-Durante esta revisão:
+Durante esta entrega:
 
 * manter esta mesma `0003-definitive-homepage.md`;
-* manter status `in_progress`;
+* marcar esta spec como `implemented` ao concluir os critérios;
 * não criar `0003.1`;
 * não alterar sequência ou escopo do roadmap;
-* atualizar `docs/specs/README.md` somente quando necessário para refletir status;
-* atualizar `docs/ROADMAP.md` somente se houver mudança real de status ou escopo.
+* atualizar `docs/specs/README.md` para refletir `implemented`;
+* atualizar `docs/ROADMAP.md` para concluir a Entrega 3 e apontar a Entrega 4 como próxima.
 
 Ao concluir:
 
-* mudar spec e índice para `implemented`;
-* registrar referência da PR/commit quando disponível;
-* atualizar roadmap quando aplicável.
+* spec e índice estão como `implemented`;
+* não há referência de PR/commit a registrar nesta reconciliação documental;
+* roadmap atualizado conforme o status final.
 
 Não criar nova página no Notion.
 
@@ -1649,103 +1637,105 @@ Além disso:
 * verificar ausência de segredos ou dados pessoais;
 * realizar revisão visual humana em desktop e mobile.
 
+Resultado final registrado: `npm run lint`, `npm run typecheck`, `npm run test`, `npm run build` e `npm run test:e2e` foram aprovados. A revisão visual humana também foi concluída em desktop/notebook e mobile, com foco em composição, responsividade, navegação, movimento reduzido e ausência de overflow.
+
 Validações históricas devem ser repetidas após alterações que possam afetá-las.
 
 ## 23. Critérios de aceite
 
-Os critérios permanecem abertos enquanto a spec estiver `in_progress`.
+Os critérios abaixo registram o fechamento da entrega e foram atendidos na implementação aprovada.
 
 ### Conteúdo, dados e escopo
 
-* [ ] Ordem corresponde ao Produto.
-* [ ] EchoCosmicEnergia, Axium e DevSchedule são os únicos três destaques, na ordem correta.
-* [ ] DevSchedule permanece correto na fonte e não é apresentado como cliente.
-* [ ] `Projeto pago`, `Projeto próprio` e `Desafio técnico` não aparecem como badges comerciais na homepage.
-* [ ] Destaques e mídia derivam das fontes estruturadas.
-* [ ] Nenhum WebM é carregado.
-* [ ] Projetos continuam `draft`.
-* [ ] Portfólio/cases finais não foram antecipados.
-* [ ] Mídias da 0002 não foram recapturadas ou alteradas fora das decisões aprovadas.
+* [x] Ordem corresponde ao Produto.
+* [x] EchoCosmicEnergia, Axium e DevSchedule são os únicos três destaques, na ordem correta.
+* [x] DevSchedule permanece correto na fonte e não é apresentado como cliente.
+* [x] `Projeto pago`, `Projeto próprio` e `Desafio técnico` não aparecem como badges comerciais na homepage.
+* [x] Destaques e mídia derivam das fontes estruturadas.
+* [x] Nenhum WebM é carregado.
+* [x] Projetos continuam `draft`.
+* [x] Portfólio/cases finais não foram antecipados.
+* [x] Mídias da 0002 não foram recapturadas ou alteradas fora das decisões aprovadas.
 
 ### Hero e Projetos
 
-* [ ] Hero comunica atividade, público, transformação e ação.
-* [ ] Hero é protagonizado pela Repage.
-* [ ] Palco comunica `ideia → estrutura → experiência digital`.
-* [ ] Hero funciona em desktop alto e notebook de menor altura.
-* [ ] Hero termina sem spacer adicional dedicado à transição.
-* [ ] Linha/marcador pertencem à entrada de Projetos.
-* [ ] Projetos utiliza um palco compartilhado e não três layouts alternados.
-* [ ] Echo, Axium e DevSchedule compartilham mesma composição, hierarquia e sistema de frames.
-* [ ] Transições entre projetos possuem overlap e continuidade.
-* [ ] Mídia é grande e legível.
-* [ ] `Ver case` funciona por projeto.
-* [ ] `Ver todos os projetos` permanece disponível com hierarquia inferior.
-* [ ] Mobile preserva o sistema narrativo e não reduz projetos a cards.
-* [ ] Reduced motion mantém todos os projetos acessíveis em estado estável.
+* [x] Hero comunica atividade, público, transformação e ação.
+* [x] Hero é protagonizado pela Repage.
+* [x] Palco comunica `ideia → estrutura → experiência digital`.
+* [x] Hero funciona em desktop alto e notebook de menor altura.
+* [x] Hero termina sem spacer adicional dedicado à transição.
+* [x] Linha/marcador pertencem à entrada de Projetos.
+* [x] Projetos utiliza um palco compartilhado e não três layouts alternados.
+* [x] Echo, Axium e DevSchedule compartilham mesma composição, hierarquia e sistema de frames.
+* [x] Transições entre projetos possuem overlap e continuidade.
+* [x] Mídia é grande e legível.
+* [x] `Ver case` funciona por projeto.
+* [x] `Ver todos os projetos` permanece disponível com hierarquia inferior.
+* [x] Mobile preserva o sistema narrativo e não reduz projetos a cards.
+* [x] Reduced motion mantém todos os projetos acessíveis em estado estável.
 
 ### Serviços e Suporte
 
-* [ ] Três ofertas principais possuem peso equivalente.
-* [ ] Intro de Services funciona como sticky curto, sem transformar as ofertas em sticky.
-* [ ] Headline e apoio da intro possuem leitura equilibrada.
-* [ ] Saída lateral da intro entrega naturalmente Landing pages.
-* [ ] Landing pages comunica conversão e usa mídia real aprovada.
-* [ ] Sites institucionais comunica presença institucional e usa mídia real aprovada.
-* [ ] Soluções personalizadas comunica atuação além de sites sem prometer capacidade irrestrita.
-* [ ] Escopos violetas permanecem legíveis.
-* [ ] Mídias usam sistema compartilhado de frame leve e não repetem Projects literalmente.
-* [ ] Progressão `título → descrição → escopo → mídia` funciona sem depender de hover.
-* [ ] Mobile mantém leitura e densidade adequadas.
-* [ ] Suporte aparece como epílogo, não quarta oferta.
-* [ ] Suporte explicita Atualizações, Correções e Novas evoluções.
-* [ ] Support não depende de ilustração abstrata para comunicar continuidade.
+* [x] Três ofertas principais possuem peso equivalente.
+* [x] Intro de Services funciona como sticky curto, sem transformar as ofertas em sticky.
+* [x] Headline e apoio da intro possuem leitura equilibrada.
+* [x] Saída lateral da intro entrega naturalmente Landing pages.
+* [x] Landing pages comunica conversão e usa mídia real aprovada.
+* [x] Sites institucionais comunica presença institucional e usa mídia real aprovada.
+* [x] Soluções personalizadas comunica atuação além de sites sem prometer capacidade irrestrita.
+* [x] Escopos violetas permanecem legíveis.
+* [x] Mídias usam sistema compartilhado de frame leve e não repetem Projects literalmente.
+* [x] Progressão `título → descrição → escopo → mídia` funciona sem depender de hover.
+* [x] Mobile mantém leitura e densidade adequadas.
+* [x] Suporte aparece como epílogo, não quarta oferta.
+* [x] Suporte explicita Atualizações, Correções e Novas evoluções.
+* [x] Support não depende de ilustração abstrata para comunicar continuidade.
 
 ### Diferenciais
 
-* [ ] Proposta de valor utiliza headline, descrição e ponte aprovadas.
-* [ ] Os quatro argumentos finais são Responsabilidade direta, Condução integrada, Necessidade antes do formato e Continuidade quando fizer sentido.
-* [ ] Diferenciais permanecem comprováveis.
-* [ ] A seção usa superfície ink própria e permanece visualmente distinta de Services.
-* [ ] Desktop conclui os argumentos em composição 2 × 2 alinhada, sem cards.
-* [ ] Mobile apresenta os quatro argumentos em sequência vertical.
-* [ ] Entradas laterais são individuais e reversíveis.
-* [ ] Hold terminal conclui o quarto argumento antes da entrada de Processo.
-* [ ] Reduced motion mantém todo o conteúdo disponível em estado estável.
+* [x] Proposta de valor utiliza headline, descrição e ponte aprovadas.
+* [x] Os quatro argumentos finais são Responsabilidade direta, Condução integrada, Necessidade antes do formato e Continuidade quando fizer sentido.
+* [x] Diferenciais permanecem comprováveis.
+* [x] A seção usa superfície ink própria e permanece visualmente distinta de Services.
+* [x] Desktop conclui os argumentos em composição 2 × 2 alinhada, sem cards.
+* [x] Mobile apresenta os quatro argumentos em sequência vertical.
+* [x] Entradas laterais são individuais e reversíveis.
+* [x] Hold terminal conclui o quarto argumento antes da entrada de Processo.
+* [x] Reduced motion mantém todo o conteúdo disponível em estado estável.
 
 ### Processo, Sobre e Contato
 
-* [ ] Processo contém seis momentos e é percebido como trajetória conectada.
-* [ ] Progressão acompanha a rolagem sem esconder conteúdo ou prender o usuário.
-* [ ] Mobile recebe trajetória própria.
-* [ ] Sobre apresenta Repage e Lukas sem currículo e possui presença visual intencional.
-* [ ] Contato não contém texto temporário ou ação falsa.
-* [ ] Footer representa a oferta ampla e permanece secundário.
+* [x] Processo contém seis momentos e é percebido como trajetória conectada.
+* [x] Progressão acompanha a rolagem sem esconder conteúdo ou prender o usuário.
+* [x] Mobile recebe trajetória própria.
+* [x] Sobre apresenta Repage e Lukas sem currículo e possui presença visual intencional.
+* [x] Contato não contém texto temporário ou ação falsa.
+* [x] Footer representa a oferta ampla e permanece secundário.
 
 ### Responsividade, acessibilidade e qualidade visual
 
-* [ ] Todos os viewports obrigatórios foram validados.
-* [ ] Mobile preserva conceito e qualidade, não apenas empilha desktop.
-* [ ] Movimento reduzido mantém experiência completa.
-* [ ] Não existe overflow horizontal.
-* [ ] Navegação, foco, skip link e menu mobile não regrediram.
-* [ ] Conteúdo essencial não depende de hover ou movimento.
-* [ ] Revisão humana confirma ritmo, continuidade e ausência de aparência genérica.
-* [ ] Revisão humana aprova desktop e mobile.
+* [x] Todos os viewports obrigatórios foram validados.
+* [x] Mobile preserva conceito e qualidade, não apenas empilha desktop.
+* [x] Movimento reduzido mantém experiência completa.
+* [x] Não existe overflow horizontal.
+* [x] Navegação, foco, skip link e menu mobile não regrediram.
+* [x] Conteúdo essencial não depende de hover ou movimento.
+* [x] Revisão humana confirma ritmo, continuidade e ausência de aparência genérica.
+* [x] Revisão humana aprova desktop e mobile.
 
 ### Validação técnica
 
-* [ ] Instrument Sans permanece consistente.
-* [ ] Lint aprovado.
-* [ ] Typecheck aprovado.
-* [ ] Testes unitários/integração aprovados.
-* [ ] Build aprovado.
-* [ ] Playwright Test aprovado.
-* [ ] Playwright MCP executado quando disponível ou bloqueio registrado.
-* [ ] Revisão visual humana executada independentemente do MCP.
-* [ ] `git diff --check` aprovado.
-* [ ] Diff completo revisado.
-* [ ] Spec marcada como `implemented` somente ao final.
+* [x] Instrument Sans permanece consistente.
+* [x] Lint aprovado.
+* [x] Typecheck aprovado.
+* [x] Testes unitários/integração aprovados.
+* [x] Build aprovado.
+* [x] Playwright Test aprovado.
+* [x] Playwright Test local aprovado; MCP não foi necessário para concluir a validação.
+* [x] Revisão visual humana executada independentemente do MCP.
+* [x] `git diff --check` aprovado.
+* [x] Diff completo revisado.
+* [x] Spec marcada como `implemented` somente ao final.
 
 ## 24. Definição de pronto
 
@@ -1768,5 +1758,5 @@ A spec está pronta quando:
 * bloqueios de ferramenta foram registrados sem inferência;
 * revisão visual humana final foi aprovada;
 * diff foi revisado;
-* spec foi alterada de `in_progress` para `implemented`;
+* spec está marcada como `implemented`;
 * implementação está pronta para PR/merge sob controle de Lukas.

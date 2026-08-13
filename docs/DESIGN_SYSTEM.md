@@ -174,17 +174,17 @@ Evitar hexadecimais espalhados em componentes.
 Superfícies escuras:
 - hero;
 - projetos destacados;
+- proposta de valor e diferenciais;
+- Sobre;
 - contato;
 - encerramento;
 - header após o hero.
 Superfícies claras:
 - serviços;
-- proposta de valor;
 - processo;
-- Sobre;
 - textos longos dos cases;
 - páginas legais.
-A alternância deve construir narrativa, não padrão decorativo.
+A alternância deve construir continuidade entre capítulos, não funcionar como padrão decorativo nem exigir divisores rígidos.
 ## 10. Azul-violeta e azul
 O violeta pode aparecer em:
 - CTA;
@@ -266,6 +266,14 @@ Não versionar fonte sem licença adequada.
 - Escala fluida com `clamp()` quando apropriado.
 Não depender apenas de cor para criar hierarquia.
 ## 18. Layout e containers
+O layout usa três níveis que não devem ser confundidos:
+
+- `page gutter`: proteção mínima compartilhada da viewport;
+- `editorial content frame`: largura de leitura e composição para conteúdos convencionais;
+- `immersive stage`: palco local para narrativas, mídia ou trajetórias que precisam extrapolar o frame.
+
+O gutter não deve ser alterado globalmente para corrigir uma seção. O frame editorial pode ser reutilizado entre capítulos convencionais, enquanto palcos imersivos mantêm largura e altura próprias.
+
 Container amplo de referência:
 - aproximadamente `1280px–1360px` para conteúdo;
 - token atual permite até `1440px`.
@@ -278,6 +286,7 @@ Grids visíveis só podem existir quando tiverem função narrativa ou de profun
 ## 20. Assimetria
 Usar assimetria controlada em mídia, recortes, títulos, escala e sobreposição.
 Textos, controles e ações devem manter alinhamento legível.
+O estado final deve continuar estável e compacto; a assimetria pertence à relação entre conteúdo, mídia e entrada, não a desalinhamentos arbitrários.
 ## 21. Extrapolação do container
 Podem ultrapassar o container:
 - screenshot;
@@ -314,6 +323,7 @@ Profundidade moderada por:
 - sombra curta;
 - luz localizada.
 Evitar sombra grande, blur, vidro, glow recorrente e perspectiva excessiva.
+Planos, linhas, recortes e variações tonais podem apoiar a identidade como camadas de profundidade, desde que poucos, assimétricos e subordinados ao conteúdo. Não formar grid técnico, moldura ou dashboard decorativo.
 ## 26. Raios, bordas e sombras
 Tokens atuais:
 - controle: `10px`;
@@ -464,6 +474,7 @@ Toda animação deve pertencer a uma função equivalente.
 - não animar layout continuamente;
 - não prender o usuário;
 - não bloquear scroll.
+Movimento temporal é adequado para entradas curtas ligadas à chegada de uma seção. Movimento scroll-driven deve usar o progresso local quando a construção depende da posição na narrativa, responder de forma reversível ao avanço e ao retorno e não usar timers, snap ou interceptação de wheel como substitutos de composição.
 ## 42. Tipografia cinética
 Preferir palavra, linha ou bloco.
 Letras individuais somente em palavra especial.
@@ -481,7 +492,7 @@ Proibido:
 - seção presa por várias telas;
 - conteúdo escondido;
 - rolagem artificial por JavaScript.
-Sticky só é válido com fallback para viewport baixa e mobile.
+Sticky só é válido quando houver necessidade narrativa concreta, com track curto, release previsível, fallback para viewport baixa e tratamento próprio no mobile. Não usar sticky para prolongar uma entrada ou compensar espaço vazio.
 ## 44. Responsividade
 Faixas de referência:
 - desktop amplo: acima de `1440px`;
@@ -601,7 +612,7 @@ Storyboard detalhado pertence à spec.
 - protótipo antes de fixar técnica.
 Comportamento exato pertence à spec.
 ## 55. Serviços
-Usar lista editorial interativa, não quatro cards SaaS.
+Apresentar uma composição editorial em fluxo normal, não cards SaaS nem accordion como padrão obrigatório.
 Mostrar com o mesmo peso:
 - landing page;
 - site institucional;

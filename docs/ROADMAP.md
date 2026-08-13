@@ -82,7 +82,7 @@ A V1 deve servir como referência comercial da marca, apoiar prospecção e cond
   **Critério de conclusão:** material suficiente para implementação ou pendência explícita que impeça publicação sem invenção.
   **Spec:** obrigatória ao iniciar, limitada à produção e organização de conteúdo e mídia.
 
-## Entrega 3 — Homepage definitiva
+## Entrega 3 — Homepage definitiva — concluída
 
 **Objetivo:** transformar a homepage existente na experiência comercial aprovada.
 **Resultado esperado:** marca, três destaques, ofertas, diferenciais, processo, Lukas e contato aparecem com conteúdo real e acabamento equivalente em desktop e mobile.
@@ -95,10 +95,10 @@ A V1 deve servir como referência comercial da marca, apoiar prospecção e cond
 * Substituir mídia conceitual, validar tipografia local e definir movimento funcional.
   **Dependências:** Entregas 1 e 2, copy, destaques, mídias e fontes aprovados.
   **Validações:** clareza comercial, conteúdo, links, teclado, foco, movimento reduzido, responsividade, desempenho, fallback e console.
-  **Critério de conclusão:** homepage sem placeholder final, com conversão clara e acabamento validado.
+**Critério de conclusão:** homepage sem placeholder final, com conversão clara e acabamento validado. **Status:** concluída; implementação visual aprovada, revisão humana final realizada e validações técnicas aprovadas.
   **Spec:** obrigatória ao iniciar.
 
-## Entrega 4 — Portfólio e seis cases
+## Entrega 4 — Portfólio e seis cases — próxima
 
 **Objetivo:** publicar provas reais da capacidade da Repage por uma fonte única.
 **Resultado esperado:** `/portfolio` lista seis projetos e cada projeto possui case completo, acessível e coerente com sua natureza.
