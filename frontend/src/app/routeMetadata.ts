@@ -8,7 +8,7 @@ export type RouteMetadata = {
   indexing: IndexingState;
 };
 
-export type RouteMetadataKey = 'home' | 'portfolio' | 'case' | 'privacy' | 'cookies' | 'notFound';
+export type RouteMetadataKey = 'home' | 'portfolio' | 'privacy' | 'cookies' | 'notFound';
 
 export const fallbackMetadata: RouteMetadata = {
   title: 'Repage',
@@ -26,11 +26,6 @@ export const routeMetadata = {
     title: 'Portfólio | Repage',
     description: 'Projetos pagos, projeto próprio e desafio técnico conduzidos por Lukas Frick.',
     indexing: 'index',
-  },
-  case: {
-    title: 'Case em preparação | Repage',
-    description: 'Case temporário do portfólio da Repage, atualmente em preparação.',
-    indexing: 'noindex',
   },
   privacy: {
     title: 'Política de Privacidade em preparação | Repage',

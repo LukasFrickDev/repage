@@ -1,4 +1,4 @@
-import { findProjectBySlug, projects } from '.';
+import { findProjectBySlug, isProjectNature, projects } from '.';
 import type { Project, ProjectNature, PublishedProject } from '.';
 import { findReadinessBySlug, projectReadinessManifest } from './projectReadiness';
 import type { ProjectReadiness } from './projectReadiness';
@@ -17,6 +17,10 @@ export function getProjectPublicabilityErrors(
   const duplicateOrders = records.filter((record) => record.portfolioOrder === project.portfolioOrder).length > 1;
 
   if (project.publicationStatus !== 'published') errors.push('publicationStatus não é published.');
+  if (!isProjectNature(project.nature)) {
+    errors.push(`Natureza inválida: ${project.slug}.`);
+    return errors;
+  }
   REQUIRED_CONTENT_FIELDS.forEach((field) => {
     if (!project[field].trim()) errors.push(`Conteúdo obrigatório ausente: ${field}.`);
   });
@@ -47,17 +51,29 @@ export function getProjectPublicabilityErrors(
   if (!cover || !cover.roles.includes('cover')) errors.push('Cover não está registrada no manifesto.');
   project.media.gallery.forEach((path) => {
     const asset = assetsByPath.get(path);
-    if (!asset || !asset.roles.includes('gallery')) errors.push(`Mídia de galeria não está registrada: ${path}.`);
+    if (!asset || (!asset.roles.includes('gallery') && !asset.roles.includes('mobile'))) {
+      errors.push(`Mídia de galeria não está registrada: ${path}.`);
+    }
   });
   project.media.videos?.forEach((path) => {
     const asset = assetsByPath.get(path);
     if (!asset || asset.kind !== 'video') errors.push(`Vídeo não está registrado: ${path}.`);
   });
-  if (project.publicUrl && (readiness.linkStatus !== 'verified' || !project.publicUrl.startsWith('https://'))) {
+  if (project.publicUrl && (readiness.linkStatus !== 'verified' || !isValidPublicUrl(project.publicUrl))) {
     errors.push('URL pública não está verificada.');
   }
 
   return errors;
+}
+
+function isValidPublicUrl(value: string): boolean {
+  try {
+    const url = new URL(value);
+    return url.protocol === 'https:'
+      && /^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$|^(?:\d{1,3}\.){3}\d{1,3}$/i.test(url.hostname);
+  } catch {
+    return false;
+  }
 }
 
 function requiredAuthorization(nature: ProjectNature): 'confirmed' | 'not-required' {

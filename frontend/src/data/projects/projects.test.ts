@@ -69,7 +69,20 @@ describe('project data', () => {
       'axium',
       'dev-schedule',
     ]);
+    expect(listFeaturedProjectRecords().map((project) => project.featuredOrder)).toEqual([1, 2, 3]);
     expect(listFeaturedProjectRecords()).toHaveLength(3);
+  });
+
+  it('rejects malformed public URLs even when they start with https://', () => {
+    const invalidUrl = { ...projects[0], publicUrl: 'https://not a public url' } as Project;
+
+    expect(getProjectPublicabilityErrors(invalidUrl, [invalidUrl])).toContain('URL pública não está verificada.');
+  });
+
+  it('rejects invalid project nature at runtime', () => {
+    const invalidNature = { ...projects[0], nature: 'invalid-nature' } as unknown as Project;
+
+    expect(getProjectPublicabilityErrors(invalidNature, [invalidNature])).toContain('Natureza inválida: echo-cosmic-energia.');
   });
 
   it('does not bypass the publication gate by changing only publicationStatus', () => {
