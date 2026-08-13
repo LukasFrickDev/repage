@@ -16,7 +16,7 @@ As specs 0001 e 0002 estão implementadas e integradas à `main`.
 
 A branch `feat/definitive-homepage` contém a implementação final da homepage definitiva. A entrega consolidou conteúdo real, fonte tipada dos destaques, mídias da 0002, componentes, responsividade, movimento e testes, seguida de aprovação visual humana da homepage completa.
 
-A revisão visual posterior avançou por checkpoints, preservando arquitetura, conteúdo válido, mídia aprovada e trabalho técnico existente. Até esta revisão documental, Hero, Projetos selecionados, Serviços, Suporte e evolução e Proposta de valor e diferenciais já receberam aprovação visual humana como direção e devem ser tratados como congelados durante a continuação da spec, salvo regressão, incompatibilidade técnica ou nova instrução explícita.
+A revisão visual posterior avançou por checkpoints, preservando arquitetura, conteúdo válido, mídia aprovada e trabalho técnico existente. A revisão final consolidou a aprovação visual de Hero, Projetos selecionados, Serviços, Suporte e evolução, Proposta de valor e diferenciais, Processo, Sobre e Contato; essas áreas permanecem congeladas, salvo regressão, incompatibilidade técnica ou nova instrução explícita.
 
 Esta revisão final da spec:
 

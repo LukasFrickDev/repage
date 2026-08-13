@@ -819,8 +819,7 @@ O design da V1 está pronto quando:
 ## 71. Pendências
 - Validar licença, arquivos e acentuação da Clash Display.
 - Decidir contingência somente se necessário.
-- Aprovar mídias de projetos pagos.
-- Prototipar capítulos de projetos.
+- Estruturar a listagem e os cases da Entrega 4 — Portfólio e seis cases.
 - Concluir conteúdo dos cases.
 - Validar contraste final.
 - Validar performance de mídia.
