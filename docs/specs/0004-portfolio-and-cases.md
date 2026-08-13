@@ -1,6 +1,6 @@
 # 0004 — Portfólio e seis cases
 
-* **Status:** approved
+* **Status:** implemented
 * **Responsável:** Lukas Frick
 * **Data:** 13 de agosto de 2026
 * **Branch-base:** `main`
@@ -29,9 +29,7 @@ A Repage já possui:
 * revisão de privacidade aprovada;
 * testes unitários e Playwright Test configurados.
 
-As rotas `/portfolio` e `/portfolio/:slug` ainda mantêm a implementação estrutural temporária criada na Entrega 1.
-
-A fonte principal de projetos ainda contém somente identidade, natureza, status e destaque. A 0004 deve evoluir essa estrutura para sustentar listagem e cases finais sem duplicar a camada de evidência e mídia preparada na 0002.
+A implementação final de `/portfolio` e `/portfolio/:slug` usa uma fonte pública tipada, um gate de publicação e uma estrutura de case compartilhada. A camada de evidência e mídia preparada na 0002 permanece no manifesto de prontidão, sem duplicação de metadados.
 
 A homepage aprovada e o Design System consolidado são referências visuais diretas. Esta entrega não inicia nova descoberta de identidade ou direção visual.
 
@@ -641,7 +639,7 @@ Estrutura:
 
 1. retorno ao portfólio;
 2. abertura;
-3. mídia principal;
+3. mídia e prova visual;
 4. visão geral;
 5. contexto;
 6. desafio;
@@ -677,11 +675,11 @@ Deve conter:
 * resumo;
 * participação;
 * link externo quando disponível;
-* mídia principal real.
+* conteúdo editorial textual, sem uma grande cover no hero;
 
 O título é o elemento dominante.
 
-A mídia principal pode atravessar visualmente a transição entre abertura escura e conteúdo claro.
+O hero permanece editorial e textual. A cover continua sendo usada na Home e em `/portfolio`, e também integra a galeria do case quando registrada para esse uso.
 
 Não copiar o `ProjectStage` da homepage.
 
@@ -745,7 +743,7 @@ Priorizar:
 * `echo-home-mobile.png`;
 * `echo-links-mobile.png`.
 
-Sem vídeo no case inicial.
+Vídeos desktop e mobile registrados integram a galeria conforme seus roles no manifesto.
 
 ### Axium
 
@@ -758,7 +756,7 @@ Priorizar:
 * `axium-blog-mobile.png`;
 * `axium-home-mobile.png`.
 
-Sem vídeo no case inicial.
+Vídeos desktop e mobile registrados integram a galeria conforme seus roles no manifesto.
 
 ### DevSchedule
 
@@ -771,12 +769,12 @@ Priorizar:
 * início mobile;
 * dashboard administrativo demonstrativo.
 
-Usar vídeo somente para demonstrar os dois fluxos distintos:
+Usar os vídeos registrados somente para demonstrar os dois fluxos distintos:
 
 * cliente;
 * administração.
 
-Preferir as versões desktop já preparadas como demonstração principal.
+As versões desktop e mobile permanecem disponíveis conforme o role de cada asset.
 
 Não expor credenciais ou mecanismo de autenticação.
 
@@ -791,7 +789,7 @@ Priorizar:
 * comentários;
 * estados mobile.
 
-Usar um tour desktop para demonstrar a interação entre esses estados.
+Usar os tours desktop e mobile registrados para demonstrar a interação entre esses estados.
 
 Não apresentar perfis demonstrativos como usuários reais ou clientes.
 
@@ -806,7 +804,7 @@ Priorizar:
 * `alma-manifesto-desktop.png`;
 * `alma-manifesto-mobile.png`.
 
-Sem vídeo no case inicial.
+Vídeos desktop e mobile registrados integram a galeria conforme seus roles no manifesto.
 
 ### Alicerce da Alma
 
@@ -821,31 +819,25 @@ Priorizar:
 
 Não usar screenshots de depoimentos como prova da Repage.
 
-Sem vídeo no case inicial.
+Vídeos desktop e mobile registrados integram a galeria conforme seus roles no manifesto.
 
 ## 15. Vídeos
 
-Vídeo é prova complementar, nunca requisito para compreender o case.
-
-Nesta entrega, usar somente onde interação ou fluxo acrescentam informação relevante:
-
-* DevSchedule;
-* GreenTweet.
+Vídeo é prova complementar, nunca requisito para compreender o case. Os vídeos WebM aprovados e registrados para os projetos fazem parte da própria galeria, quando selecionados nos dados e resolvidos pelo manifesto de prontidão.
 
 Regras:
 
-* sem autoplay;
-* sem áudio automático;
-* `controls`;
-* `playsInline`;
-* `preload="metadata"` ou estratégia equivalente;
-* poster existente;
-* fallback existente;
-* nunca iniciar mais de um vídeo automaticamente;
+* role `desktop` ou `mobile` explícito no manifesto;
+* aparecem depois das screenshots do respectivo grupo;
+* usam o mesmo `BrowserFrame` ou `PhoneFrame` da galeria;
+* reprodução inline, sem autoplay e sem áudio automático;
+* `controls`, `playsInline` e `preload` controlado;
+* poster e fallback reais do manifesto;
+* vários vídeos por grupo são suportados quando existirem;
 * conteúdo textual e imagens devem explicar o projeto sem reprodução;
-* `prefers-reduced-motion` não pode retirar conteúdo.
+* `prefers-reduced-motion` não retira conteúdo.
 
-Não carregar vídeos dos quatro cases que não os utilizam.
+Não criar seção separada de vídeos nem comportamento dependente de slug.
 
 ## 16. Galeria e visualizador
 
@@ -862,6 +854,7 @@ Não adicionar biblioteca externa apenas para isso.
 Comportamento obrigatório:
 
 * acionável por botão/link semântico;
+* screenshots e vídeos podem abrir no mesmo viewer compartilhado;
 * diálogo modal acessível;
 * botão de fechar;
 * `Esc`;
@@ -869,6 +862,7 @@ Comportamento obrigatório:
 * foco contido enquanto aberto;
 * retorno de foco ao acionador;
 * anterior/próximo quando houver mais de uma imagem;
+* sequência derivada da galeria completa, com screenshots antes dos vídeos em cada grupo;
 * teclado;
 * toque;
 * nenhuma dependência de swipe;
@@ -1197,8 +1191,8 @@ Dividir a implementação em fases coerentes.
 
 ### Fase 5 — mídia interativa e fallbacks
 
-* visualizador;
-* vídeos de DevSchedule e GreenTweet;
+* visualizador compartilhado para screenshots e vídeos;
+* vídeos WebM aprovados integrados à galeria conforme dados e manifesto;
 * falhas de imagem;
 * poster/fallback;
 * teclado;
@@ -1370,6 +1364,12 @@ Além disso:
 * verificar os seis projetos `published`;
 * verificar que nenhum blocker interno é exposto na interface.
 
+### 32.1 Resultado da validação final
+
+As validações finais da Entrega 4 foram executadas no estado reconciliado: lint, typecheck, testes, E2E, build e `git diff --check` aprovados. A implementação final possui `/portfolio` definitivo com seis projetos, seis cases públicos, fonte tipada compartilhada, publication gate, template único de case, hero editorial sem grande cover, galeria compartilhada Desktop/Mobile com cover também na galeria, vídeos WebM integrados aos grupos correspondentes, reprodução inline, `MediaViewer` compartilhado para imagens e vídeos, posters, fallbacks, navegação anterior/próximo, retorno ao portfólio, responsividade, acessibilidade e reduced motion validados. A arquitetura permanece data-driven, sem exceções visuais por slug, e preparada para novos projetos por dados, readiness e publicação.
+
+O build foi concluído com sucesso e o Vite reportou apenas o warning não bloqueante de chunk principal acima de 500 kB após minificação (aproximadamente 578.78 kB; gzip aproximadamente 170.46 kB). Não se aumenta `chunkSizeWarningLimit` nem se introduz `manualChunks` nesta entrega; code splitting fica para etapa própria quando houver medição e necessidade.
+
 ## 33. Documentação
 
 Durante a implementação, atualizar os dossiês de `docs/content/projects/` somente quando a 0004 materializar confirmação editorial que substitua uma pendência antiga.
@@ -1473,7 +1473,7 @@ Mitigação:
 
 Mitigação:
 
-* vídeos somente DevSchedule e GreenTweet;
+* vídeos registrados integrados à galeria, com carregamento controlado;
 * lazy loading;
 * mídia de um case por vez;
 * nenhuma mídia de outros projetos pré-carregada.
@@ -1498,11 +1498,11 @@ Mitigação:
 * [ ] Cada case contém visão geral, contexto, desafio, solução e participação.
 * [ ] Cada case contém serviços/capacidades e funcionalidades.
 * [ ] Cada case contém tecnologias quando relevantes.
-* [ ] Cada case possui mídia principal real.
+* [ ] Cada case possui cover real e mídia real na galeria.
 * [ ] Cada case possui galeria real.
-* [ ] DevSchedule utiliza vídeo apenas para demonstrar fluxos relevantes.
-* [ ] GreenTweet utiliza vídeo apenas para demonstrar interação relevante.
-* [ ] Demais cases não carregam vídeo sem necessidade.
+* [ ] Vídeos do DevSchedule demonstram os fluxos relevantes registrados.
+* [ ] Vídeos do GreenTweet demonstram a interação relevante registrada.
+* [ ] Vídeos registrados são carregados de forma controlada na galeria dos cases correspondentes, sem autoplay nem pré-carregamento global.
 * [ ] Galeria funciona sem visualizador.
 * [ ] Visualizador é acessível por teclado.
 * [ ] `Esc` fecha visualizador.

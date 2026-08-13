@@ -17,9 +17,9 @@ A V1 deve servir como referência comercial da marca, apoiar prospecção e cond
 * Frontend em React, TypeScript, Vite e Styled Components.
 * Framer Motion, homepage responsiva, logo, marca, tokens e direção visual disponíveis.
 * Roteamento público, páginas auxiliares, `PublicLayout`, âncoras, gerenciamento de foco e scroll, menu mobile acessível, metadados básicos e testes automatizados materializados na entrega 1.
-* A entrega 2 está concluída: conteúdo, dossiês e mídias reais dos seis projetos foram auditados e preparados. Portfólio e cases finais continuam pendentes da entrega posterior; a auditoria da área administrativa do DevSchedule não é mídia pública nem bloqueia esta entrega.
+* A entrega 2 está concluída: conteúdo, dossiês e mídias reais dos seis projetos foram auditados e preparados; esse material foi integrado ao portfólio e aos cases na Entrega 4. A auditoria da área administrativa do DevSchedule não é mídia pública nem bloqueia esta entrega.
 * A entrega 3 está concluída: a homepage reúne os três destaques, ofertas, diferenciais, processo, Sobre e contato com conteúdo e mídias reais, com revisão visual humana e validações técnicas aprovadas.
-* A entrega 4 — Portfólio e seis cases — é a próxima entrega.
+* A entrega 4 está concluída: `/portfolio` e os seis cases usam conteúdo e mídia reais, galerias, viewer, vídeos integrados, publicação validada e navegação compartilhada.
 * Formulário ainda sem persistência.
 * Backend, PostgreSQL e e-mails ainda inexistentes.
 * Consentimento, Analytics, SEO e prerender ainda inexistentes.
@@ -99,10 +99,10 @@ A V1 deve servir como referência comercial da marca, apoiar prospecção e cond
 **Critério de conclusão:** homepage sem placeholder final, com conversão clara e acabamento validado. **Status:** concluída; implementação visual aprovada, revisão humana final realizada e validações técnicas aprovadas.
   **Spec:** obrigatória ao iniciar.
 
-## Entrega 4 — Portfólio e seis cases — próxima
+## Entrega 4 — Portfólio e seis cases — concluída
 
 **Objetivo:** publicar provas reais da capacidade da Repage por uma fonte única.
-**Resultado esperado:** `/portfolio` lista seis projetos e cada projeto possui case completo, acessível e coerente com sua natureza.
+**Resultado:** `/portfolio` lista seis projetos e cada projeto possui case completo, acessível e coerente com sua natureza, com galerias, viewer, vídeos e fallbacks validados.
 **Escopo principal:**
 
 * Consolidar fonte única, listagem editorial e cases por slug.
@@ -111,7 +111,8 @@ A V1 deve servir como referência comercial da marca, apoiar prospecção e cond
 * Implementar anterior, próximo, retorno e bloqueio de publicação incompleta.
   **Dependências:** Entregas 1, 2 e 3, conteúdo, mídias, autorizações e links verificados.
   **Validações:** seis projetos, slugs únicos, destaques derivados, dados completos, navegação, acessibilidade, mobile e fallbacks.
-  **Critério de conclusão:** seis cases úteis mesmo sem o projeto externo, sem prova inventada.
+  **Critério de conclusão:** atendido; seis cases úteis mesmo sem o projeto externo, sem prova inventada.
+  **Status:** concluída; implementação aprovada, validações finais executadas e documentação reconciliada.
   **Spec:** obrigatória ao iniciar, preferencialmente conjunta para portfólio e cases.
 
 ## Entrega 5 — Backend, PostgreSQL, API, Admin e formulário
