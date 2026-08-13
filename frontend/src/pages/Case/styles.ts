@@ -11,7 +11,7 @@ export const Page = styled.section`
 export const Intro = styled.header`
   position: relative;
   z-index: 1;
-  min-height: calc(100svh - 1.25rem);
+  min-height: calc(100svh - ${layout.headerHeight});
   display: flex;
   background: ${colors.ink};
   color: ${colors.paper};
@@ -29,8 +29,9 @@ export const Intro = styled.header`
   }
 
   @media (max-width: ${breakpoints.tabletMax}) {
-    min-height: 0;
-    display: block;
+    min-height: calc(100svh - ${layout.headerHeight});
+    padding-top: calc(${layout.headerHeight} + clamp(1.5rem, 6vw, 2.5rem));
+    padding-bottom: clamp(2.5rem, 8vw, 4rem);
   }
 `;
 
@@ -53,8 +54,9 @@ export const IntroMain = styled.div`
   transform: translateY(-3%);
 
   @media (max-width: ${breakpoints.tabletMax}) {
-    flex: initial;
-    transform: none;
+    flex: 1;
+    justify-content: center;
+    transform: translateY(-2%);
   }
 `;
 
@@ -464,9 +466,9 @@ export const NeighborNav = styled.nav`
   gap: 1rem;
   border-top: 1px solid rgba(16, 24, 39, 0.16);
   @media (max-width: ${breakpoints.tabletMax}) {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 1.25rem;
+    align-items: baseline;
+    gap: 0.75rem;
+    width: 100%;
   }
 `;
 
@@ -474,20 +476,33 @@ export const NeighborLink = styled(Link)`
   display: inline-flex;
   align-items: center;
   gap: 0.45rem;
+  min-width: 0;
+  flex: 1 1 0;
+  justify-content: center;
+  max-width: 100%;
+  svg { flex: 0 0 1rem; }
   color: ${colors.ink};
   font-weight: 700;
   text-decoration: none;
   &:hover, &:focus-visible { color: ${colors.highlight}; }
+  &:last-child { justify-content: flex-end; }
 `;
 
 export const ReturnLink = styled(Link)`
   display: block;
   margin-top: 0;
+  min-width: 0;
+  flex: 1 1 0;
+  max-width: 100%;
   color: ${colors.graphite};
   font-size: 0.9rem;
   font-weight: 700;
   text-decoration: underline;
   text-underline-offset: 0.3rem;
+
+  @media (max-width: ${breakpoints.tabletMax}) {
+    text-align: left;
+  }
 `;
 
 export const NotFoundPage = styled(Page)`

@@ -3,11 +3,16 @@ type NavigationItem = {
   href: string;
 };
 
-export const navigation: NavigationItem[] = [
+export const footerNavigation: NavigationItem[] = [
   { label: 'Serviços', href: '/#servicos' },
   { label: 'Projetos', href: '/portfolio' },
   { label: 'Como funciona', href: '/#processo' },
   { label: 'Sobre', href: '/#sobre' },
+];
+
+export const headerNavigation: NavigationItem[] = [
+  { label: 'Início', href: '/' },
+  ...footerNavigation,
 ];
 
 export const legalNavigation: NavigationItem[] = [

@@ -3,7 +3,7 @@ import { useReducedMotion } from 'framer-motion';
 import { useEffect, useRef, useState } from 'react';
 import type { KeyboardEvent } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { navigation, heroContent } from '../../content/repageContent';
+import { headerNavigation, heroContent } from '../../content/repageContent';
 import * as S from './styles';
 
 export function HomeHeader() {
@@ -102,7 +102,7 @@ export function HomeHeader() {
         </S.Brand>
 
         <S.DesktopNavigation aria-label="Navegação principal">
-          {navigation.map((item) => <Link key={item.href} to={item.href}>{item.label}</Link>)}
+          {headerNavigation.map((item) => <Link key={item.href} to={item.href}>{item.label}</Link>)}
         </S.DesktopNavigation>
 
         <S.DesktopCta to={heroContent.primaryCta.href}>
@@ -130,7 +130,7 @@ export function HomeHeader() {
           ref={mobilePanelRef}
         >
           <nav aria-label="Navegação móvel">
-            {navigation.map((item) => {
+            {headerNavigation.map((item) => {
               const active = isNavigationItemActive(item.href);
 
               return (

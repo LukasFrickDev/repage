@@ -468,6 +468,64 @@ describe('public routes', () => {
   });
 });
 
+describe('primary navigation', () => {
+  it('keeps Início in the header only and preserves both logo destinations', async () => {
+    const user = userEvent.setup();
+    renderAt('/');
+
+    const desktopNavigation = document.querySelector('nav[aria-label="Navegação principal"]') as HTMLElement;
+    expect(desktopNavigation).toBeInTheDocument();
+    expect(within(desktopNavigation).getAllByRole('link', { hidden: true }).map((link) => link.textContent)).toEqual([
+      'Início',
+      'Serviços',
+      'Projetos',
+      'Como funciona',
+      'Sobre',
+    ]);
+    expect(within(desktopNavigation).getByRole('link', { name: 'Início', hidden: true })).toHaveAttribute('href', '/');
+
+    const footer = screen.getByRole('contentinfo');
+    expect(within(footer).queryByRole('link', { name: 'Início' })).not.toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Repage, ir para o início' })).toHaveAttribute('href', '/');
+    expect(screen.getByRole('link', { name: 'Repage, ir para a página inicial' })).toHaveAttribute('href', '/');
+
+    await user.click(screen.getByRole('button', { name: 'Abrir menu' }));
+    const mobileNavigation = screen.getByRole('navigation', { name: 'Navegação móvel' });
+    expect(within(mobileNavigation).getAllByRole('link').slice(0, 5).map((link) => link.textContent)).toEqual([
+      'Início',
+      'Serviços',
+      'Projetos',
+      'Como funciona',
+      'Sobre',
+    ]);
+  });
+
+  it('marks Início active only on the hashless homepage', async () => {
+    const user = userEvent.setup();
+    renderAt('/');
+
+    await user.click(screen.getByRole('button', { name: 'Abrir menu' }));
+    expect(within(screen.getByRole('navigation', { name: 'Navegação móvel' })).getByRole('link', { name: 'Início' })).toHaveAttribute('aria-current', 'location');
+  });
+
+  it('does not mark Início active when the homepage has a hash', async () => {
+    const user = userEvent.setup();
+    renderAt('/#servicos');
+
+    await user.click(screen.getByRole('button', { name: 'Abrir menu' }));
+    expect(within(screen.getByRole('navigation', { name: 'Navegação móvel' })).getByRole('link', { name: 'Início' })).not.toHaveAttribute('aria-current', 'location');
+  });
+
+  it('keeps programmatic route focus without showing a ring on the route heading', async () => {
+    const user = userEvent.setup();
+    renderAt('/portfolio');
+
+    await user.click(screen.getByRole('link', { name: 'Repage, ir para o início' }));
+    expect(screen.getByRole('heading', { level: 1 })).toHaveFocus();
+    expect(getComputedStyle(screen.getByRole('heading', { level: 1 })).outlineStyle).toBe('none');
+  });
+});
+
 describe('mobile menu', () => {
   it('does not render focusable descendants while closed', () => {
     renderAt('/');
