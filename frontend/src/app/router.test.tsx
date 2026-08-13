@@ -1,4 +1,4 @@
-import { act, render, screen, waitFor, within } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter, useLocation, useNavigate } from 'react-router-dom';
 import { describe, expect, it, vi } from 'vitest';
@@ -78,7 +78,7 @@ describe('public routes', () => {
     expect(screen.getAllByRole('heading', { level: 1 })).toHaveLength(1);
   });
 
-  it('renders Echo inline gallery groups from typed media without videos or other case assets', () => {
+  it('renders Echo inline gallery groups with screenshots before typed inline videos', () => {
     renderAt('/portfolio/echo-cosmic-energia');
 
     const gallery = within(screen.getByRole('main')).getByRole('region', { name: 'O trabalho em uso.' });
@@ -95,22 +95,106 @@ describe('public routes', () => {
     ]);
     expect(within(gallery).getAllByRole('img').every((image) => image.getAttribute('alt'))).toBe(true);
     gallery.querySelectorAll('figure').forEach((figure) => {
-      const visual = figure.querySelector(':scope > span, :scope > img');
+      const visual = figure.querySelector(':scope > button, :scope > span, :scope > img');
       const caption = figure.querySelector(':scope > figcaption');
       expect(visual).toBeInTheDocument();
       expect(caption).toBeInTheDocument();
       expect(visual?.contains(caption)).toBe(false);
       expect(caption?.textContent?.trim()).not.toBe('');
     });
-    expect(gallery.querySelectorAll('[data-project-browser-frame]')).toHaveLength(4);
-    expect(gallery.querySelectorAll('[data-project-phone-frame]')).toHaveLength(2);
+    expect(gallery.querySelectorAll('[data-project-browser-frame]')).toHaveLength(5);
+    expect(gallery.querySelectorAll('[data-project-phone-frame]')).toHaveLength(3);
     expect(gallery.querySelector('[data-gallery-group="GERAL"]')).not.toBeInTheDocument();
     expect(gallery.querySelector('[data-gallery-group="DESKTOP"] img[src$="echo-social.png"]')).toBeInTheDocument();
     expect(gallery.querySelector('[data-gallery-group="MOBILE"] img[src$="echo-social.png"]')).not.toBeInTheDocument();
     expect(gallery.querySelectorAll('figure p')).toHaveLength(0);
     expect(screen.getByRole('img', { name: 'Página inicial da Echo Cosmic Energia para compartilhamento social.' })).toHaveAttribute('src', '/projects/echo-cosmic-energia/echo-social.png');
     expect(screen.queryByRole('link', { name: 'Mídia principal de EchoCosmicEnergia' })).not.toBeInTheDocument();
-    expect(screen.getByRole('main').querySelector('video')).not.toBeInTheDocument();
+    const videos = gallery.querySelectorAll('video');
+    expect(videos).toHaveLength(2);
+    expect([...videos].map((video) => video.getAttribute('src'))).toEqual([
+      '/projects/echo-cosmic-energia/videos/echo-tour-desktop.webm',
+      '/projects/echo-cosmic-energia/videos/echo-tour-mobile.webm',
+    ]);
+    [...videos].forEach((video) => {
+      expect(video).toHaveAttribute('controls');
+      expect(video).toHaveAttribute('playsinline');
+      expect(video).toHaveAttribute('preload', 'none');
+      expect(video).toHaveAttribute('poster');
+      expect(video).toHaveAttribute('data-project-video', 'true');
+    });
+  });
+
+  it('opens only screenshots in the accessible case viewer', async () => {
+    const user = userEvent.setup();
+    renderAt('/portfolio/echo-cosmic-energia');
+
+    const gallery = within(screen.getByRole('main')).getByRole('region', { name: 'O trabalho em uso.' });
+    const screenshotTriggers = within(gallery).getAllByRole('button', { name: /^Ampliar:/ });
+    expect(screenshotTriggers).toHaveLength(6);
+
+    await user.click(screenshotTriggers[0]);
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Mídia anterior' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Próxima mídia' })).toBeEnabled();
+
+    await user.keyboard('{ArrowRight}');
+    expect(screen.getByRole('dialog')).toHaveTextContent('2 de 8');
+    await user.keyboard('{Escape}');
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    await waitFor(() => expect(document.activeElement).toBe(screenshotTriggers[0]));
+  });
+
+  it('opens an inline video in the shared viewer without autoplay', async () => {
+    const user = userEvent.setup();
+    const pauseSpy = vi.spyOn(HTMLMediaElement.prototype, 'pause').mockImplementation(() => undefined);
+    renderAt('/portfolio/echo-cosmic-energia');
+
+    const gallery = within(screen.getByRole('main')).getByRole('region', { name: 'O trabalho em uso.' });
+    const expandButtons = within(gallery).getAllByRole('button', { name: 'Abrir vídeo no viewer' });
+    expect(expandButtons).toHaveLength(2);
+
+    await user.click(expandButtons[0]);
+    const viewer = screen.getByRole('dialog');
+    const viewerVideo = viewer.querySelector('video');
+    expect(viewerVideo).toBeInTheDocument();
+    expect(viewerVideo).toHaveAttribute('src', '/projects/echo-cosmic-energia/videos/echo-tour-desktop.webm');
+    expect(viewerVideo).toHaveAttribute('poster', '/projects/echo-cosmic-energia/echo-social.png');
+    expect(viewerVideo).toHaveAttribute('preload', 'none');
+    expect(viewerVideo).toHaveAttribute('controls');
+    expect(viewerVideo).toHaveAttribute('playsinline');
+    expect(viewerVideo).not.toHaveAttribute('autoplay');
+    expect(viewer).toHaveTextContent('5 de 8');
+
+    await user.click(screen.getByRole('button', { name: 'Próxima mídia' }));
+    expect(within(screen.getByRole('dialog')).queryByRole('video', { name: 'Tour desktop da Echo Cosmic Energia.' })).not.toBeInTheDocument();
+    expect(screen.getByRole('dialog')).toHaveTextContent('6 de 8');
+    expect(pauseSpy).toHaveBeenCalled();
+
+    await user.keyboard('{Escape}');
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    const pauseCallsBeforeClose = pauseSpy.mock.calls.length;
+    await user.click(expandButtons[0]);
+    await user.keyboard('{Escape}');
+    expect(pauseSpy.mock.calls.length).toBeGreaterThan(pauseCallsBeforeClose);
+    await waitFor(() => expect(document.activeElement).toBe(expandButtons[0]));
+    pauseSpy.mockRestore();
+  });
+
+  it('uses the registered video fallback without opening the screenshot viewer', () => {
+    renderAt('/portfolio/echo-cosmic-energia');
+
+    const gallery = within(screen.getByRole('main')).getByRole('region', { name: 'O trabalho em uso.' });
+    const video = gallery.querySelector('video');
+    expect(video).toBeInTheDocument();
+    fireEvent.error(video as HTMLVideoElement);
+
+    expect(gallery.querySelectorAll('video')).toHaveLength(1);
+    expect(within(gallery).getByRole('img', { name: 'Tour desktop da Echo Cosmic Energia.' })).toHaveAttribute(
+      'src',
+      '/projects/echo-cosmic-energia/echo-social.png',
+    );
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
 
   it('renders the shared case gallery for all public project routes', () => {

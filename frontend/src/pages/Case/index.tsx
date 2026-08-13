@@ -1,6 +1,6 @@
 import { ArrowLeft, ArrowRight, ExternalLink, Monitor, Smartphone } from 'lucide-react';
 import { Link, useParams } from 'react-router-dom';
-import { useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import { getCaseMetadata, routeMetadata, useRouteMetadata } from '../../app/routeMetadata';
 import { PrimaryCta } from '../../components/PrimaryCta';
@@ -11,6 +11,8 @@ import { useEditorialReveal } from '../../components/EditorialMotion/useEditoria
 import { useTitleReveal } from '../../components/TitleReveal/useTitleReveal';
 import { findPublicProjectNeighbors, findPublicProjectBySlug } from '../../data/projects/publication';
 import { findReadinessBySlug } from '../../data/projects/projectReadiness';
+import { resolveCaseGallery } from '../../data/projects/caseGallery';
+import type { ProjectMediaAsset } from '../../data/projects/projectReadiness';
 import * as S from './styles';
 
 export function CasePage() {
@@ -94,15 +96,11 @@ type CaseGalleryProps = {
 
 function CaseGallery({ project }: CaseGalleryProps) {
   const readiness = findReadinessBySlug(project.slug);
-  const assets = project.media.gallery.map((path) => readiness?.assets.find((asset) => asset.path === path));
-
-  if (assets.some((asset) => !asset || asset.kind !== 'screenshot')) {
-    throw new Error(`Galeria pública inválida no manifesto: ${project.slug}.`);
-  }
-
-  const galleryAssets = assets as NonNullable<typeof assets[number]>[];
-  const desktopAssets = galleryAssets.filter((asset) => asset.roles.includes('desktop'));
-  const mobileAssets = galleryAssets.filter((asset) => asset.roles.includes('mobile'));
+  if (!readiness) throw new Error(`Galeria pública sem readiness: ${project.slug}.`);
+  const { desktop: desktopAssets, mobile: mobileAssets } = resolveCaseGallery(project, readiness);
+  const viewerAssets = [...desktopAssets, ...mobileAssets];
+  const [viewerIndex, setViewerIndex] = useState<number | null>(null);
+  const triggerRef = useRef<HTMLElement | null>(null);
 
   if (!desktopAssets.length && !mobileAssets.length) return null;
 
@@ -110,13 +108,14 @@ function CaseGallery({ project }: CaseGalleryProps) {
     <S.Gallery aria-labelledby="case-gallery-title">
       <S.GalleryEyebrow>Prova visual</S.GalleryEyebrow>
       <S.GalleryTitle id="case-gallery-title">O trabalho em uso.</S.GalleryTitle>
-      {desktopAssets.length ? <GalleryGroup label="DESKTOP" assets={desktopAssets} /> : null}
-      {mobileAssets.length ? <GalleryGroup label="MOBILE" assets={mobileAssets} /> : null}
+      {desktopAssets.length ? <GalleryGroup label="DESKTOP" assets={desktopAssets} onOpen={(asset, trigger) => { triggerRef.current = trigger; setViewerIndex(viewerAssets.findIndex((candidate) => candidate.path === asset.path)); }} /> : null}
+      {mobileAssets.length ? <GalleryGroup label="MOBILE" assets={mobileAssets} onOpen={(asset, trigger) => { triggerRef.current = trigger; setViewerIndex(viewerAssets.findIndex((candidate) => candidate.path === asset.path)); }} /> : null}
+      {viewerIndex !== null ? <MediaViewer assets={viewerAssets} index={viewerIndex} onClose={() => { setViewerIndex(null); requestAnimationFrame(() => triggerRef.current?.focus()); }} onChange={setViewerIndex} /> : null}
     </S.Gallery>
   );
 }
 
-function GalleryGroup({ label, assets }: { label: 'DESKTOP' | 'MOBILE'; assets: readonly NonNullable<ReturnType<typeof findReadinessBySlug>>['assets'][number][] }) {
+function GalleryGroup({ label, assets, onOpen }: { label: 'DESKTOP' | 'MOBILE'; assets: readonly ProjectMediaAsset[]; onOpen: (asset: ProjectMediaAsset, trigger: HTMLElement) => void }) {
   const ref = useRef<HTMLDivElement>(null);
   const reveal = useEditorialReveal(ref);
 
@@ -129,16 +128,79 @@ function GalleryGroup({ label, assets }: { label: 'DESKTOP' | 'MOBILE'; assets: 
       <S.GalleryGrid $variant={label === 'MOBILE' ? 'mobile' : 'desktop'}>
         {assets.map((asset) => (
           <S.GalleryFigure key={asset.path} $variant={label === 'MOBILE' ? 'mobile' : 'desktop'}>
-            {asset.roles.includes('mobile') ? (
-              <ProjectPhoneFrame src={asset.path} alt={asset.alt} width={asset.width} height={asset.height} />
+            {asset.kind === 'screenshot' ? (
+              <S.GalleryTrigger type="button" aria-label={`Ampliar: ${asset.alt}`} onClick={(event) => onOpen(asset, event.currentTarget)}>
+                {asset.roles.includes('mobile') ? (
+                  <ProjectPhoneFrame src={asset.path} alt={asset.alt} width={asset.width} height={asset.height} />
+                ) : (
+                  <ProjectBrowserFrame src={asset.path} alt={asset.alt} width={asset.width} height={asset.height} listing gallery />
+                )}
+              </S.GalleryTrigger>
+            ) : asset.roles.includes('mobile') ? (
+              <ProjectPhoneFrame src={asset.path} alt={asset.alt} width={asset.width} height={asset.height} kind="video" poster={asset.posterPath} fallbackSrc={asset.fallbackPath} onExpand={(event) => onOpen(asset, event.currentTarget)} expandLabel="Abrir vídeo no viewer" />
             ) : (
-              <ProjectBrowserFrame src={asset.path} alt={asset.alt} width={asset.width} height={asset.height} listing gallery />
+              <ProjectBrowserFrame src={asset.path} alt={asset.alt} width={asset.width} height={asset.height} listing gallery kind="video" poster={asset.posterPath} fallbackSrc={asset.fallbackPath} onExpand={(event) => onOpen(asset, event.currentTarget)} expandLabel="Abrir vídeo no viewer" />
             )}
             <S.GalleryCaption>{asset.description}</S.GalleryCaption>
           </S.GalleryFigure>
         ))}
       </S.GalleryGrid>
     </S.GalleryGroup>
+  );
+}
+
+function MediaViewer({ assets, index, onClose, onChange }: { assets: readonly ProjectMediaAsset[]; index: number; onClose: () => void; onChange: (index: number) => void }) {
+  const closeRef = useRef<HTMLButtonElement>(null);
+  const mediaRef = useRef<HTMLVideoElement>(null);
+  const [failedVideoIndex, setFailedVideoIndex] = useState<number | null>(null);
+  const pauseCurrentVideo = useCallback(() => mediaRef.current?.pause(), []);
+  const changeMedia = useCallback((nextIndex: number) => { pauseCurrentVideo(); onChange(nextIndex); }, [onChange, pauseCurrentVideo]);
+  const closeViewer = useCallback(() => { pauseCurrentVideo(); onClose(); }, [onClose, pauseCurrentVideo]);
+
+  useEffect(() => {
+    const previousOverflow = document.body.style.overflow;
+    const activeVideo = mediaRef.current;
+    document.body.style.overflow = 'hidden';
+    closeRef.current?.focus();
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') closeViewer();
+      if (event.key === 'ArrowLeft' && index > 0) changeMedia(index - 1);
+      if (event.key === 'ArrowRight' && index < assets.length - 1) changeMedia(index + 1);
+      if (event.key === 'Tab') {
+        const focusable = [...document.querySelectorAll<HTMLButtonElement>('[role="dialog"] button:not(:disabled)')];
+        const currentIndex = focusable.indexOf(document.activeElement as HTMLButtonElement);
+        const nextIndex = currentIndex === -1 ? 0 : (currentIndex + (event.shiftKey ? -1 : 1) + focusable.length) % focusable.length;
+        event.preventDefault();
+        focusable[nextIndex]?.focus();
+      }
+    };
+    document.addEventListener('keydown', onKeyDown);
+    return () => { activeVideo?.pause(); document.body.style.overflow = previousOverflow; document.removeEventListener('keydown', onKeyDown); };
+  }, [index, changeMedia, closeViewer, assets.length]);
+
+  const asset = assets[index];
+  const isVideo = asset.kind === 'video';
+  return (
+    <S.Viewer role="dialog" aria-modal="true" aria-labelledby="case-viewer-title">
+      <S.ViewerPanel>
+        <S.ViewerToolbar>
+          <span id="case-viewer-title">{asset.alt}</span>
+          <S.ViewerControls>
+            <S.ViewerButton type="button" onClick={() => changeMedia(index - 1)} disabled={index === 0} aria-label="Mídia anterior"><ArrowLeft size={18} aria-hidden="true" /></S.ViewerButton>
+            <S.ViewerButton type="button" onClick={() => changeMedia(index + 1)} disabled={index === assets.length - 1} aria-label="Próxima mídia"><ArrowRight size={18} aria-hidden="true" /></S.ViewerButton>
+            <S.ViewerButton ref={closeRef} type="button" onClick={closeViewer}>Fechar</S.ViewerButton>
+          </S.ViewerControls>
+        </S.ViewerToolbar>
+        <S.ViewerImageWrap>
+          {isVideo && failedVideoIndex !== index ? (
+            <S.ViewerVideo ref={mediaRef} src={asset.path} poster={asset.posterPath} controls playsInline preload="none" aria-label={asset.alt} onError={() => setFailedVideoIndex(index)} />
+          ) : (
+            <S.ViewerImage src={isVideo ? asset.fallbackPath : asset.path} alt={asset.alt} />
+          )}
+        </S.ViewerImageWrap>
+        <S.ViewerCaption>{asset.description} · {index + 1} de {assets.length}</S.ViewerCaption>
+      </S.ViewerPanel>
+    </S.Viewer>
   );
 }
 

@@ -287,6 +287,94 @@ export const GalleryCaption = styled.figcaption`
   line-height: 1.45;
 `;
 
+export const GalleryTrigger = styled.button`
+  width: 100%;
+  padding: 0;
+  display: block;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: zoom-in;
+`;
+
+export const Viewer = styled.div`
+  position: fixed;
+  z-index: 100;
+  inset: 0;
+  padding: clamp(1rem, 3vw, 3rem);
+  display: grid;
+  place-items: center;
+  background: rgba(13, 21, 34, 0.94);
+`;
+
+export const ViewerPanel = styled.div`
+  width: min(100%, 78rem);
+  max-height: 100%;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: 1rem;
+  color: ${colors.paper};
+`;
+
+export const ViewerToolbar = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+`;
+
+export const ViewerControls = styled.div`
+  display: flex;
+  gap: 0.5rem;
+`;
+
+export const ViewerButton = styled.button`
+  min-width: 2.5rem;
+  min-height: 2.5rem;
+  padding: 0.55rem 0.75rem;
+  border: 1px solid rgba(245, 242, 236, 0.24);
+  border-radius: ${layout.radii.control};
+  background: rgba(245, 242, 236, 0.08);
+  color: ${colors.paper};
+  font: inherit;
+  cursor: pointer;
+  &:hover:not(:disabled), &:focus-visible:not(:disabled) { background: rgba(108, 99, 255, 0.72); }
+  &:disabled { cursor: not-allowed; opacity: 0.38; }
+`;
+
+export const ViewerImageWrap = styled.div`
+  min-height: 0;
+  display: grid;
+  place-items: center;
+  overflow: auto;
+`;
+
+export const ViewerImage = styled.img`
+  max-width: 100%;
+  max-height: min(72svh, 52rem);
+  width: auto;
+  height: auto;
+  display: block;
+  object-fit: contain;
+`;
+
+export const ViewerVideo = styled.video`
+  max-width: 100%;
+  max-height: min(72svh, 52rem);
+  width: auto;
+  height: auto;
+  display: block;
+  object-fit: contain;
+`;
+
+export const ViewerCaption = styled.p`
+  max-width: 52rem;
+  color: ${colors.textSecondary};
+  font-size: 0.9rem;
+  line-height: 1.5;
+`;
+
 export const CopyBlock = styled.div`
 `;
 

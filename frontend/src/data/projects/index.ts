@@ -83,6 +83,7 @@ export const projects = [
     media: {
       cover: '/projects/echo-cosmic-energia/echo-social.png',
       gallery: ['/projects/echo-cosmic-energia/echo-social.png', '/projects/echo-cosmic-energia/echo-store-desktop.png', '/projects/echo-cosmic-energia/echo-articles-desktop.png', '/projects/echo-cosmic-energia/echo-business-services-desktop.png', '/projects/echo-cosmic-energia/echo-home-mobile.png', '/projects/echo-cosmic-energia/echo-links-mobile.png'],
+      videos: ['/projects/echo-cosmic-energia/videos/echo-tour-desktop.webm', '/projects/echo-cosmic-energia/videos/echo-tour-mobile.webm'],
     },
     routeMetadata: { title: 'EchoCosmicEnergia — case | Repage', description: 'Case da EchoCosmicEnergia, com comércio digital, conteúdo e diferentes pontos de contato.' },
   },
@@ -107,6 +108,7 @@ export const projects = [
     media: {
       cover: '/projects/axium/axium-social.png',
       gallery: ['/projects/axium/axium-social.png', '/projects/axium/axium-nr01-desktop.png', '/projects/axium/axium-nr01-mobile.png', '/projects/axium/axium-blog-desktop.png', '/projects/axium/axium-blog-mobile.png', '/projects/axium/axium-home-mobile.png'],
+      videos: ['/projects/axium/videos/axium-tour-desktop.webm', '/projects/axium/videos/axium-tour-mobile.webm'],
     },
     routeMetadata: { title: 'Axium — case | Repage', description: 'Case da Axium, com experiência institucional, serviços e conteúdo editorial responsivo.' },
   },
@@ -131,7 +133,7 @@ export const projects = [
     media: {
       cover: '/projects/dev-schedule/devschedule-social.png',
       gallery: ['/projects/dev-schedule/devschedule-social.png', '/projects/dev-schedule/devschedule-client-services-mobile.png', '/projects/dev-schedule/devschedule-client-calendar-desktop.png', '/projects/dev-schedule/devschedule-client-calendar-mobile.png', '/projects/dev-schedule/devschedule-client-availability-desktop.png', '/projects/dev-schedule/devschedule-client-availability-mobile.png', '/projects/dev-schedule/devschedule-client-data-desktop.png', '/projects/dev-schedule/devschedule-client-data-mobile.png', '/projects/dev-schedule/devschedule-admin-dashboard-desktop.png', '/projects/dev-schedule/devschedule-admin-dashboard-mobile.png'],
-      videos: ['/projects/dev-schedule/videos/devschedule-client-desktop.webm', '/projects/dev-schedule/videos/devschedule-admin-desktop.webm'],
+      videos: ['/projects/dev-schedule/videos/devschedule-client-desktop.webm', '/projects/dev-schedule/videos/devschedule-client-mobile.webm', '/projects/dev-schedule/videos/devschedule-admin-desktop.webm', '/projects/dev-schedule/videos/devschedule-admin-mobile.webm'],
     },
     routeMetadata: { title: 'DevSchedule — case | Repage', description: 'Case do DevSchedule, desafio técnico de agendamento com fluxo público e administração demonstrativa.' },
   },
@@ -155,7 +157,7 @@ export const projects = [
     media: {
       cover: '/projects/green-tweet/greentweet-social.png',
       gallery: ['/projects/green-tweet/greentweet-social.png', '/projects/green-tweet/greentweet-feed-posts-mobile.png', '/projects/green-tweet/greentweet-profile-desktop.png', '/projects/green-tweet/greentweet-profile-mobile.png', '/projects/green-tweet/greentweet-notifications-desktop.png', '/projects/green-tweet/greentweet-notifications-mobile.png', '/projects/green-tweet/greentweet-demo-profile-desktop.png', '/projects/green-tweet/greentweet-demo-profile-mobile.png', '/projects/green-tweet/greentweet-comments-desktop.png', '/projects/green-tweet/greentweet-comments-mobile.png'],
-      videos: ['/projects/green-tweet/videos/greentweet-tour-desktop.webm'],
+      videos: ['/projects/green-tweet/videos/greentweet-tour-desktop.webm', '/projects/green-tweet/videos/greentweet-tour-mobile.webm'],
     },
     routeMetadata: { title: 'GreenTweet — case | Repage', description: 'Case do GreenTweet, projeto próprio full stack inspirado em uma rede social.' },
   },
@@ -179,6 +181,7 @@ export const projects = [
     media: {
       cover: '/projects/a-alma-no-comando/alma-social.png',
       gallery: ['/projects/a-alma-no-comando/alma-social.png', '/projects/a-alma-no-comando/alma-home-mobile.png', '/projects/a-alma-no-comando/alma-method-desktop.png', '/projects/a-alma-no-comando/alma-book-desktop.png', '/projects/a-alma-no-comando/alma-manifesto-desktop.png', '/projects/a-alma-no-comando/alma-manifesto-mobile.png'],
+      videos: ['/projects/a-alma-no-comando/videos/alma-tour-desktop.webm', '/projects/a-alma-no-comando/videos/alma-tour-mobile.webm'],
     },
     routeMetadata: { title: 'A Alma no Comando — case | Repage', description: 'Case de A Alma no Comando, landing page responsiva organizada em seções editoriais.' },
   },
@@ -202,6 +205,7 @@ export const projects = [
     media: {
       cover: '/projects/alicerce-da-alma/alicerce-social.png',
       gallery: ['/projects/alicerce-da-alma/alicerce-social.png', '/projects/alicerce-da-alma/alicerce-home-mobile.png', '/projects/alicerce-da-alma/alicerce-services-desktop.png', '/projects/alicerce-da-alma/alicerce-services-mobile.png', '/projects/alicerce-da-alma/alicerce-differentials-desktop.png', '/projects/alicerce-da-alma/alicerce-differentials-mobile.png'],
+      videos: ['/projects/alicerce-da-alma/videos/alicerce-tour-desktop.webm', '/projects/alicerce-da-alma/videos/alicerce-tour-mobile.webm'],
     },
     routeMetadata: { title: 'Alicerce da Alma — case | Repage', description: 'Case do Alicerce da Alma, experiência institucional responsiva com serviços e diferenciais.' },
   },

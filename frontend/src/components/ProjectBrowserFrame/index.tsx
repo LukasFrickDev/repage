@@ -1,3 +1,6 @@
+import { useState } from 'react';
+import { Maximize2 } from 'lucide-react';
+import type { MouseEvent } from 'react';
 import styled from 'styled-components';
 import { breakpoints, colors, homepageTokens } from '../../styles/theme';
 
@@ -9,6 +12,11 @@ type ProjectBrowserFrameProps = {
   loading?: 'eager' | 'lazy';
   listing?: boolean;
   gallery?: boolean;
+  kind?: 'image' | 'video';
+  poster?: string;
+  fallbackSrc?: string;
+  onExpand?: (event: MouseEvent<HTMLButtonElement>) => void;
+  expandLabel?: string;
 };
 
 const Frame = styled.span<{ $listing: boolean; $gallery: boolean }>`
@@ -98,15 +106,75 @@ const Image = styled.img<{ $gallery: boolean }>`
   object-position: ${({ $gallery }) => ($gallery ? 'top center' : 'center')};
 `;
 
-export function ProjectBrowserFrame({ listing = false, gallery = false, ...imageProps }: ProjectBrowserFrameProps) {
+const Video = styled.video<{ $gallery: boolean }>`
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  object-position: ${({ $gallery }) => ($gallery ? 'top center' : 'center')};
+`;
+
+const Fallback = styled.span`
+  width: 100%;
+  height: 100%;
+  min-height: 8rem;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: ${colors.inkRaised};
+  color: ${colors.textSecondary};
+  font-size: 0.8rem;
+  text-align: center;
+`;
+
+const ExpandButton = styled.button`
+  position: absolute;
+  z-index: 2;
+  top: 0.25rem;
+  right: 0.4rem;
+  min-width: 1.8rem;
+  min-height: 1.8rem;
+  padding: 0.2rem;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(245, 242, 236, 0.28);
+  border-radius: 0.35rem;
+  background: rgba(16, 24, 39, 0.72);
+  color: ${colors.paper};
+  cursor: pointer;
+  &:hover, &:focus-visible { background: rgba(108, 99, 255, 0.84); }
+`;
+
+export function ProjectBrowserFrame({ listing = false, gallery = false, kind = 'image', poster, fallbackSrc, onExpand, expandLabel = 'Abrir mídia no viewer', src, alt, width, height, loading = 'lazy' }: ProjectBrowserFrameProps) {
+  const [failed, setFailed] = useState(false);
+
   return (
     <Frame $listing={listing} $gallery={gallery} data-project-browser-frame={gallery ? '' : undefined}>
       <Bar $gallery={gallery} aria-hidden="true">
         <WindowControls><i /><i /><i /></WindowControls>
         <AddressHint />
       </Bar>
+      {onExpand ? <ExpandButton type="button" onClick={onExpand} aria-label={expandLabel}><Maximize2 size={14} aria-hidden="true" /></ExpandButton> : null}
       <Viewport $gallery={gallery}>
-        <Image $gallery={gallery} {...imageProps} />
+        {failed ? (
+          fallbackSrc ? <Image $gallery={gallery} src={fallbackSrc} alt={alt} width={width} height={height} loading="lazy" /> : <Fallback role="img" aria-label={`${alt} — mídia indisponível`}>Mídia indisponível</Fallback>
+        ) : kind === 'video' ? (
+          <Video
+            $gallery={gallery}
+            src={src}
+            poster={poster}
+            width={width}
+            height={height}
+            controls
+            playsInline
+            preload="none"
+            aria-label={alt}
+            data-project-video="true"
+            onError={() => setFailed(true)}
+          />
+        ) : (
+          <Image $gallery={gallery} src={src} alt={alt} width={width} height={height} loading={loading} onError={() => setFailed(true)} />
+        )}
       </Viewport>
     </Frame>
   );

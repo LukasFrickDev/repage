@@ -58,7 +58,7 @@ export function getProjectPublicabilityErrors(
   });
   project.media.videos?.forEach((path) => {
     const asset = assetsByPath.get(path);
-    if (!asset || asset.kind !== 'video') errors.push(`Vídeo não está registrado: ${path}.`);
+    if (!asset || asset.kind !== 'video' || (!asset.roles.includes('desktop') && !asset.roles.includes('mobile'))) errors.push(`Vídeo não está registrado ou classificado: ${path}.`);
   });
   if (project.publicUrl && (readiness.linkStatus !== 'verified' || !isValidPublicUrl(project.publicUrl))) {
     errors.push('URL pública não está verificada.');
