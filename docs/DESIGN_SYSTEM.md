@@ -1,7 +1,7 @@
 # Repage — Design System
 ## Status
 - **Status:** direção visual e experiência aprovadas.
-- **Última consolidação:** 5 de agosto de 2026.
+- **Última consolidação:** 13 de agosto de 2026.
 - **Responsabilidade:** identidade, layout, componentes, mídia, movimento, responsividade, acessibilidade e qualidade.
 - **Tokens auditados:** `frontend/src/styles/theme.ts`.
 - **Memória completa:** página de Design System no Notion.
@@ -819,11 +819,8 @@ O design da V1 está pronto quando:
 ## 71. Pendências
 - Validar licença, arquivos e acentuação da Clash Display.
 - Decidir contingência somente se necessário.
-- Produzir mídias reais.
 - Aprovar mídias de projetos pagos.
-- Definir storyboard do hero em spec.
 - Prototipar capítulos de projetos.
-- Definir coreografia do processo em spec.
 - Concluir conteúdo dos cases.
 - Validar contraste final.
 - Validar performance de mídia.

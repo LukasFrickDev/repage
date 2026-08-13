@@ -3,7 +3,7 @@
 * **Status:** implemented
 * **Responsável:** Lukas Frick
 * **Data:** 7 de agosto de 2026
-* **Última revisão:** 12 de agosto de 2026
+* **Última revisão:** 13 de agosto de 2026
 * **Branch-base:** `main`
 * **Branch de implementação:** `feat/definitive-homepage`
 * **Entrega do roadmap:** 3 — Homepage definitiva
@@ -712,11 +712,11 @@ O epílogo explicita três dimensões de continuidade:
 
 **Correções**
 
-> Ajustes pontuais para manter a experiência consistente.
+> Ajustes pontuais para manter a experiência clara e consistente.
 
 **Novas evoluções**
 
-> Expansões e refinamentos avaliados conforme a necessidade.
+> Expansões e refinamentos avaliados conforme a necessidade do projeto.
 
 Esses três pontos:
 
@@ -904,7 +904,7 @@ Sequência:
 
 1. **Conversa** — entender negócio, necessidade, objetivo, público e momento.
 2. **Planejamento** — organizar estrutura, conteúdo, prioridades e caminho da solução.
-3. **Criação** — transformar decisões em direção visual e desenvolvimento.
+3. **Criação** — transformar as decisões em direção visual e desenvolvimento.
 4. **Ajustes** — revisar a entrega com validações objetivas e refinamentos necessários.
 5. **Publicação** — preparar e disponibilizar a solução no ambiente definido.
 6. **Evolução** — avaliar suporte, manutenção ou novas necessidades depois da entrega.
@@ -954,7 +954,7 @@ Não substituir simplesmente por seis cards empilhados. Desktop e mobile usam a 
 
 **Descrição**
 
-> A Repage é um estúdio de desenvolvimento web conduzido de forma próxima, unindo estrutura, conteúdo, direção visual e tecnologia para criar experiências digitais profissionais e preparadas para evoluir.
+> A Repage é um estúdio de desenvolvimento web que reúne estrutura, conteúdo, direção visual e tecnologia para transformar necessidades reais em experiências digitais profissionais e preparadas para evoluir.
 
 **Assinatura**
 
