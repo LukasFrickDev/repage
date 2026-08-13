@@ -23,9 +23,9 @@ export const routeMetadata = {
     indexing: 'index',
   },
   portfolio: {
-    title: 'Portfólio em preparação | Repage',
-    description: 'Estrutura inicial do portfólio da Repage, atualmente em preparação.',
-    indexing: 'noindex',
+    title: 'Portfólio | Repage',
+    description: 'Projetos pagos, projeto próprio e desafio técnico conduzidos por Lukas Frick.',
+    indexing: 'index',
   },
   case: {
     title: 'Case em preparação | Repage',
@@ -49,11 +49,11 @@ export const routeMetadata = {
   },
 } as const satisfies Record<RouteMetadataKey, RouteMetadata>;
 
-export function getCaseMetadata(projectTitle: string): RouteMetadata {
+export function getCaseMetadata(projectMetadata: { title: string; description: string }): RouteMetadata {
   return {
-    ...routeMetadata.case,
-    title: `${projectTitle} — case em preparação | Repage`,
-    description: `Estrutura temporária do case ${projectTitle}, atualmente em preparação.`,
+    title: projectMetadata.title,
+    description: projectMetadata.description,
+    indexing: 'index',
   };
 }
 

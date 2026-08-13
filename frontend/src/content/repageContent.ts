@@ -3,8 +3,6 @@ type NavigationItem = {
   href: string;
 };
 
-export type FeaturedProjectSlug = 'echo-cosmic-energia' | 'axium' | 'dev-schedule';
-
 export const navigation: NavigationItem[] = [
   { label: 'Serviços', href: '/#servicos' },
   { label: 'Projetos', href: '/portfolio' },
@@ -31,14 +29,6 @@ export const featuredProjectsSectionContent = {
   title: 'Trabalho real para necessidades diferentes.',
   description:
     'Uma seleção que reúne comércio digital, presença institucional e uma aplicação de agendamento.',
-  summaries: {
-    'echo-cosmic-energia':
-      'Experiência full stack com catálogo, loja, conteúdo editorial e diferentes pontos de contato em uma presença digital integrada.',
-    axium:
-      'Experiência institucional para uma empresa de serviços, com páginas especializadas e conteúdo editorial responsivo.',
-    'dev-schedule':
-      'Aplicação de agendamento com fluxo público por etapas e uma área administrativa demonstrativa.',
-  } satisfies Record<FeaturedProjectSlug, string>,
   allProjectsCta: { label: 'Ver todos os projetos', href: '/portfolio' },
 };
 

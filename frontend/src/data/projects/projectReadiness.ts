@@ -174,13 +174,13 @@ export const projectReadinessManifest = [
   {
     slug: echoSlug,
     evidenceStatus: 'confirmed',
-    contentStatus: 'partial',
+    contentStatus: 'ready',
     authorizationStatus: 'confirmed',
     authorizationSource: paidAuthorizationSource,
     linkStatus: 'verified',
     mediaStatus: 'ready',
-    blockers: ['Participação pública e relação temporal com a formalização da Repage não foram confirmadas.'],
-    nextSteps: ['Confirmar participação pública e relação temporal com Lukas antes da copy definitiva.'],
+    blockers: [],
+    nextSteps: [],
     assets: [
       image({ slug: echoSlug, filename: 'echo-social.png', roles: ['cover', 'social'], sourceUrl: echoRoot, origin: 'public-site', viewport: socialViewport, bytes: 635807, alt: 'Página inicial da Echo Cosmic Energia para compartilhamento social.', description: 'Captura principal preparada para uso social.', authorizationStatus: 'confirmed' }),
       image({ slug: echoSlug, filename: 'echo-home-mobile.png', roles: ['mobile'], sourceUrl: echoRoot, origin: 'public-site', viewport: mobileViewport, bytes: 251381, alt: 'Página inicial da Echo Cosmic Energia em mobile.', description: 'Referência responsiva da homepage pública.', authorizationStatus: 'confirmed' }),
@@ -194,14 +194,14 @@ export const projectReadinessManifest = [
   },
   {
     slug: axiumSlug,
-    evidenceStatus: 'partial',
-    contentStatus: 'partial',
+    evidenceStatus: 'confirmed',
+    contentStatus: 'ready',
     authorizationStatus: 'confirmed',
     authorizationSource: paidAuthorizationSource,
     linkStatus: 'verified',
     mediaStatus: 'ready',
-    blockers: ['Participação pública, serviços detalhados e relação temporal não têm fonte editorial específica.'],
-    nextSteps: ['Confirmar participação, escopo público e relação temporal com Lukas antes da copy definitiva.'],
+    blockers: [],
+    nextSteps: [],
     assets: [
       image({ slug: axiumSlug, filename: 'axium-social.png', roles: ['cover', 'social'], sourceUrl: axiumRoot, origin: 'public-site', viewport: socialViewport, bytes: 686612, alt: 'Abertura institucional da Axium para compartilhamento social.', description: 'Captura principal preparada para uso social.', authorizationStatus: 'confirmed' }),
       image({ slug: axiumSlug, filename: 'axium-home-mobile.png', roles: ['mobile'], sourceUrl: axiumRoot, origin: 'public-site', viewport: mobileViewport, bytes: 251481, alt: 'Abertura institucional da Axium em mobile.', description: 'Referência responsiva da homepage pública.', authorizationStatus: 'confirmed' }),
@@ -243,13 +243,13 @@ export const projectReadinessManifest = [
   {
     slug: greenTweetSlug,
     evidenceStatus: 'confirmed',
-    contentStatus: 'partial',
+    contentStatus: 'ready',
     authorizationStatus: 'not-required',
     authorizationSource: null,
     linkStatus: 'verified',
     mediaStatus: 'ready',
-    blockers: ['A relação temporal com a formalização da Repage não foi confirmada.'],
-    nextSteps: ['Confirmar a relação temporal com Lukas antes da copy definitiva.'],
+    blockers: [],
+    nextSteps: [],
     assets: [
       image({ slug: greenTweetSlug, filename: 'greentweet-social.png', roles: ['cover', 'social'], sourceUrl: `${greenTweetRoot}feed`, origin: 'authenticated-demo', viewport: socialViewport, bytes: 252431, alt: 'Feed demonstrativo do GreenTweet para compartilhamento social.', description: 'Estado demonstrativo preparado para uso social.', authorizationStatus: 'not-required' }),
       image({ slug: greenTweetSlug, filename: 'greentweet-feed-mobile.png', roles: ['mobile'], sourceUrl: `${greenTweetRoot}feed`, origin: 'authenticated-demo', viewport: mobileViewport, bytes: 48543, alt: 'Feed demonstrativo do GreenTweet em mobile.', description: 'Referência móvel do feed autenticado.', authorizationStatus: 'not-required' }),
@@ -269,13 +269,13 @@ export const projectReadinessManifest = [
   {
     slug: almaSlug,
     evidenceStatus: 'confirmed',
-    contentStatus: 'partial',
+    contentStatus: 'ready',
     authorizationStatus: 'confirmed',
     authorizationSource: paidAuthorizationSource,
     linkStatus: 'verified',
     mediaStatus: 'ready',
-    blockers: ['Participação, serviços e relação temporal não têm confirmação editorial pública.'],
-    nextSteps: ['Confirmar participação, serviços e relação temporal com Lukas antes da copy definitiva.'],
+    blockers: [],
+    nextSteps: [],
     assets: [
       image({ slug: almaSlug, filename: 'alma-social.png', roles: ['cover', 'social'], sourceUrl: almaRoot, origin: 'public-site', viewport: { width: 1689, height: 725 }, bytes: 1587706, alt: 'Abertura de A Alma no Comando para compartilhamento social.', description: 'Captura principal preparada para uso social.', authorizationStatus: 'confirmed' }),
       image({ slug: almaSlug, filename: 'alma-home-mobile.png', roles: ['mobile'], sourceUrl: almaRoot, origin: 'public-site', viewport: mobileViewport, bytes: 471207, alt: 'Abertura do site A Alma no Comando em mobile.', description: 'Referência móvel da landing page pública.', authorizationStatus: 'confirmed' }),
@@ -289,14 +289,14 @@ export const projectReadinessManifest = [
   },
   {
     slug: alicerceSlug,
-    evidenceStatus: 'partial',
-    contentStatus: 'partial',
+    evidenceStatus: 'confirmed',
+    contentStatus: 'ready',
     authorizationStatus: 'confirmed',
     authorizationSource: paidAuthorizationSource,
     linkStatus: 'verified',
     mediaStatus: 'ready',
-    blockers: ['Participação, serviços específicos e relação temporal permanecem pendentes de fonte editorial.'],
-    nextSteps: ['Confirmar participação, serviços específicos e relação temporal com Lukas antes da copy definitiva.'],
+    blockers: [],
+    nextSteps: [],
     assets: [
       image({ slug: alicerceSlug, filename: 'alicerce-social.png', roles: ['cover', 'social'], sourceUrl: alicerceRoot, origin: 'public-site', viewport: socialViewport, bytes: 655748, alt: 'Abertura do Alicerce da Alma para compartilhamento social.', description: 'Captura principal preparada para uso social.', authorizationStatus: 'confirmed' }),
       image({ slug: alicerceSlug, filename: 'alicerce-home-mobile.png', roles: ['mobile'], sourceUrl: alicerceRoot, origin: 'public-site', viewport: mobileViewport, bytes: 235086, alt: 'Abertura do site Alicerce da Alma em mobile.', description: 'Referência móvel da homepage pública.', authorizationStatus: 'confirmed' }),
@@ -354,7 +354,6 @@ export function validateProjectReadinessManifest(
 
   projectRecords.forEach((project) => {
     if (!readinessSlugs.includes(project.slug)) errors.push(`Projeto sem prontidão: ${project.slug}.`);
-    if (project.publicationStatus === 'published') errors.push(`Projeto publicado indevidamente: ${project.slug}.`);
   });
 
   records.forEach((record) => {

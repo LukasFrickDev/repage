@@ -1,5 +1,6 @@
 import { routeMetadata, useRouteMetadata } from '../../app/routeMetadata';
-import { listProjects, projectNatureLabels } from '../../data/projects';
+import { projectNatureLabels } from '../../data/projects';
+import { listPublicProjects } from '../../data/projects/publication';
 import * as S from '../StructuralPage/styles';
 
 export function PortfolioPage() {
@@ -9,12 +10,12 @@ export function PortfolioPage() {
     <S.Page aria-labelledby="portfolio-title">
       <S.Container>
         <S.Eyebrow>Portfólio</S.Eyebrow>
-        <S.Title id="portfolio-title" data-route-heading tabIndex={-1}>Projetos em preparação.</S.Title>
+        <S.Title id="portfolio-title" data-route-heading tabIndex={-1}>Projetos conduzidos por Lukas Frick.</S.Title>
         <S.Description>
-          Esta página reúne a estrutura inicial dos projetos confirmados. Os cases e materiais completos ainda estão em preparação.
+          Trabalhos pagos, projeto próprio e desafio técnico que mostram diferentes formas de combinar estratégia, design e desenvolvimento.
         </S.Description>
         <S.ProjectList aria-label="Projetos registrados">
-          {listProjects().map((project) => (
+          {listPublicProjects().map((project) => (
             <li key={project.slug}>
               <S.ProjectLink to={`/portfolio/${project.slug}`}>
                 <strong>{project.title}</strong>

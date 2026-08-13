@@ -1,12 +1,13 @@
 import { useParams } from 'react-router-dom';
 import { getCaseMetadata, routeMetadata, useRouteMetadata } from '../../app/routeMetadata';
-import { findProjectBySlug, projectNatureLabels } from '../../data/projects';
+import { projectNatureLabels } from '../../data/projects';
+import { findPublicProjectBySlug } from '../../data/projects/publication';
 import * as S from '../StructuralPage/styles';
 
 export function CasePage() {
   const { slug = '' } = useParams();
-  const project = findProjectBySlug(slug);
-  useRouteMetadata(project ? getCaseMetadata(project.title) : routeMetadata.notFound);
+  const project = findPublicProjectBySlug(slug);
+  useRouteMetadata(project ? getCaseMetadata(project.routeMetadata) : routeMetadata.notFound);
 
   if (!project) {
     return (
@@ -27,11 +28,11 @@ export function CasePage() {
   return (
     <S.Page aria-labelledby="case-title">
       <S.Container>
-        <S.Eyebrow>Case em preparação</S.Eyebrow>
+        <S.Eyebrow>Case</S.Eyebrow>
         <S.Title id="case-title" data-route-heading tabIndex={-1}>{project.title}</S.Title>
         <S.Meta>{projectNatureLabels[project.nature]}</S.Meta>
         <S.Description>
-          Este case ainda está em preparação. A página completa será publicada somente após a validação das informações e dos materiais aplicáveis.
+          {project.summary}
         </S.Description>
         <S.Actions>
           <S.ActionLink to="/#contato" data-primary="true">Solicitar orçamento</S.ActionLink>

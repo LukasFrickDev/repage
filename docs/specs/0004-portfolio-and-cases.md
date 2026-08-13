@@ -85,6 +85,10 @@ Para esta entrega está confirmado que Lukas Frick conduziu, nos seis projetos:
 * direção visual/design;
 * desenvolvimento.
 
+Para DevSchedule e GreenTweet, essa confirmação abrange estratégia inicial, estrutura, direção visual/design e desenvolvimento.
+
+DevSchedule permanece classificado como `technical-challenge` e GreenTweet como `owned`. Nenhum dos dois é cliente. Ambos integram publicamente o portfólio da Repage como projetos conduzidos por Lukas Frick, respeitando suas naturezas de desafio técnico e projeto próprio. A relação temporal com a formalização da Repage permanece não confirmada; portanto, não afirmar que foram originalmente desenvolvidos pela Repage enquanto marca sem essa confirmação.
+
 Nos projetos pagos, o trabalho foi refinado e validado com o cliente.
 
 A copy pública pode descrever essa participação de forma compatível com a natureza de cada projeto.
@@ -191,6 +195,10 @@ Um projeto só pode utilizar:
 `publicationStatus: 'published'`
 
 quando todos os requisitos obrigatórios estiverem atendidos.
+
+`publicationStatus: 'published'` não pode ser a única condição usada pelos seletores públicos. A exposição pública depende da validação conjunta dos requisitos obrigatórios desta spec e do manifesto de prontidão. Alterar isoladamente `publicationStatus` não pode expor um projeto que falhe em conteúdo, autorização, mídia, privacidade, cover, galeria, natureza, ordem, slug ou outro requisito obrigatório.
+
+O gate concreto dessa exposição será definido na Fase 1; esta spec não prescreve ainda sua implementação.
 
 ### Projeto pago
 
@@ -539,6 +547,8 @@ Direção de copy:
 
 Usar grade editorial controlada no desktop.
 
+Aqui, “editorial” descreve composição, hierarquia e ritmo; não significa uma estética crua, excessivamente tipográfica ou com pouca mídia. A mídia real da Entrega 2 deve ter forte presença visual, e screenshots não devem ser tratados como pequenas thumbnails secundárias.
+
 Ordem obrigatória:
 
 1. EchoCosmicEnergia;
@@ -561,6 +571,8 @@ Não exibir tecnologia como informação dominante.
 
 Não transformar a listagem em seis cards SaaS iguais.
 
+A listagem pode explorar diferentes escalas, proporções, assimetria controlada, recortes e alternância de densidade. O resultado deve parecer uma coleção curada, não seis cards SaaS nem um bento grid. A qualidade visual dos projetos deve ser perceptível antes da leitura detalhada.
+
 Não usar vídeo na listagem.
 
 Não usar autoplay.
@@ -581,7 +593,22 @@ Tablet reduz a assimetria progressivamente.
 
 Mobile usa sequência vertical única, preservando ordem e mídia.
 
-### 11.5 Interação
+A variação de escala e ritmo deve servir à curadoria e à presença da mídia, sem transformar a listagem em uma sequência de molduras tipográficas vazias.
+
+### 11.5 Referências visuais operacionais
+
+As referências abaixo orientam somente mecanismos para esta entrega:
+
+* Koto: presença forte de mídia; portfólio como showcase comercial; relação texto/imagem; layouts flexíveis;
+* Build in Amsterdam: escaneabilidade da listagem; transição listagem → case; mídia como prova; alternância entre explicação e demonstração;
+* BASIC/DEPT: ritmo de storytelling; capítulos semânticos; mídia assumindo o palco; variação entre cases dentro do mesmo sistema;
+* Studio Freight: narrativa contextual por projeto; evitar linguagem genérica de agência.
+
+Não devem ser copiadas identidade, paleta, tipografia, layout completo, animação característica ou conceito proprietário.
+
+`docs/DESIGN_SYSTEM.md`, a homepage aprovada e a mídia real da Entrega 2 continuam sendo as referências primárias.
+
+### 11.6 Interação
 
 Hover, quando disponível, pode usar:
 
@@ -625,6 +652,8 @@ Estrutura:
 
 A estrutura semântica é compartilhada, mas nem todo bloco precisa possuir a mesma densidade visual.
 
+A sequência acima representa cobertura semântica obrigatória, não 17 seções visuais consecutivas. É permitido agrupar conteúdos relacionados em capítulos editoriais, intercalar mídia e texto e variar densidade e ritmo conforme o conteúdo.
+
 Conteúdo vazio não gera seção vazia.
 
 ## 13. Direção visual dos cases
@@ -649,7 +678,11 @@ A mídia principal pode atravessar visualmente a transição entre abertura escu
 
 Não copiar o `ProjectStage` da homepage.
 
-Não utilizar sticky/pinned stage nesta entrega.
+Sticky não é padrão e não deve reproduzir o `ProjectStage` da homepage. Só pode ser considerado diante de necessidade narrativa concreta, exigindo track curto, release previsível, tratamento para viewport baixa e solução própria para mobile. Qualquer uso deve ser validado no checkpoint visual antes de replicação.
+
+A mídia mostra a identidade do trabalho; a composição da página mostra a identidade da Repage. Os projetos podem ocupar bastante espaço através de suas mídias, mas a camada externa do case deve continuar reconhecivelmente Repage por tipografia, enquadramento, gutters, superfícies, ritmo, navegação, linhas, planos, recortes, microinterações e motion grammar.
+
+Não transformar cada case em um tema integral baseado na identidade visual do projeto.
 
 ### 13.2 Corpo editorial
 
@@ -998,6 +1031,8 @@ Nenhum projeto depende de hover.
 
 Abertura reorganiza título, metadados, ações e mídia sem comprimir a composição desktop.
 
+Mobile não é apenas desktop empilhado. Para composições expressivas, a implementação deve buscar a versão mobile da mesma ideia, preservando presença da mídia, hierarquia, narrativa, identidade, CTA e ritmo. A geometria pode mudar significativamente quando necessário.
+
 Blocos editoriais se tornam verticais quando necessário.
 
 Duplas desktop/mobile preservam legibilidade.
@@ -1024,7 +1059,7 @@ Preferir:
 
 Não usar como padrão:
 
-* sticky/pinned stage;
+* sticky/pinned stage sem necessidade narrativa concreta;
 * scroll-driven longo;
 * scroll hijacking;
 * snap;
@@ -1288,6 +1323,13 @@ Antes de fechar a spec:
 * confirmar que nenhum case parece página genérica ou template SaaS;
 * confirmar que a estrutura compartilhada não tornou os seis visualmente indistinguíveis;
 * confirmar que diferenças vêm do conteúdo e da mídia, não de seis layouts independentes.
+
+Perguntar também:
+
+* A mídia possui presença suficiente para provar a qualidade do trabalho antes da leitura detalhada?
+* O tratamento editorial está enriquecendo mídia, hierarquia e narrativa ou apenas tornando a interface mais crua?
+
+Uma solução excessivamente tipográfica, vazia, estática ou que trate screenshots como thumbnails secundárias deve ser considerada visualmente incompleta.
 
 Usar checkpoints.
 

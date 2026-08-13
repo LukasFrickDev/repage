@@ -35,7 +35,7 @@ function renderAt(entry: string) {
 describe('public routes', () => {
   it.each([
     ['/', 'Uma nova página para o seu negócio começa aqui.'],
-    ['/portfolio', 'Projetos em preparação.'],
+    ['/portfolio', 'Projetos conduzidos por Lukas Frick.'],
     ['/portfolio/axium', 'Axium'],
     ['/privacidade', 'Política de Privacidade em preparação.'],
     ['/cookies', 'Política de Cookies em preparação.'],
@@ -92,7 +92,7 @@ describe('public routes', () => {
       ['echo-cosmic-energia', 'EchoCosmicEnergia'],
       ['axium', 'Axium'],
       ['dev-schedule', 'DevSchedule'],
-    ].forEach(([slug, title]) => {
+    ].forEach(([slug]) => {
       const links = [...projectsSection.querySelectorAll(`a[href="/portfolio/${slug}"]`)];
       expect(links).toHaveLength(2);
       links.forEach((link) => expect(link).toHaveAttribute('href', `/portfolio/${slug}`));
@@ -152,7 +152,7 @@ describe('public routes', () => {
 
     await user.click(screen.getByRole('link', { name: 'Ver projetos' }));
 
-    const heading = screen.getByRole('heading', { level: 1, name: 'Projetos em preparação.' });
+    const heading = screen.getByRole('heading', { level: 1, name: 'Projetos conduzidos por Lukas Frick.' });
     expect(screen.getByTestId('location')).toHaveTextContent('/portfolio');
     expect(heading).toHaveFocus();
   });
@@ -198,7 +198,7 @@ describe('public routes', () => {
 
     await user.click(screen.getByRole('button', { name: 'Voltar no histórico de teste' }));
     expect(screen.getByTestId('location')).toHaveTextContent('/portfolio');
-    expect(screen.getByRole('heading', { level: 1, name: 'Projetos em preparação.' })).toHaveFocus();
+    expect(screen.getByRole('heading', { level: 1, name: 'Projetos conduzidos por Lukas Frick.' })).toHaveFocus();
 
     await user.click(screen.getByRole('button', { name: 'Avançar no histórico de teste' }));
     expect(screen.getByTestId('location')).toHaveTextContent('/#contato');
@@ -232,7 +232,7 @@ describe('public routes', () => {
     expect(document.getElementById('sobre')?.scrollIntoView).toHaveBeenCalledWith({ block: 'start', behavior: 'auto' });
   });
 
-  it('restores route metadata including noindex after navigation', async () => {
+  it('restores route metadata after navigation', async () => {
     const user = userEvent.setup();
     renderAt('/');
 
@@ -245,22 +245,25 @@ describe('public routes', () => {
 
     await user.click(screen.getByRole('link', { name: 'Ver projetos' }));
 
-    await waitFor(() => expect(document.title).toBe('Portfólio em preparação | Repage'));
-    expect(document.querySelector('meta[name="robots"]')).toHaveAttribute('content', 'noindex, nofollow');
+    await waitFor(() => expect(document.title).toBe(routeMetadata.portfolio.title));
+    expect(document.querySelector('meta[name="robots"]')).toHaveAttribute('content', 'index, follow');
   });
 
   it.each([
     ['/portfolio', routeMetadata.portfolio],
-    ['/portfolio/axium', getCaseMetadata('Axium')],
+    ['/portfolio/axium', getCaseMetadata({ title: 'Axium — case | Repage', description: 'Case da Axium, com experiência institucional, serviços e conteúdo editorial responsivo.' })],
     ['/privacidade', routeMetadata.privacy],
     ['/cookies', routeMetadata.cookies],
     ['/rota-inexistente', routeMetadata.notFound],
-  ])('applies temporary noindex metadata to %s', async (route, metadata) => {
+  ])('applies route metadata to %s', async (route, metadata) => {
     renderAt(route);
 
     await waitFor(() => expect(document.title).toBe(metadata.title));
     expect(document.querySelector('meta[name="description"]')).toHaveAttribute('content', metadata.description);
-    expect(document.querySelector('meta[name="robots"]')).toHaveAttribute('content', 'noindex, nofollow');
+    expect(document.querySelector('meta[name="robots"]')).toHaveAttribute(
+      'content',
+      metadata.indexing === 'index' ? 'index, follow' : 'noindex, nofollow',
+    );
   });
 });
 

@@ -11,7 +11,6 @@ import {
 import type { MotionValue } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { featuredProjectsSectionContent } from '../../content/repageContent';
-import type { FeaturedProjectSlug } from '../../content/repageContent';
 import type { Project } from '../../data/projects';
 import { listHomepageFeaturedProjects } from '../../data/projects/homepage';
 import type { ProjectMediaAsset } from '../../data/projects/projectReadiness';
@@ -242,7 +241,7 @@ export function FeaturedProjectsSection() {
                 project={featured.project}
                 desktop={desktop}
                 mobile={mobile}
-                summary={featuredProjectsSectionContent.summaries[featured.project.slug as FeaturedProjectSlug]}
+                summary={featured.project.summary}
                 progress={progress}
                 window={stageWindows[index]}
                 isActive={activeProject === index}

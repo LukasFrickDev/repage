@@ -4,17 +4,19 @@ import {
   findProjectBySlug,
   isProjectNature,
   listDraftProjects,
-  listFeaturedProjects,
+  listFeaturedProjectRecords,
   listProjects,
-  listPublishedProjects,
+  listPublishedProjectRecords,
   PROJECT_NATURES,
   projects,
 } from '.';
-import type { Project, PublishedProject } from '.';
+import type { Project } from '.';
 import { listHomepageFeaturedProjects } from './homepage';
+import { findPublicProjectBySlug, getProjectPublicabilityErrors, listPublicProjects } from './publication';
+import { projectReadinessManifest } from './projectReadiness';
 
 describe('project data', () => {
-  it('registers the six confirmed projects with valid natures', () => {
+  it('registers the six confirmed projects with valid natures, order and editorial content', () => {
     expect(listProjects()).toHaveLength(6);
     expect(listProjects().map((project) => project.title)).toEqual([
       'EchoCosmicEnergia',
@@ -24,27 +26,26 @@ describe('project data', () => {
       'A Alma no Comando',
       'Alicerce da Alma',
     ]);
+    expect(listProjects().map((project) => project.portfolioOrder)).toEqual([1, 2, 3, 4, 5, 6]);
     expect(projects.every((project) => isProjectNature(project.nature))).toBe(true);
+    expect(projects.every((project) => project.summary && project.overview && project.context && project.challenge && project.solution && project.participation)).toBe(true);
     expect(PROJECT_NATURES).toEqual(['paid', 'owned', 'technical-challenge']);
   });
 
-  it('finds a registered project by slug', () => {
+  it('finds a registered and a public project by slug', () => {
     expect(findProjectBySlug('dev-schedule')?.title).toBe('DevSchedule');
+    expect(findPublicProjectBySlug('dev-schedule')?.title).toBe('DevSchedule');
     expect(findProjectBySlug('unknown-project')).toBeUndefined();
+    expect(findPublicProjectBySlug('unknown-project')).toBeUndefined();
   });
 
-  it('separates drafts from published projects', () => {
-    const published: PublishedProject = {
-      title: 'Published example',
-      slug: 'published-example',
-      nature: 'owned',
-      publicationStatus: 'published',
-    };
-    const records: Project[] = [projects[0], published];
+  it('separates internal drafts from published records', () => {
+    const draft = { ...projects[0], publicationStatus: 'draft' } as Project;
+    const records: Project[] = [draft, projects[1]];
 
-    expect(listDraftProjects(records)).toEqual([projects[0]]);
-    expect(listPublishedProjects(records)).toEqual([published]);
-    expect(listPublishedProjects()).toHaveLength(0);
+    expect(listDraftProjects(records)).toEqual([draft]);
+    expect(listPublishedProjectRecords(records)).toEqual([projects[1]]);
+    expect(listPublishedProjectRecords()).toHaveLength(6);
   });
 
   it('detects duplicate slugs', () => {
@@ -54,15 +55,31 @@ describe('project data', () => {
     expect(findDuplicateProjectSlugs()).toEqual([]);
   });
 
-  it('returns exactly the three homepage highlights in the approved order', () => {
-    expect(listFeaturedProjects().map((project) => project.slug)).toEqual([
+  it('returns only public projects in portfolio order and preserves the three highlights', () => {
+    expect(listPublicProjects().map((project) => project.slug)).toEqual([
+      'echo-cosmic-energia',
+      'axium',
+      'dev-schedule',
+      'green-tweet',
+      'a-alma-no-comando',
+      'alicerce-da-alma',
+    ]);
+    expect(listFeaturedProjectRecords().map((project) => project.slug)).toEqual([
       'echo-cosmic-energia',
       'axium',
       'dev-schedule',
     ]);
-    expect(listFeaturedProjects()).toHaveLength(3);
-    expect(listFeaturedProjects().every((project) => project.publicationStatus === 'draft')).toBe(true);
-    expect(listFeaturedProjects().some((project) => project.slug === 'green-tweet')).toBe(false);
+    expect(listFeaturedProjectRecords()).toHaveLength(3);
+  });
+
+  it('does not bypass the publication gate by changing only publicationStatus', () => {
+    const invalidReadiness = { ...projectReadinessManifest[0], contentStatus: 'partial' as const };
+    const published = { ...projects[0], publicationStatus: 'published' } as Project;
+
+    expect(getProjectPublicabilityErrors(published, [published], [invalidReadiness, ...projectReadinessManifest.slice(1)])).toContain(
+      'Conteúdo do manifesto não está ready.',
+    );
+    expect(findPublicProjectBySlug(published.slug, [published], [invalidReadiness, ...projectReadinessManifest.slice(1)])).toBeUndefined();
   });
 
   it('resolves each homepage highlight cover from the readiness manifest', () => {
