@@ -567,13 +567,26 @@ Cada item possui:
 * principais serviços/capacidades;
 * acesso ao case.
 
+`/portfolio`, a estrutura compartilhada dos cases e seus capítulos editoriais convencionais devem utilizar a gramática editorial definida no Design System, sem duplicar seus valores técnicos. A abertura usa a entrada editorial de rota; os capítulos convencionais usam reveal editorial scroll-linked.
+
+`nature` permanece no contrato factual e no gate de publicação. Na listagem pública, o tipo da solução construída tem prioridade editorial e é representado por `projectType`. Os valores aprovados para esta entrega são:
+
+* EchoCosmicEnergia — `Site institucional · E-commerce`;
+* Axium — `Site institucional`;
+* DevSchedule — `Aplicação web · Full stack`;
+* GreenTweet — `Aplicação web · Full stack`;
+* A Alma no Comando — `Landing page`;
+* Alicerce da Alma — `Landing page`.
+
+`Projeto pago`, `Projeto próprio` e `Desafio técnico` continuam disponíveis para veracidade, autorização e publicação, mas não são a classificação principal da listagem.
+
 Não exibir tecnologia como informação dominante.
 
 Não transformar a listagem em seis cards SaaS iguais.
 
 A listagem pode explorar diferentes escalas, proporções, assimetria controlada, recortes e alternância de densidade. O resultado deve parecer uma coleção curada, não seis cards SaaS nem um bento grid. A qualidade visual dos projetos deve ser perceptível antes da leitura detalhada.
 
-Não usar vídeo na listagem.
+Cada projeto deve ter uma única mídia principal na listagem: a cover social já definida em `project.media.cover`, resolvida pelo asset correspondente no manifesto. Não usar screenshots adicionais, mobile ou vídeo na listagem. Screenshots mobile continuam disponíveis para a composição dos cases, quando aplicável. A implementação deve reutilizar o frame de navegador já existente na homepage e seu comportamento de preenchimento da imagem, sem criar uma moldura ou regra de enquadramento concorrente.
 
 Não usar autoplay.
 

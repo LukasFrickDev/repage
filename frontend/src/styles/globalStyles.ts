@@ -5,7 +5,6 @@ const GlobalStyles = createGlobalStyle`
   * { box-sizing: border-box; }
   html {
     background: ${colors.background};
-    scroll-behavior: smooth;
     scrollbar-width: thin;
     scrollbar-color: ${withAlpha(colors.violet, 0.62)} transparent;
   }

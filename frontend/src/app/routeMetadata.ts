@@ -24,7 +24,7 @@ export const routeMetadata = {
   },
   portfolio: {
     title: 'Portfólio | Repage',
-    description: 'Projetos pagos, projeto próprio e desafio técnico conduzidos por Lukas Frick.',
+    description: 'Uma seleção de sites institucionais, e-commerce, landing pages e aplicações web que reúne estrutura, design e desenvolvimento.',
     indexing: 'index',
   },
   privacy: {

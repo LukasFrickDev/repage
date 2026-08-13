@@ -10,6 +10,15 @@ export const projectNatureLabels: Record<ProjectNature, string> = {
 
 export type ProjectPublicationStatus = 'draft' | 'published';
 
+export const PROJECT_TYPES = [
+  'Site institucional · E-commerce',
+  'Site institucional',
+  'Aplicação web · Full stack',
+  'Landing page',
+] as const;
+
+export type ProjectType = (typeof PROJECT_TYPES)[number];
+
 export type ProjectMediaSelection = {
   cover: string;
   gallery: readonly string[];
@@ -25,6 +34,7 @@ type ProjectBase = {
   title: string;
   slug: string;
   nature: ProjectNature;
+  projectType: ProjectType;
   publicationStatus: ProjectPublicationStatus;
   portfolioOrder: 1 | 2 | 3 | 4 | 5 | 6;
   featuredOrder?: 1 | 2 | 3;
@@ -55,6 +65,7 @@ export const projects = [
     title: 'EchoCosmicEnergia',
     slug: 'echo-cosmic-energia',
     nature: 'paid',
+    projectType: 'Site institucional · E-commerce',
     publicationStatus: 'published',
     portfolioOrder: 1,
     featuredOrder: 1,
@@ -78,6 +89,7 @@ export const projects = [
     title: 'Axium',
     slug: 'axium',
     nature: 'paid',
+    projectType: 'Site institucional',
     publicationStatus: 'published',
     portfolioOrder: 2,
     featuredOrder: 2,
@@ -101,6 +113,7 @@ export const projects = [
     title: 'DevSchedule',
     slug: 'dev-schedule',
     nature: 'technical-challenge',
+    projectType: 'Aplicação web · Full stack',
     publicationStatus: 'published',
     portfolioOrder: 3,
     featuredOrder: 3,
@@ -125,6 +138,7 @@ export const projects = [
     title: 'GreenTweet',
     slug: 'green-tweet',
     nature: 'owned',
+    projectType: 'Aplicação web · Full stack',
     publicationStatus: 'published',
     portfolioOrder: 4,
     summary: 'Aplicação full stack inspirada em uma rede social, construída para explorar fluxos de publicação, perfil e interação entre usuários.',
@@ -148,6 +162,7 @@ export const projects = [
     title: 'A Alma no Comando',
     slug: 'a-alma-no-comando',
     nature: 'paid',
+    projectType: 'Landing page',
     publicationStatus: 'published',
     portfolioOrder: 5,
     summary: 'Landing page responsiva organizada em seções editoriais.',
@@ -170,6 +185,7 @@ export const projects = [
     title: 'Alicerce da Alma',
     slug: 'alicerce-da-alma',
     nature: 'paid',
+    projectType: 'Landing page',
     publicationStatus: 'published',
     portfolioOrder: 6,
     summary: 'Experiência institucional responsiva organizada para apresentar conteúdo, serviços e diferenciais.',

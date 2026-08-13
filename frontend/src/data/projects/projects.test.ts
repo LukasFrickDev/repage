@@ -27,6 +27,14 @@ describe('project data', () => {
       'Alicerce da Alma',
     ]);
     expect(listProjects().map((project) => project.portfolioOrder)).toEqual([1, 2, 3, 4, 5, 6]);
+    expect(listProjects().map((project) => project.projectType)).toEqual([
+      'Site institucional · E-commerce',
+      'Site institucional',
+      'Aplicação web · Full stack',
+      'Aplicação web · Full stack',
+      'Landing page',
+      'Landing page',
+    ]);
     expect(projects.every((project) => isProjectNature(project.nature))).toBe(true);
     expect(projects.every((project) => project.summary && project.overview && project.context && project.challenge && project.solution && project.participation)).toBe(true);
     expect(PROJECT_NATURES).toEqual(['paid', 'owned', 'technical-challenge']);
@@ -71,6 +79,19 @@ describe('project data', () => {
     ]);
     expect(listFeaturedProjectRecords().map((project) => project.featuredOrder)).toEqual([1, 2, 3]);
     expect(listFeaturedProjectRecords()).toHaveLength(3);
+  });
+
+  it('resolves each portfolio cover from the readiness manifest', () => {
+    listPublicProjects().forEach((project) => {
+      const readiness = projectReadinessManifest.find(({ slug }) => slug === project.slug);
+      const cover = readiness?.assets.find(({ path }) => path === project.media.cover);
+
+      expect(cover?.kind).toBe('screenshot');
+      expect(cover?.roles).toContain('cover');
+      expect(cover?.alt.trim()).not.toBe('');
+      expect(cover?.width).toBeGreaterThan(0);
+      expect(cover?.height).toBeGreaterThan(0);
+    });
   });
 
   it('rejects malformed public URLs even when they start with https://', () => {

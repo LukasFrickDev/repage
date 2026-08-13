@@ -35,7 +35,7 @@ function renderAt(entry: string) {
 describe('public routes', () => {
   it.each([
     ['/', 'Uma nova página para o seu negócio começa aqui.'],
-    ['/portfolio', 'Projetos conduzidos por Lukas Frick.'],
+    ['/portfolio', 'Projetos reais para contextos diferentes.'],
     ['/portfolio/axium', 'Axium'],
     ['/privacidade', 'Política de Privacidade em preparação.'],
     ['/cookies', 'Política de Cookies em preparação.'],
@@ -52,6 +52,49 @@ describe('public routes', () => {
 
     expect(screen.getByRole('heading', { level: 1, name: 'Projeto não encontrado.' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Ver portfólio' })).toHaveAttribute('href', '/portfolio');
+  });
+
+  it('resets immediately when navigating to a new route without a hash', async () => {
+    const user = userEvent.setup();
+    renderAt('/');
+
+    await user.click(screen.getByRole('link', { name: 'Ver projetos' }));
+
+    expect(window.scrollTo).toHaveBeenCalledWith({ top: 0, left: 0, behavior: 'auto' });
+  });
+
+  it('renders the six editorial portfolio projects with their covers and solution types', () => {
+    renderAt('/portfolio');
+
+    const portfolio = screen.getByRole('region', { name: 'Projetos do portfólio' });
+    expect(within(portfolio).getAllByRole('listitem')).toHaveLength(6);
+    expect(within(portfolio).getAllByRole('heading', { level: 2 }).map((heading) => heading.textContent)).toEqual([
+      'EchoCosmicEnergia',
+      'Axium',
+      'DevSchedule',
+      'GreenTweet',
+      'A Alma no Comando',
+      'Alicerce da Alma',
+    ]);
+    expect(within(portfolio).getAllByRole('img')).toHaveLength(6);
+    expect(within(portfolio).getAllByRole('img').map((image) => image.getAttribute('src'))).toEqual([
+      '/projects/echo-cosmic-energia/echo-social.png',
+      '/projects/axium/axium-social.png',
+      '/projects/dev-schedule/devschedule-social.png',
+      '/projects/green-tweet/greentweet-social.png',
+      '/projects/a-alma-no-comando/alma-social.png',
+      '/projects/alicerce-da-alma/alicerce-social.png',
+    ]);
+    expect(within(portfolio).getAllByRole('img').every((image) => !image.getAttribute('src')?.includes('mobile'))).toBe(true);
+    expect(within(portfolio).getAllByRole('link').filter((link) => link.getAttribute('href')?.startsWith('/portfolio/'))).toHaveLength(12);
+    expect(within(portfolio).queryByText('Projeto pago')).not.toBeInTheDocument();
+    expect(within(portfolio).queryByText('Projeto próprio')).not.toBeInTheDocument();
+    expect(within(portfolio).queryByText('Desafio técnico')).not.toBeInTheDocument();
+    expect(portfolio.querySelector('video')).not.toBeInTheDocument();
+    expect(within(portfolio).getByText('Site institucional · E-commerce')).toBeInTheDocument();
+    expect(within(portfolio).getAllByText('Aplicação web · Full stack')).toHaveLength(2);
+    expect(within(portfolio).getAllByText('Landing page')).toHaveLength(2);
+    expect(screen.getByRole('heading', { level: 1 }).querySelectorAll(':scope > span')).toHaveLength(3);
   });
 
   it('routes project and budget CTAs to real destinations without #briefing', () => {
@@ -152,7 +195,7 @@ describe('public routes', () => {
 
     await user.click(screen.getByRole('link', { name: 'Ver projetos' }));
 
-    const heading = screen.getByRole('heading', { level: 1, name: 'Projetos conduzidos por Lukas Frick.' });
+    const heading = screen.getByRole('heading', { level: 1, name: 'Projetos reais para contextos diferentes.' });
     expect(screen.getByTestId('location')).toHaveTextContent('/portfolio');
     expect(heading).toHaveFocus();
   });
@@ -198,7 +241,7 @@ describe('public routes', () => {
 
     await user.click(screen.getByRole('button', { name: 'Voltar no histórico de teste' }));
     expect(screen.getByTestId('location')).toHaveTextContent('/portfolio');
-    expect(screen.getByRole('heading', { level: 1, name: 'Projetos conduzidos por Lukas Frick.' })).toHaveFocus();
+    expect(screen.getByRole('heading', { level: 1, name: 'Projetos reais para contextos diferentes.' })).toHaveFocus();
 
     await user.click(screen.getByRole('button', { name: 'Avançar no histórico de teste' }));
     expect(screen.getByTestId('location')).toHaveTextContent('/#contato');
@@ -246,6 +289,10 @@ describe('public routes', () => {
     await user.click(screen.getByRole('link', { name: 'Ver projetos' }));
 
     await waitFor(() => expect(document.title).toBe(routeMetadata.portfolio.title));
+    expect(document.querySelector('meta[name="description"]')).toHaveAttribute(
+      'content',
+      'Uma seleção de sites institucionais, e-commerce, landing pages e aplicações web que reúne estrutura, design e desenvolvimento.',
+    );
     expect(document.querySelector('meta[name="robots"]')).toHaveAttribute('content', 'index, follow');
   });
 

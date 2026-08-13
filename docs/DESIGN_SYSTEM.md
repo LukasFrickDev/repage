@@ -479,6 +479,18 @@ Movimento temporal é adequado para entradas curtas ligadas à chegada de uma se
 Preferir palavra, linha ou bloco.
 Letras individuais somente em palavra especial.
 Evitar cursor, terminal, digitação e embaralhamento ilegível.
+
+### Entrada editorial de título
+Quando uma página ou seção reutilizar a assinatura aprovada de entrada editorial, o eyebrow entra primeiro; o título é construído por linha, bloco ou polo, nunca por letra individual; os polos entram em progressão com máscara, pequeno deslocamento e opacidade; e o texto de apoio entra após o título. Usar a configuração compartilhada aprovada em código, sem criar durations ou ranges locais diferentes sem necessidade narrativa explícita. O trigger pode ser scroll local da seção ou mount/entrada de uma nova rota, mas o ritmo percebido deve permanecer consistente. Com `prefers-reduced-motion`, todo o conteúdo aparece imediatamente.
+
+### Gramática editorial de entrada
+A Repage possui uma linguagem-base compartilhada para entradas convencionais. A ordem é eyebrow, título por linha/bloco/polo e texto de apoio. A progressão é suave, com máscara/clip quando fizer sentido, opacity e deslocamento curto; o texto de apoio entra depois do título e os títulos entram por bloco, não por letras.
+
+Na entrada de rota, usar uma sequência temporal própria, perceptível e fluida, sem condensar eyebrow, título e apoio em um reveal rápido. Durante scroll, o reveal deve preferencialmente acompanhar o progresso local do elemento no viewport: o scroll controla a progressão, o spring a suaviza, e opacity com deslocamento curto formam a base. Não transformar essa entrada em apenas `inView → animate` nem criar timing local arbitrário.
+
+A mesma gramática pode ser acionada por progresso local de seção ou mount/entrada de rota; o trigger muda, mas a identidade temporal não. Reutilizar a gramática significa preservar também o comportamento temporal percebido; compartilhar apenas duração, spring ou offsets não é suficiente quando o mecanismo de progressão produz outra sensação. Com `prefers-reduced-motion`, todo o conteúdo fica completo e imediatamente disponível.
+
+A gramática editorial é o padrão para páginas e capítulos convencionais. Coreografias específicas continuam permitidas quando justificadas pela spec, como Hero, projetos destacados da Home e Processo; essas experiências não devem redefinir os timings básicos da gramática editorial.
 ## 43. Scroll e sticky
 Permitido:
 - continuidade hero → projetos;

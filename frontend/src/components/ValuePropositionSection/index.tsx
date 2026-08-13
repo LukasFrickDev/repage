@@ -1,28 +1,26 @@
-import { useReducedMotion, useScroll, useSpring, useTransform } from 'framer-motion';
+import { useScroll, useSpring, useTransform } from 'framer-motion';
 import { useRef } from 'react';
 import { valuePropositionContent } from '../../content/repageContent';
 import { breakpoints } from '../../styles/theme';
+import { editorialMotion } from '../../styles/editorialMotion';
+import { useTitleReveal } from '../TitleReveal/useTitleReveal';
 import * as S from './styles';
 
 export function ValuePropositionSection() {
-  const prefersReducedMotion = Boolean(useReducedMotion());
   const compactMotion = typeof window !== 'undefined'
     && window.matchMedia(`(max-width: ${breakpoints.tabletMax})`).matches;
   const phoneMotion = typeof window !== 'undefined'
     && window.matchMedia(`(max-width: ${breakpoints.mobileMax})`).matches;
-  const terminalHoldEnabled = !prefersReducedMotion && typeof window !== 'undefined'
-    && !window.matchMedia(`(max-width: ${breakpoints.contentMax})`).matches;
   const sectionRef = useRef<HTMLElement>(null);
   const introRef = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({
-    target: introRef,
-    offset: ['start 92%', 'start 18%'],
+  const titleReveal = useTitleReveal(introRef, {
+    firstRange: compactMotion ? [...editorialMotion.entry.firstPoleCompact] as [number, number] : [...editorialMotion.entry.firstPole] as [number, number],
+    secondRange: compactMotion ? [...editorialMotion.entry.secondPoleCompact] as [number, number] : [...editorialMotion.entry.secondPole] as [number, number],
+    shift: compactMotion ? editorialMotion.entry.titleShiftCompact : editorialMotion.entry.titleShift,
   });
-  const entranceProgress = useSpring(scrollYProgress, {
-    stiffness: 150,
-    damping: 32,
-    mass: 0.28,
-  });
+  const { prefersReducedMotion } = titleReveal;
+  const terminalHoldEnabled = !prefersReducedMotion && typeof window !== 'undefined'
+    && !window.matchMedia(`(max-width: ${breakpoints.contentMax})`).matches;
   const { scrollYProgress: sectionScrollProgress } = useScroll({
     target: sectionRef,
     offset: ['start 92%', terminalHoldEnabled ? 'end 63%' : 'end 18%'],
@@ -32,36 +30,7 @@ export function ValuePropositionSection() {
     damping: 32,
     mass: 0.28,
   });
-  const titleShift = compactMotion ? 10 : 18;
   const differentialShift = compactMotion ? 12 : 18;
-  const clarityEnd = compactMotion ? 0.4 : 0.46;
-  const structureEnd = compactMotion ? 0.68 : 0.74;
-  const eyebrowOpacity = useTransform(entranceProgress, [0.01, 0.14], [0, 1]);
-  const eyebrowY = useTransform(entranceProgress, [0.01, 0.14], [8, 0]);
-  const clarityClipPath = useTransform(
-    entranceProgress,
-    [0.08, clarityEnd],
-    ['inset(0 100% 0 0)', 'inset(0 0% 0 0)'],
-  );
-  const clarityX = useTransform(entranceProgress, [0.08, clarityEnd], [titleShift, 0]);
-  const clarityOpacity = useTransform(
-    entranceProgress,
-    [0.08, 0.3, clarityEnd],
-    [0, 0.78, 1],
-  );
-  const structureClipPath = useTransform(
-    entranceProgress,
-    [0.38, structureEnd],
-    ['inset(0 100% 0 0)', 'inset(0 0% 0 0)'],
-  );
-  const structureX = useTransform(entranceProgress, [0.38, structureEnd], [titleShift, 0]);
-  const structureOpacity = useTransform(
-    entranceProgress,
-    [0.38, 0.59, structureEnd],
-    [0, 0.78, 1],
-  );
-  const descriptionOpacity = useTransform(entranceProgress, [0.76, 0.94], [0, 1]);
-  const descriptionY = useTransform(entranceProgress, [0.76, 0.94], [10, 0]);
   const practicalRanges = phoneMotion
     ? [[0.26, 0.34], [0.33, 0.41], [0.4, 0.48], [0.47, 0.55], [0.54, 0.62]]
     : [[0.36, 0.42], [0.41, 0.49], [0.48, 0.56], [0.55, 0.63], [0.62, 0.7]];
@@ -97,34 +66,30 @@ export function ValuePropositionSection() {
       <S.Container>
         <S.Intro ref={introRef}>
           <S.Eyebrow
-            style={prefersReducedMotion ? undefined : { opacity: eyebrowOpacity, y: eyebrowY }}
+            style={prefersReducedMotion ? undefined : titleReveal.eyebrow}
           >
             {valuePropositionContent.eyebrow}
           </S.Eyebrow>
           <S.Title id="value-proposition-title">
             <S.TitlePole
               $position="clarity"
-              style={prefersReducedMotion
-                ? undefined
-                : { clipPath: clarityClipPath, opacity: clarityOpacity }}
+              style={prefersReducedMotion ? undefined : titleReveal.first}
             >
-              <S.TitlePoleText style={prefersReducedMotion ? undefined : { x: clarityX }}>
+              <S.TitlePoleText style={prefersReducedMotion ? undefined : titleReveal.firstText}>
                 {titlePoles[0]}
               </S.TitlePoleText>
             </S.TitlePole>{' '}
             <S.TitlePole
               $position="structure"
-              style={prefersReducedMotion
-                ? undefined
-                : { clipPath: structureClipPath, opacity: structureOpacity }}
+              style={prefersReducedMotion ? undefined : titleReveal.second}
             >
-              <S.TitlePoleText style={prefersReducedMotion ? undefined : { x: structureX }}>
+              <S.TitlePoleText style={prefersReducedMotion ? undefined : titleReveal.secondText}>
                 {titlePoles[1]}
               </S.TitlePoleText>
             </S.TitlePole>
           </S.Title>
           <S.Description
-            style={prefersReducedMotion ? undefined : { opacity: descriptionOpacity, y: descriptionY }}
+            style={prefersReducedMotion ? undefined : titleReveal.description}
           >
             {valuePropositionContent.description}
           </S.Description>

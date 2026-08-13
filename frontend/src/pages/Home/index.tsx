@@ -1,4 +1,5 @@
 import { ArrowRight } from 'lucide-react';
+import { PrimaryCta } from '../../components/PrimaryCta';
 import { useReducedMotion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { routeMetadata, useRouteMetadata } from '../../app/routeMetadata';
@@ -56,10 +57,10 @@ const Home = () => {
             >
               <S.Description>{heroContent.description}</S.Description>
               <S.Actions>
-                <S.PrimaryCta as={Link} to={heroContent.primaryCta.href}>
+                <PrimaryCta as={Link} to={heroContent.primaryCta.href}>
                   <span>{heroContent.primaryCta.label}</span>
                   <ArrowRight size={18} aria-hidden="true" />
-                </S.PrimaryCta>
+                </PrimaryCta>
                 <S.SecondaryCta as={Link} to={heroContent.secondaryCta.href}>
                   <span>{heroContent.secondaryCta.label}</span>
                   <ArrowRight size={18} aria-hidden="true" />

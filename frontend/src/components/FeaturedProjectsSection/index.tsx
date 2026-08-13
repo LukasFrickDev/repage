@@ -11,6 +11,8 @@ import {
 import type { MotionValue } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { featuredProjectsSectionContent } from '../../content/repageContent';
+import { ProjectBrowserFrame } from '../ProjectBrowserFrame';
+import { ProjectCaseLink } from '../ProjectCaseLink';
 import type { Project } from '../../data/projects';
 import { listHomepageFeaturedProjects } from '../../data/projects/homepage';
 import type { ProjectMediaAsset } from '../../data/projects/projectReadiness';
@@ -104,21 +106,13 @@ function ProjectStage({
           aria-label={`Ver case ${project.title}`}
           tabIndex={canInteract ? undefined : -1}
         >
-          <S.BrowserFrame>
-            <S.BrowserBar aria-hidden="true">
-              <S.WindowControls><i /><i /><i /></S.WindowControls>
-              <S.AddressHint />
-            </S.BrowserBar>
-            <S.BrowserViewport>
-              <S.DesktopImage
-                src={desktop.path}
-                alt={desktop.alt}
-                width={desktop.width}
-                height={desktop.height}
-                loading={loading}
-              />
-            </S.BrowserViewport>
-          </S.BrowserFrame>
+          <ProjectBrowserFrame
+            src={desktop.path}
+            alt={desktop.alt}
+            width={desktop.width}
+            height={desktop.height}
+            loading={loading}
+          />
           <S.DeviceFrame>
             <S.DeviceViewport>
               <S.MobileImage
@@ -136,14 +130,12 @@ function ProjectStage({
       <S.ProjectInfo style={infoStyle}>
         <S.ProjectTitle>{project.title}</S.ProjectTitle>
         <S.ProjectSummary>{summary}</S.ProjectSummary>
-        <S.ProjectLink
-          as={Link}
+        <ProjectCaseLink
           to={`/portfolio/${project.slug}`}
-          aria-label={`Ver case ${project.title}`}
+          ariaLabel={`Ver case ${project.title}`}
           tabIndex={canInteract ? undefined : -1}
-        >
-          Ver case <ArrowRight size={18} aria-hidden="true" />
-        </S.ProjectLink>
+          homepage
+        />
         {!isStatic && (
           <S.ProjectAllProjectsLink
             as={Link}
