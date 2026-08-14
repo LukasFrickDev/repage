@@ -32,6 +32,8 @@ TECHNICAL_FIELDS = (
 
 
 class LeadAdminForm(forms.ModelForm):
+    whatsapp = forms.CharField(max_length=32)
+
     class Meta:
         model = Lead
         fields = COMMERCIAL_FIELDS
@@ -83,9 +85,6 @@ class LeadAdmin(admin.ModelAdmin):
             obj.privacy_policy_acknowledged = False
             obj.privacy_policy_version = ''
         super().save_model(request, obj, form, change)
-
-    def has_add_permission(self, request):
-        return True
 
     def has_delete_permission(self, request, obj=None):
         return False

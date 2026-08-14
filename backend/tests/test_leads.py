@@ -4,6 +4,7 @@ from datetime import timedelta
 import pytest
 from django.contrib import admin
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import Permission
 from django.conf import settings
 from django.test import Client
 from django.utils import timezone
@@ -212,7 +213,6 @@ def test_admin_registers_lead_with_search_filters_and_archive_action():
     assert isinstance(model_admin, LeadAdmin)
     assert model_admin.list_filter == ('status', 'project_type', 'created_at')
     assert model_admin.search_fields == ('name', 'email', 'whatsapp', 'business_name')
-    assert model_admin.has_add_permission(None) is True
     assert model_admin.has_delete_permission(None) is False
     serializer = LeadSerializer(data=payload())
     assert serializer.is_valid(), serializer.errors
@@ -238,11 +238,14 @@ def test_admin_registers_lead_with_search_filters_and_archive_action():
 
 @pytest.mark.django_db
 def test_admin_creates_manual_lead_with_internal_values_and_shared_normalization():
-    user = get_user_model().objects.create_superuser(
+    user = get_user_model().objects.create_user(
         username='lead-admin',
         email='admin@example.test',
         password='Fictitious-Admin-Password-123!',
+        is_staff=True,
     )
+    permission = Permission.objects.get(codename='add_lead', content_type__app_label='leads')
+    user.user_permissions.add(permission)
     client = Client()
     client.force_login(user)
 
@@ -251,7 +254,7 @@ def test_admin_creates_manual_lead_with_internal_values_and_shared_normalization
         {
             'name': '  Manual Fictício  ',
             'email': ' MANUAL@EXEMPLO.COM ',
-            'whatsapp': '(11) 99999-9999',
+            'whatsapp': '+55 11 99999-9999',
             'project_type': 'landing_page',
             'business_name': '  Negócio manual  ',
             'message': '  Registro interno  ',
@@ -268,8 +271,24 @@ def test_admin_creates_manual_lead_with_internal_values_and_shared_normalization
     assert lead.business_name == 'Negócio manual'
 
 
+@pytest.mark.django_db
+def test_admin_staff_without_add_permission_cannot_create_lead():
+    user = get_user_model().objects.create_user(
+        username='lead-read-only',
+        password='Fictitious-Admin-Password-123!',
+        is_staff=True,
+    )
+    client = Client()
+    client.force_login(user)
+
+    response = client.get(reverse('admin:leads_lead_add'))
+
+    assert response.status_code == 403
+    assert Lead.objects.count() == 0
+
+
 def test_admin_requires_authentication():
-    response = APIClient().get('/admin/apps/leads/lead/')
+    response = Client().get(reverse('admin:leads_lead_add'))
 
     assert response.status_code == 302
     assert '/admin/login/' in response['Location']
