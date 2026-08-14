@@ -128,7 +128,7 @@ A V1 deve servir como referência comercial da marca, apoiar prospecção e cond
   **Dependências:** Entrega 1, contrato de campos, versão da política, PostgreSQL local e origens definidas.
   **Validações:** checks, migrations, Ruff, pytest, validações frontend, persistência, Admin, health, readiness e logs sanitizados.
   **Critério de conclusão:** envio válido persiste; envio inválido não persiste; falhas são recuperáveis e seguras.
-  **Spec:** obrigatória ao iniciar, coordenando API, persistência, Admin e formulário.
+  **Spec:** [`0005-lead-intake-backend-and-form.md`](specs/0005-lead-intake-backend-and-form.md) — `approved`; coordena API, persistência, Admin e formulário.
 
 ## Entrega 6 — E-mails, idempotência e proteção
 
