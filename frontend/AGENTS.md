@@ -66,7 +66,7 @@ Não criar `href="#"`, rota inexistente, CTA falso ou aparência de ação sem d
 
 Portfólio da V1 é estático, tipado, versionado e derivado de uma fonte única. A mesma estrutura alimenta homepage, listagem, cases, ordem, metadados, Open Graph e sitemap.
 
-Cada projeto deve registrar slug, título, natureza, destaque, ordem, resumo, contexto, desafio, solução, participação, serviços, funcionalidades, tecnologias, galeria, URL opcional, autorização, indicador de projeto anterior à Repage e SEO.
+Identidade e conteúdo editorial ficam na fonte tipada de projetos. Autorização, privacidade e metadados de readiness ficam no manifesto apropriado; seletores públicos combinam as fontes por meio do gate. Não duplicar esses dados. `predatesRepage` é opcional e só pode ser preenchido mediante confirmação explícita; sua ausência não permite inferir relação temporal com a Repage.
 
 Naturezas: pago, próprio ou desafio técnico. Projetos próprios e desafios não podem ser apresentados como clientes.
 
@@ -107,7 +107,7 @@ Usar screenshots reais. Evitar mockup publicitário e mídia externa apresentada
 
 Implementar, quando aplicável: padrão, hover, foco, pressionado, desabilitado, carregamento, sucesso e erro.
 
-Hover é melhoria, não requisito. Foco deve ser visível. Elemento desabilitado não pode parecer ativo. Loading deve impedir ação duplicada. Erro deve permitir recuperação.
+Hover é melhoria, não requisito. O foco de elementos interativos deve permanecer claramente visível: links, botões, campos, CTAs, menu, viewer e demais controles nunca podem perder `focus-visible`. Elementos não interativos que recebem foco programático exclusivamente para gerenciamento de navegação, como route headings com `tabIndex=-1`, podem ser visualmente neutros desde que o foco semântico e o gerenciamento de navegação sejam preservados. Elemento desabilitado não pode parecer ativo. Loading deve impedir ação duplicada. Erro deve permitir recuperação.
 
 ## Formulário
 

@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { legalNavigation, navigation, siteFooterContent } from '../../content/repageContent';
+import { footerNavigation, legalNavigation, siteFooterContent } from '../../content/repageContent';
 import { siteConfig } from '../../config/site';
 import * as S from './styles';
 
@@ -17,7 +17,7 @@ export function SiteFooter() {
           </S.BrandBlock>
 
           <S.Navigation aria-label="Navegação do rodapé">
-            {navigation.map((item) => <Link key={item.href} to={item.href}>{item.label}</Link>)}
+            {footerNavigation.map((item) => <Link key={item.href} to={item.href}>{item.label}</Link>)}
             {legalNavigation.map((item) => <Link key={item.href} to={item.href}>{item.label}</Link>)}
           </S.Navigation>
         </S.MainBand>

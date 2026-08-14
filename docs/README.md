@@ -43,9 +43,9 @@ Estado conhecido:
 - baseline em `main`;
 - frontend React/TypeScript/Vite/Styled Components existente;
 - Framer Motion disponível;
-- Entregas 1, 2 e 3 concluídas, incluindo a homepage definitiva;
+- Entregas 1–4 concluídas, incluindo homepage definitiva, portfólio e seis cases;
 - roteamento público já materializado;
-- Entrega 4 — Portfólio e seis cases — como próxima entrega;
+- Entrega 5 — Backend, banco, API, Admin e formulário persistido — como próxima entrega;
 - backend, banco, formulário persistido e demais entregas posteriores ainda pendentes;
 - arquitetura-alvo documentada.
 

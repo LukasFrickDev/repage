@@ -82,3 +82,4 @@ Somente spec aprovada orienta implementação planejada.
 | [`0001-frontend-foundation-and-routing.md`](0001-frontend-foundation-and-routing.md) | `implemented` | Fundação do frontend, roteamento e caminho de conversão |
 | [`0002-project-content-and-media-preparation.md`](0002-project-content-and-media-preparation.md) | `implemented` | Preparação de conteúdo e mídias dos projetos |
 | [`0003-definitive-homepage.md`](0003-definitive-homepage.md) | `implemented` | Homepage definitiva |
+| [`0004-portfolio-and-cases.md`](0004-portfolio-and-cases.md) | `implemented` | Portfólio e seis cases |

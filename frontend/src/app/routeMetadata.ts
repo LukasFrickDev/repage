@@ -8,7 +8,7 @@ export type RouteMetadata = {
   indexing: IndexingState;
 };
 
-export type RouteMetadataKey = 'home' | 'portfolio' | 'case' | 'privacy' | 'cookies' | 'notFound';
+export type RouteMetadataKey = 'home' | 'portfolio' | 'privacy' | 'cookies' | 'notFound';
 
 export const fallbackMetadata: RouteMetadata = {
   title: 'Repage',
@@ -23,14 +23,9 @@ export const routeMetadata = {
     indexing: 'index',
   },
   portfolio: {
-    title: 'Portfólio em preparação | Repage',
-    description: 'Estrutura inicial do portfólio da Repage, atualmente em preparação.',
-    indexing: 'noindex',
-  },
-  case: {
-    title: 'Case em preparação | Repage',
-    description: 'Case temporário do portfólio da Repage, atualmente em preparação.',
-    indexing: 'noindex',
+    title: 'Portfólio | Repage',
+    description: 'Uma seleção de sites institucionais, e-commerce, landing pages e aplicações web que reúne estrutura, design e desenvolvimento.',
+    indexing: 'index',
   },
   privacy: {
     title: 'Política de Privacidade em preparação | Repage',
@@ -49,11 +44,11 @@ export const routeMetadata = {
   },
 } as const satisfies Record<RouteMetadataKey, RouteMetadata>;
 
-export function getCaseMetadata(projectTitle: string): RouteMetadata {
+export function getCaseMetadata(projectMetadata: { title: string; description: string }): RouteMetadata {
   return {
-    ...routeMetadata.case,
-    title: `${projectTitle} — case em preparação | Repage`,
-    description: `Estrutura temporária do case ${projectTitle}, atualmente em preparação.`,
+    title: projectMetadata.title,
+    description: projectMetadata.description,
+    indexing: 'index',
   };
 }
 

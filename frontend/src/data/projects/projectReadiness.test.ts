@@ -143,10 +143,10 @@ function readWebmMetadata(path: string): { width: number | null; height: number 
 }
 
 describe('project readiness manifest', () => {
-  it('covers every draft project with coherent readiness states', () => {
+  it('covers every project with coherent readiness states', () => {
     expect(projectReadinessManifest).toHaveLength(6);
     expect(validateProjectReadinessManifest()).toEqual([]);
-    expect(projects.every((project) => project.publicationStatus === 'draft')).toBe(true);
+    expect(projects.every((project) => project.publicationStatus === 'published')).toBe(true);
   });
 
   it('resolves known slugs and rejects unknown slugs', () => {

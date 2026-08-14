@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
-import { breakpoints, colors, fonts, homepageTokens, immersiveIntro, layout, motion as motionTokens } from '../../styles/theme';
+import { breakpoints, colors, fonts, homepageTokens, immersiveIntro, layout } from '../../styles/theme';
 
 export const Section = styled.section`
   position: relative;
@@ -242,45 +242,6 @@ export const ProjectSummary = styled.p`
 
 `;
 
-export const ProjectLink = styled.a`
-  grid-column: 10 / -1;
-  justify-self: end;
-  width: fit-content;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.65rem;
-  color: ${colors.white};
-  font-family: ${fonts.primary};
-  font-size: ${homepageTokens.projects.categorySize};
-  font-weight: 650;
-  text-decoration: none;
-  transition: color ${motionTokens.duration.fast} ${motionTokens.easing.standard};
-
-  svg {
-    transition: transform ${motionTokens.duration.fast} ${motionTokens.easing.standard};
-  }
-
-  &:hover {
-    color: ${colors.neonBlue};
-  }
-
-  &:hover svg {
-    transform: translateX(3px);
-  }
-
-  &:focus-visible {
-    outline: 2px solid ${colors.neonBlue};
-    outline-offset: 0.45rem;
-  }
-
-  @media (max-width: ${breakpoints.tabletMax}) {
-    grid-column: 2;
-    grid-row: 1;
-    margin-top: 0.2rem;
-    white-space: nowrap;
-  }
-`;
-
 export const ProjectMedia = styled(motion.div)`
   position: relative;
   z-index: 2;
@@ -323,106 +284,6 @@ export const ProjectMediaLink = styled(Link)`
     outline: 2px solid ${colors.neonBlue};
     outline-offset: -2px;
   }
-`;
-
-export const BrowserFrame = styled.span`
-  position: absolute;
-  z-index: 1;
-  left: calc(50% - ${homepageTokens.projects.mediaCompositionShift});
-  top: 50%;
-  height: ${homepageTokens.projects.browser.height};
-  max-width: ${homepageTokens.projects.browser.maxWidth};
-  aspect-ratio: ${homepageTokens.projects.browser.aspectRatio};
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  background: ${colors.inkDeep};
-  border: 1px solid rgba(245, 242, 236, 0.18);
-  border-radius: clamp(0.55rem, 0.9vw, 0.85rem);
-  box-shadow: 0 2rem 5rem rgba(4, 8, 17, 0.34);
-  transform: translate(-50%, -50%);
-  transition: transform 360ms ease;
-
-  ${ProjectMediaLink}:hover & {
-    transform: translate(-50%, -50%) scale(1.006);
-  }
-
-  @media (max-width: ${breakpoints.tabletMax}) {
-    left: 50%;
-    width: ${homepageTokens.projects.browser.compactWidth};
-    height: auto;
-    max-width: none;
-    aspect-ratio: ${homepageTokens.projects.browser.compactAspectRatio};
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    transition: none;
-  }
-`;
-
-export const BrowserBar = styled.span`
-  flex: 0 0 clamp(1.85rem, 2.6vw, 2.35rem);
-  padding-inline: clamp(0.55rem, 1vw, 0.85rem);
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 0.75rem;
-  background: ${colors.inkHeader};
-  border-bottom: 1px solid rgba(245, 242, 236, 0.12);
-
-  @media (max-width: ${breakpoints.tabletMax}) {
-    flex-basis: 1.5rem;
-  }
-`;
-
-export const WindowControls = styled.span`
-  display: flex;
-  gap: 0.3rem;
-
-  i {
-    width: 0.42rem;
-    aspect-ratio: 1;
-    border: 1px solid rgba(245, 242, 236, 0.28);
-    border-radius: 50%;
-    background: rgba(245, 242, 236, 0.08);
-  }
-
-  i:first-child {
-    border-color: rgba(108, 99, 255, 0.7);
-  }
-
-  @media (max-width: ${breakpoints.tabletMax}) {
-    gap: 0.2rem;
-
-    i {
-      width: 0.3rem;
-    }
-  }
-`;
-
-export const AddressHint = styled.span`
-  grid-column: 2;
-  justify-self: center;
-  width: min(52%, 18rem);
-  height: 0.48rem;
-  border: 1px solid rgba(245, 242, 236, 0.12);
-  border-radius: 999px;
-  background: rgba(245, 242, 236, 0.035);
-`;
-
-export const BrowserViewport = styled.span`
-  min-height: 0;
-  flex: 1;
-  display: block;
-  overflow: hidden;
-`;
-
-export const DesktopImage = styled.img`
-  width: 100%;
-  height: 100%;
-  display: block;
-  object-fit: cover;
-  object-position: center;
 `;
 
 export const DeviceFrame = styled.span`

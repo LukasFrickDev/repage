@@ -5,7 +5,6 @@ const GlobalStyles = createGlobalStyle`
   * { box-sizing: border-box; }
   html {
     background: ${colors.background};
-    scroll-behavior: smooth;
     scrollbar-width: thin;
     scrollbar-color: ${withAlpha(colors.violet, 0.62)} transparent;
   }
@@ -21,6 +20,7 @@ const GlobalStyles = createGlobalStyle`
   :where(section[id], main[id]) { scroll-margin-top: 6rem; }
   ::selection { background: ${withAlpha(colors.violet, 0.32)}; color: ${colors.paper}; }
   :focus-visible { outline: 3px solid ${colors.neonBlue}; outline-offset: 4px; }
+  [data-route-heading][tabindex='-1']:focus-visible { outline: none; }
   @media (max-width: ${breakpoints.mobileMax}) {
     :where(section[id], main[id])[tabindex='-1']:focus,
     :where(section[id], main[id])[tabindex='-1']:focus-visible {

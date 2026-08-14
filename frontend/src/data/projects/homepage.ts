@@ -1,4 +1,4 @@
-import { listFeaturedProjects } from '.';
+import { listPublicFeaturedProjects } from './publication';
 import { findReadinessBySlug } from './projectReadiness';
 import type { Project } from '.';
 import type { ProjectMediaAsset } from './projectReadiness';
@@ -11,7 +11,7 @@ export type HomepageFeaturedProject = {
 };
 
 export function listHomepageFeaturedProjects(): HomepageFeaturedProject[] {
-  return listFeaturedProjects().map((project) => {
+  return listPublicFeaturedProjects().map((project) => {
     const readiness = findReadinessBySlug(project.slug);
     const cover = readiness?.assets.find((asset) => asset.kind === 'screenshot' && asset.roles.includes('cover'));
     const desktopProof = readiness?.assets.find((asset) => (

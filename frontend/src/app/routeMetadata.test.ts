@@ -11,7 +11,7 @@ describe('route metadata', () => {
     expect(isolatedDocument.querySelector('meta[name="description"]')?.getAttribute('content'))
       .toBe(routeMetadata.portfolio.description);
     expect(isolatedDocument.querySelector('meta[name="robots"]')?.getAttribute('content'))
-      .toBe('noindex, nofollow');
+      .toBe('index, follow');
 
     applyRouteMetadata(routeMetadata.home, isolatedDocument);
 
