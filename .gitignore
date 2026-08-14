@@ -42,6 +42,7 @@ venv/
 .coverage.*
 htmlcov/
 coverage.xml
+*.dmg
 
 # Django
 backend/staticfiles/
