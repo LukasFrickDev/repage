@@ -1,7 +1,7 @@
 # Repage — Arquitetura
 ## Status
 - **Status:** aprovado para implementação.
-- **Última consolidação:** 5 de agosto de 2026.
+- **Última consolidação:** 14 de agosto de 2026.
 - **Baseline documental:** `main`.
 - **Responsabilidade:** stack, rotas, dados, backend, segurança, testes, ambientes, CI/CD, deploy e backups.
 - **Memória completa:** página de Arquitetura no Notion.
@@ -23,21 +23,23 @@ Código, migrations, mídia estática e documentação vivem no GitHub. Hospedag
 ### 1.7 Operação verificável
 Deploy, backup, restauração e health checks exigem evidência.
 ## 2. Arquitetura atual
-Estado conhecido em `main`:
+Estado atual ao concluir a Entrega 4:
 - React;
 - TypeScript;
 - Vite;
 - Styled Components;
 - Framer Motion;
-- homepage como implementação principal;
-- sem roteamento completo;
+- React Router;
+- `PublicLayout` e roteamento público materializados;
+- homepage definitiva implementada;
+- `/portfolio` definitivo;
+- seis cases públicos;
+- fonte tipada de projetos;
+- manifesto/readiness de mídia e publicação;
+- testes frontend e Playwright Test configurados;
 - sem backend;
-- sem banco;
+- sem PostgreSQL;
 - formulário sem persistência;
-- portfólio provisório;
-- sem testes automatizados configurados;
-- scripts de lint e build existentes;
-- responsividade básica existente;
 - tokens em `frontend/src/styles/theme.ts`.
 Dependências aprovadas para a arquitetura-alvo podem ainda não estar instaladas. O manifesto do projeto é a fonte do estado instalado.
 ## 3. Arquitetura-alvo
@@ -205,7 +207,9 @@ Não haverá:
 - CRUD administrativo;
 - upload dinâmico.
 ## 13. Fonte única de projetos
-A mesma estrutura alimenta:
+Existe uma fonte pública tipada para identidade e conteúdo editorial dos projetos e uma camada/manifesto tipado de readiness, evidência e mídia. Seletores e gate combinam essas fontes; os mesmos dados não devem ser mantidos manualmente em listas paralelas.
+
+A fonte compartilhada alimenta:
 - três destaques;
 - seis cards;
 - seis cases;
@@ -214,10 +218,12 @@ A mesma estrutura alimenta:
 - sitemap;
 - navegação anterior/próximo;
 - ordem e destaque.
-Dados mínimos:
+O conteúdo editorial pode conter, quando aplicável:
 - slug;
 - título;
 - natureza;
+- tipo;
+- status de publicação;
 - destaque;
 - ordem;
 - resumo;
@@ -230,10 +236,13 @@ Dados mínimos:
 - tecnologias;
 - galeria;
 - URL pública opcional;
-- autorização;
-- indicador anterior à marca;
-- SEO.
-Seletores derivam projetos publicados, destaques, ordenação, anterior, próximo, rotas e sitemap.
+- seleção de mídia;
+- metadados da rota;
+- `predatesRepage`, somente quando houver confirmação explícita.
+
+Autorização, fonte da autorização, revisão de privacidade, estado de mídia, origem, dimensões, poster, fallback e demais evidências pertencem ao manifesto/camada de prontidão e não devem ser duplicados na fonte editorial. `predatesRepage` é opcional; sua ausência não permite inferir relação temporal com a Repage.
+
+O publication gate combina conteúdo editorial e readiness antes da exposição pública. Homepage, portfólio, cases, ordem e, futuramente, SEO/sitemap derivam dessas fontes compartilhadas.
 ## 14. Integridade do portfólio
 Build ou testes devem detectar:
 - slug duplicado;
@@ -243,9 +252,9 @@ Build ou testes devem detectar:
 - case incompleto;
 - URL inválida;
 - natureza inválida;
-- autorização indefinida;
+- falha no readiness ou na autorização aplicável;
 - metadado ausente.
-Não publicar case final incompleto.
+Não publicar case final incompleto: seletores públicos só retornam projetos aprovados pelo gate combinado de conteúdo e readiness.
 ## 15. Imagens e vídeos
 Na V1, mídias são estáticas, otimizadas e versionadas.
 Imagens devem ter:
