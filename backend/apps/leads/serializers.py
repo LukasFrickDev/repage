@@ -7,6 +7,40 @@ from rest_framework import serializers
 from .models import Lead
 
 
+def normalize_name(value):
+    return value.strip()
+
+
+def normalize_email(value):
+    return value.strip().casefold()
+
+
+def normalize_whatsapp(value):
+    digits = re.sub(r'\D', '', value)
+    if digits.startswith('55') and len(digits) in (12, 13):
+        national_number = digits[2:]
+    elif len(digits) in (10, 11):
+        national_number = digits
+    else:
+        raise ValueError('Informe um WhatsApp brasileiro válido.')
+
+    if national_number[0] == '0':
+        raise ValueError('Informe um WhatsApp brasileiro válido.')
+    if len(national_number) == 10 and national_number[2] not in '2345':
+        raise ValueError('Informe um WhatsApp brasileiro válido.')
+    if len(national_number) == 11 and national_number[2] != '9':
+        raise ValueError('Informe um WhatsApp brasileiro válido.')
+    return f'+55{national_number}'
+
+
+def normalize_business_name(value):
+    return value.strip()
+
+
+def normalize_message(value):
+    return value.replace('\r\n', '\n').replace('\r', '\n').strip()
+
+
 class LeadSerializer(serializers.ModelSerializer):
     name = serializers.CharField(
         max_length=120,
@@ -53,7 +87,7 @@ class LeadSerializer(serializers.ModelSerializer):
         error_messages={'max_length': 'A mensagem deve ter no máximo 4000 caracteres.'},
     )
     source = serializers.ChoiceField(
-        choices=Lead.Source.choices,
+        choices=((Lead.Source.WEBSITE, Lead.Source.WEBSITE.label),),
         error_messages={
             'required': 'A origem da solicitação é obrigatória.',
             'invalid_choice': 'A origem da solicitação é inválida.',
@@ -95,36 +129,25 @@ class LeadSerializer(serializers.ModelSerializer):
         return super().to_internal_value(data)
 
     def validate_name(self, value):
-        value = value.strip()
+        value = normalize_name(value)
         if not value:
             raise serializers.ValidationError('Informe seu nome.')
         return value
 
     def validate_email(self, value):
-        return value.strip().casefold()
+        return normalize_email(value)
 
     def validate_whatsapp(self, value):
-        digits = re.sub(r'\D', '', value)
-        if digits.startswith('55') and len(digits) in (12, 13):
-            national_number = digits[2:]
-        elif len(digits) in (10, 11):
-            national_number = digits
-        else:
-            raise serializers.ValidationError('Informe um WhatsApp brasileiro válido.')
-
-        if national_number[0] == '0':
-            raise serializers.ValidationError('Informe um WhatsApp brasileiro válido.')
-        if len(national_number) == 10 and national_number[2] not in '2345':
-            raise serializers.ValidationError('Informe um WhatsApp brasileiro válido.')
-        if len(national_number) == 11 and national_number[2] != '9':
-            raise serializers.ValidationError('Informe um WhatsApp brasileiro válido.')
-        return f'+55{national_number}'
+        try:
+            return normalize_whatsapp(value)
+        except ValueError as exc:
+            raise serializers.ValidationError(str(exc)) from exc
 
     def validate_business_name(self, value):
-        return value.strip()
+        return normalize_business_name(value)
 
     def validate_message(self, value):
-        return value.replace('\r\n', '\n').replace('\r', '\n').strip()
+        return normalize_message(value)
 
     def validate_privacy_policy_acknowledged(self, value):
         if not value:

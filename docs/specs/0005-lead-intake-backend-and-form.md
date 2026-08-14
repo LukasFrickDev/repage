@@ -373,13 +373,14 @@ String opcional vazia pode ser normalizada para representação consistente defi
 
 ## 11. `source`
 
-Nesta entrega existe uma única origem pública:
+Nesta entrega existem somente duas origens de Lead na V1:
 
-`website`
+- `website`: Lead recebido pelo formulário/API pública;
+- `manual`: Lead cadastrado internamente pelo Django Admin autenticado.
 
-O frontend envia somente esse valor.
+O frontend e a API pública enviam somente `website`. A API pública rejeita `manual`.
 
-O backend aceita somente origens explicitamente permitidas.
+O backend aceita somente essas duas origens, e `manual` é reservado à criação administrativa.
 
 Não implementar tracking de campanha, UTM, referer persistido ou perfil de navegação nesta entrega.
 
@@ -424,6 +425,10 @@ Se houver divergência entre cliente e servidor, a solicitação não deve ser p
 Retornar erro seguro solicitando atualização/recarregamento da experiência.
 
 Não inventar conteúdo jurídico nesta spec.
+
+Lead criado manualmente pelo Django Admin não passou pelo formulário público. Portanto,
+deve manter `privacy_policy_acknowledged` como `false` e
+`privacy_policy_version` vazio, sem simular ciência ou inventar uma versão aceita.
 
 ## 13. API pública
 
@@ -477,6 +482,8 @@ Não aceitar como campos controláveis:
 - campos administrativos.
 
 Campos desconhecidos devem produzir erro de validação em vez de serem silenciosamente persistidos ou ignorados.
+
+Na API pública, `source` só pode ser `website`. `manual` é exclusivo da criação autenticada pelo Admin.
 
 ## 15. Resposta de sucesso
 
@@ -677,7 +684,20 @@ sem excluir o registro.
 
 ### Inclusão
 
-Não é necessário usar Admin para criar Leads manualmente.
+O Admin permite criar Leads manualmente, além dos Leads recebidos pelo formulário público.
+
+Na criação manual, o operador preenche somente os dados comerciais existentes:
+
+- `name`;
+- `email`;
+- `whatsapp`;
+- `project_type`;
+- `business_name`;
+- `message`.
+
+O backend define `source=manual`, `status=new`,
+`privacy_policy_acknowledged=false` e `privacy_policy_version` vazio.
+Esses campos técnicos não são controláveis pelo operador.
 
 ### Exclusão
 
@@ -1166,6 +1186,8 @@ Testes de persistência devem usar PostgreSQL no fluxo final de validação.
 - modelo registrado;
 - acesso requer autenticação;
 - filtros/busca/configuração essencial;
+- criação manual autenticada com origem `manual`;
+- Leads manuais sem ciência ou versão de política;
 - arquivamento.
 
 ### Core
@@ -1262,7 +1284,8 @@ A entrega atravessa backend, banco e frontend e deve ser dividida em fases.
 - normalização;
 - API;
 - Admin;
-- testes backend.
+- criação manual autenticada no Admin;
+- testes backend dos fluxos público e manual.
 
 ### Fase 3 — formulário frontend
 

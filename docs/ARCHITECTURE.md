@@ -363,6 +363,11 @@ Status da V1:
 - `new`;
 - `archived`.
 Não antecipar pipeline de CRM. `archived` não significa exclusão.
+
+`Lead.source` possui somente `website` e `manual`: a API pública cria apenas Leads
+com `website`, enquanto `manual` é reservado à criação administrativa autenticada.
+Ciência e versão da Política de Privacidade pertencem ao fluxo público e não são
+falsificadas em Leads manuais.
 ## 25. Modelo EmailDelivery
 Relaciona-se ao Lead e representa:
 - `internal_notification`;
@@ -418,6 +423,7 @@ Corpo semântico:
   "source": "string controlada"
 }
 ```
+Na API pública, `source` é obrigatoriamente `website`; `manual` é exclusivo do Admin autenticado.
 Campos de proteção podem existir sem aparecer na experiência visível.
 O código HTTP e o envelope final devem ser consolidados na spec da API, sem alterar a semântica aprovada.
 ## 29. Respostas
@@ -511,6 +517,7 @@ Recursos:
 - filtros;
 - busca;
 - visualização;
+- criação manual de Lead;
 - arquivamento;
 - inspeção de entregas;
 - reenvio;
@@ -527,6 +534,7 @@ Proteção:
 - logs de ações;
 - MFA ou restrição adicional quando viável.
 Dados do Lead são registro histórico; evitar edição livre.
+Leads manuais usam `source=manual`, status inicial `new` e não registram ciência ou versão de Política de Privacidade.
 ## 39. Privacidade e consentimento
 Categorias:
 - necessários;

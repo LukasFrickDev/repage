@@ -17,6 +17,7 @@ class Lead(models.Model):
 
     class Source(models.TextChoices):
         WEBSITE = 'website', 'Website'
+        MANUAL = 'manual', 'Manual'
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=120)
@@ -28,7 +29,7 @@ class Lead(models.Model):
     source = models.CharField(max_length=32, choices=Source.choices)
     status = models.CharField(max_length=16, choices=Status.choices, default=Status.NEW)
     privacy_policy_acknowledged = models.BooleanField(default=False)
-    privacy_policy_version = models.CharField(max_length=64)
+    privacy_policy_version = models.CharField(max_length=64, blank=True, default='')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
