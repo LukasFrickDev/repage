@@ -1,6 +1,6 @@
 # 0006 — Experiência administrativa Repage
 
-- **Status:** approved
+- **Status:** implemented
 - **Responsável:** Lukas Frick
 - **Data:** 15 de agosto de 2026
 - **Branch-base:** `main`
@@ -16,7 +16,7 @@ O backend atual usa Django 5.2.6, Django REST Framework, PostgreSQL e Django Adm
 
 A administração de Leads já é funcional. O `LeadAdmin` existente possui listagem, busca, filtros, criação manual, detalhe, edição operacional limitada, ação em massa de arquivamento, exclusão desabilitada e autenticação obrigatória.
 
-Ainda não existem `AdminSite` customizado da Repage, templates administrativos próprios, CSS/static administrativo da Repage, login administrativo com branding, index administrativo com identidade própria ou refinamento visual e responsivo específico da área administrativa.
+A implementação final materializa o `AdminSite` padrão do Django como `RepageAdminSite`, com templates e assets administrativos próprios, login com branding, shell Repage e refinamento específico da área administrativa. Após autenticação, `/admin/` direciona diretamente para a changelist de Leads; não há uma index operacional separada.
 
 A Entrega 6 evolui essa base funcional. Ela não reconstrói o domínio de Leads nem cria um novo produto administrativo.
 
@@ -27,7 +27,7 @@ Transformar o Django Admin existente em uma experiência administrativa profissi
 Ao final:
 
 - `/admin/` continua sendo o ponto de entrada administrativo;
-- login, header, navegação e index usam identidade Repage;
+- login, header e navegação usam identidade Repage;
 - a listagem de Leads fica mais clara e ergonômica;
 - o detalhe organiza as informações por contexto;
 - a criação manual recebe a mesma organização visual;
@@ -48,7 +48,7 @@ Critérios observáveis:
 - paleta coerente com azul-grafite, off-white e violeta;
 - hierarquia visual consistente;
 - navegação nativa preservada e refinada;
-- index administrativa objetiva;
+- entrada administrativa objetiva, direcionada à listagem de Leads;
 - listagem de Leads legível e funcional;
 - status distinguíveis por texto e apoio visual;
 - detalhe do Lead dividido em grupos compreensíveis;
@@ -216,7 +216,6 @@ Candidatos esperados:
 
 - `admin/base.html` ou `admin/base_site.html`;
 - template de login;
-- template de index;
 - templates específicos de Lead somente se o `ModelAdmin` não resolver a necessidade.
 
 Não duplicar integralmente `change_list.html`, `change_form.html` ou `submit_line.html` quando bastar estender o template nativo e sobrescrever um bloco.
@@ -319,18 +318,11 @@ Usuários/Grupos do Django podem permanecer disponíveis conforme permissão, ma
 
 Não criar menu custom em JavaScript, router administrativo, navegação paralela ou sidebar proprietária complexa.
 
-## 15. Index administrativa
+## 15. Entrada administrativa
 
-A página inicial do Admin deve ser objetiva.
-
-Deve oferecer acesso claro a:
-
-- lista de Leads;
-- criação manual, quando o usuário tiver permissão;
-- gerenciamento de usuários/grupos conforme permissões nativas;
-- ações recentes nativas quando úteis.
-
-Pode incluir identificação curta como `Administração Repage` e descrição operacional breve.
+Após autenticação, `/admin/` direciona diretamente para a changelist de Leads, que é a
+superfície operacional principal da V1. O namespace `admin`, a navegação nativa, o acesso
+a Leads e o gerenciamento de usuários/grupos continuam sujeitos às permissões nativas.
 
 Não criar dashboard com faturamento, conversão, leads por mês, gráficos, metas, funil ou KPIs fictícios.
 
@@ -610,7 +602,7 @@ Cobrir:
 - títulos/branding configurados;
 - `/admin/` usando o AdminSite esperado;
 - login custom renderiza;
-- index custom renderiza;
+- `/admin/` direciona para a changelist de Leads;
 - autenticação continua obrigatória.
 
 ### 32.2 Permissões
@@ -882,62 +874,62 @@ Ao concluir:
 
 ## 44. Critérios de aceite
 
-- [ ] `main` pós-0005 foi usada como baseline.
-- [ ] `/admin/` continua sendo a URL administrativa.
-- [ ] Django Admin continua sendo a superfície administrativa.
-- [ ] Não existe painel React.
-- [ ] Não existe API privada nova para painel.
-- [ ] Não existe autenticação própria.
-- [ ] `AdminSite` Repage está ativo.
-- [ ] Branding Repage aparece no login e shell.
-- [ ] Logo usado deriva do asset oficial.
-- [ ] Não existe dependência externa de tema Admin.
-- [ ] Login mantém autenticação/CSRF/sessão nativos.
-- [ ] Header mantém ações nativas do usuário.
-- [ ] Index administrativa prioriza Leads.
-- [ ] Index não contém métricas fictícias.
-- [ ] Navegação nativa permanece funcional.
-- [ ] Listagem mantém nome, e-mail, WhatsApp, tipo, status e data.
-- [ ] Status possui texto e apoio visual.
-- [ ] Busca existente permanece funcional.
-- [ ] Filtros existentes permanecem funcionais.
-- [ ] Arquivamento em massa permanece funcional.
-- [ ] Exclusão continua desabilitada.
-- [ ] Detalhe organiza Contato, Projeto, Origem e Privacidade/registro.
-- [ ] Mensagem integral continua legível e readonly.
-- [ ] Somente `email`, `whatsapp`, `project_type` e `status` são editáveis depois da criação.
-- [ ] Demais campos permanecem readonly.
-- [ ] Criação manual preserva contrato da 0005.
-- [ ] Leads manuais continuam com `source=manual`.
-- [ ] Leads manuais continuam iniciando em `new`.
-- [ ] Ciência de política não é falsificada em Lead manual.
-- [ ] Ações de e-mail/WhatsApp, se implementadas, exigem ação explícita e não enviam PII automaticamente.
-- [ ] Histórico nativo permanece disponível.
-- [ ] Desktop/notebook possuem experiência aprovada.
-- [ ] Tablet permanece utilizável.
-- [ ] Mobile permite consultas/operações razoáveis.
-- [ ] Não há overflow horizontal descontrolado da página.
-- [ ] Tabela pode usar scroll horizontal contido quando necessário.
-- [ ] Teclado funciona.
-- [ ] Foco é visível.
-- [ ] Labels e erros continuam acessíveis.
-- [ ] Nenhuma informação depende só de cor.
-- [ ] Nenhuma informação depende só de hover.
-- [ ] Segurança nativa do Admin não foi enfraquecida.
-- [ ] Nenhuma PII foi adicionada a assets/logs/testes públicos.
-- [ ] Nenhum recurso da Entrega 7 foi antecipado.
-- [ ] Nenhum CRM/dashboard/Analytics administrativo foi criado.
-- [ ] Checkpoint visual A foi aprovado.
-- [ ] Checkpoint visual B foi aprovado.
-- [ ] Checkpoint visual C foi aprovado.
-- [ ] `python manage.py check` aprovado.
-- [ ] migration check aprovado e sem migration inesperada.
-- [ ] Ruff aprovado.
-- [ ] pytest aprovado.
-- [ ] `git diff --check` aprovado.
-- [ ] Revisão de segurança aprovada.
-- [ ] Documentação reconciliada.
-- [ ] Spec marcada `implemented` somente após todos os critérios obrigatórios.
+- [x] `main` pós-0005 foi usada como baseline.
+- [x] `/admin/` continua sendo a URL administrativa.
+- [x] Django Admin continua sendo a superfície administrativa.
+- [x] Não existe painel React.
+- [x] Não existe API privada nova para painel.
+- [x] Não existe autenticação própria.
+- [x] `AdminSite` Repage está ativo.
+- [x] Branding Repage aparece no login e shell.
+- [x] Logo usado deriva do asset oficial.
+- [x] Não existe dependência externa de tema Admin.
+- [x] Login mantém autenticação/CSRF/sessão nativos.
+- [x] Header mantém ações nativas do usuário.
+- [x] A entrada administrativa direciona diretamente para Leads.
+- [x] Não há métricas fictícias na entrada administrativa.
+- [x] Navegação nativa permanece funcional.
+- [x] Listagem mantém nome, e-mail, WhatsApp, tipo, status e data.
+- [x] Status possui texto e apoio visual.
+- [x] Busca existente permanece funcional.
+- [x] Filtros existentes permanecem funcionais.
+- [x] Arquivamento em massa permanece funcional.
+- [x] Exclusão continua desabilitada.
+- [x] Detalhe organiza Contato, Projeto, Origem e Privacidade/registro.
+- [x] Mensagem integral continua legível e readonly.
+- [x] Somente `email`, `whatsapp`, `project_type` e `status` são editáveis depois da criação.
+- [x] Demais campos permanecem readonly.
+- [x] Criação manual preserva contrato da 0005.
+- [x] Leads manuais continuam com `source=manual`.
+- [x] Leads manuais continuam iniciando em `new`.
+- [x] Ciência de política não é falsificada em Lead manual.
+- [x] Ações de e-mail/WhatsApp, se implementadas, exigem ação explícita e não enviam PII automaticamente.
+- [x] Histórico nativo permanece disponível.
+- [x] Desktop/notebook possuem experiência aprovada.
+- [x] Tablet permanece utilizável.
+- [x] Mobile permite consultas/operações razoáveis.
+- [x] Não há overflow horizontal descontrolado da página.
+- [x] Tabela pode usar scroll horizontal contido quando necessário.
+- [x] Teclado funciona.
+- [x] Foco é visível.
+- [x] Labels e erros continuam acessíveis.
+- [x] Nenhuma informação depende só de cor.
+- [x] Nenhuma informação depende só de hover.
+- [x] Segurança nativa do Admin não foi enfraquecida.
+- [x] Nenhuma PII foi adicionada a assets/logs/testes públicos.
+- [x] Nenhum recurso da Entrega 7 foi antecipado.
+- [x] Nenhum CRM/dashboard/Analytics administrativo foi criado.
+- [x] Checkpoint visual A foi aprovado.
+- [x] Checkpoint visual B foi aprovado.
+- [x] Checkpoint visual C foi aprovado.
+- [x] `python manage.py check` aprovado.
+- [x] migration check aprovado e sem migration inesperada.
+- [x] Ruff aprovado.
+- [x] pytest aprovado.
+- [x] `git diff --check` aprovado.
+- [x] Revisão de segurança aprovada.
+- [x] Documentação reconciliada.
+- [x] Spec marcada `implemented` após os critérios obrigatórios.
 
 ## 45. Definição de pronto
 

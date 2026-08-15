@@ -84,3 +84,4 @@ Somente spec aprovada orienta implementação planejada.
 | [`0003-definitive-homepage.md`](0003-definitive-homepage.md) | `implemented` | Homepage definitiva |
 | [`0004-portfolio-and-cases.md`](0004-portfolio-and-cases.md) | `implemented` | Portfólio e seis cases |
 | [`0005-lead-intake-backend-and-form.md`](0005-lead-intake-backend-and-form.md) | `implemented` | Backend, persistência de leads e formulário |
+| [`0006-repage-admin-experience.md`](0006-repage-admin-experience.md) | `implemented` | Experiência administrativa Repage |

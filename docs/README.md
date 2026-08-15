@@ -46,7 +46,7 @@ Estado conhecido:
 - Entregas 1–4 concluídas, incluindo homepage definitiva, portfólio e seis cases;
 - Entrega 5 concluída: backend Django/DRF, PostgreSQL, API de Leads, Django Admin e formulário persistido integrados e validados;
 - roteamento público já materializado;
-- próxima entrega: Entrega 6 — Experiência administrativa Repage no Django Admin;
+- Entrega 6 concluída: Experiência administrativa Repage no Django Admin;
 - e-mails, idempotência e proteção continuam pendentes para a Entrega 7;
 - demais entregas futuras continuam pendentes;
 - arquitetura-alvo documentada e estado materializado reconciliado.

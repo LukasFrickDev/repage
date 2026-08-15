@@ -21,7 +21,7 @@ A V1 deve servir como referência comercial da marca, apoiar prospecção e cond
 * A entrega 3 está concluída: a homepage reúne os três destaques, ofertas, diferenciais, processo, Sobre e contato com conteúdo e mídias reais, com revisão visual humana e validações técnicas aprovadas.
 * A entrega 4 está concluída: `/portfolio` e os seis cases usam conteúdo e mídia reais, galerias, viewer, vídeos integrados, publicação validada e navegação compartilhada.
 * A entrega 5 está concluída: backend Django/DRF, PostgreSQL, API pública de Leads, Django Admin, formulário persistido e migrations versionadas foram validados.
-* A próxima entrega é a Experiência administrativa Repage no Django Admin existente.
+* A entrega 6 está concluída: o Django Admin existente recebeu a experiência administrativa Repage, com Leads como superfície operacional principal.
 * E-mails, idempotência e proteção continuam pendentes para a Entrega 7.
 * Consentimento, Analytics, SEO, prerender, CI/CD, deploy e lançamento continuam pendentes nas entregas seguintes.
 
@@ -131,7 +131,7 @@ A V1 deve servir como referência comercial da marca, apoiar prospecção e cond
   **Critério de conclusão:** envio válido persiste; envio inválido não persiste; falhas são recuperáveis e seguras.
   **Spec:** [`0005-lead-intake-backend-and-form.md`](specs/0005-lead-intake-backend-and-form.md) — `implemented`; coordena API, persistência, Admin e formulário.
 
-## Entrega 6 — Experiência administrativa Repage
+## Entrega 6 — Experiência administrativa Repage — concluída
 
 **Objetivo:** transformar o Django Admin funcional em uma experiência administrativa profissional e coerente com a identidade Repage, sem criar um painel React separado.
 **Resultado esperado:** login, navegação, listagem e detalhe de Leads ficam mais claros, acessíveis e responsivos, preservando autenticação, sessão, CSRF, permissões nativas e operações já aprovadas.
@@ -145,7 +145,7 @@ A V1 deve servir como referência comercial da marca, apoiar prospecção e cond
   **Dependências:** Entrega 5, revisão da experiência administrativa e definição da spec própria.
   **Validações:** autenticação, permissões, CSRF, operações existentes, responsividade, acessibilidade e regressão do fluxo de Leads.
   **Critério de conclusão:** Django Admin permanece a superfície administrativa funcional, com experiência visual e ergonômica aprovada.
-  **Spec:** obrigatória somente ao iniciar a entrega; não criar antecipadamente.
+  **Spec:** [`0006-repage-admin-experience.md`](specs/0006-repage-admin-experience.md) — `implemented`.
 
 ## Entrega 7 — E-mails, idempotência e proteção
 
