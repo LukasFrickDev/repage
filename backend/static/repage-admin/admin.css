@@ -1,22 +1,98 @@
-:root {
+:root,
+html[data-theme="light"] {
   --repage-ink: #101827;
+  --repage-graphite: #182235;
   --repage-paper: #f5f2ec;
   --repage-surface: #ffffff;
-  --repage-violet: #7c5cff;
+  --repage-violet: #6c63ff;
   --repage-line: #d9d5ce;
   --repage-muted: #5f6875;
   --primary: var(--repage-violet);
+  --primary-fg: var(--repage-paper);
+  --secondary: var(--repage-ink);
+  --accent: var(--repage-violet);
+  --body-fg: var(--repage-ink);
+  --body-bg: var(--repage-paper);
+  --body-quiet-color: var(--repage-muted);
+  --body-medium-color: var(--repage-ink);
+  --body-loud-color: var(--repage-ink);
   --header-color: var(--repage-paper);
   --header-branding-color: var(--repage-paper);
   --header-link-color: var(--repage-paper);
-  --link-fg: #5d43d8;
-  --body-bg: var(--repage-paper);
-  --darkened-bg: #eeeae3;
-  --selected-bg: #e8e2ff;
+  --header-bg: var(--repage-ink);
+  --breadcrumbs-fg: var(--repage-muted);
+  --breadcrumbs-link-fg: var(--repage-muted);
+  --breadcrumbs-bg: transparent;
+  --link-fg: #5148c4;
+  --link-hover-color: var(--repage-violet);
+  --link-selected-fg: var(--repage-ink);
+  --darkened-bg: transparent;
+  --selected-bg: rgba(108, 99, 255, 0.08);
+  --selected-row: rgba(108, 99, 255, 0.08);
   --hairline-color: var(--repage-line);
+  --border-color: #bdb9b1;
+  --error-fg: #8b3030;
+  --message-success-bg: rgba(108, 99, 255, 0.1);
+  --message-warning-bg: rgba(108, 99, 255, 0.1);
+  --message-error-bg: rgba(139, 48, 48, 0.1);
+  --button-fg: var(--repage-paper);
   --button-bg: var(--repage-ink);
   --default-button-bg: var(--repage-violet);
+  --button-hover-bg: var(--repage-violet);
+  --default-button-hover-bg: var(--repage-ink);
+  --close-button-bg: var(--repage-muted);
+  --delete-button-bg: #7b3434;
+  --object-tools-bg: var(--repage-ink);
+  --object-tools-hover-bg: var(--repage-violet);
+  color-scheme: light;
+}
+
+html[data-theme="dark"] {
+  --repage-ink: #101827;
+  --repage-graphite: #182235;
+  --repage-paper: #f5f2ec;
+  --repage-surface: #182235;
+  --repage-violet: #6c63ff;
+  --repage-line: #354052;
+  --repage-muted: #b9c0cc;
+  --primary: var(--repage-violet);
+  --primary-fg: var(--repage-paper);
+  --secondary: #141e30;
+  --accent: var(--repage-violet);
+  --body-fg: var(--repage-paper);
+  --body-bg: var(--repage-ink);
   --body-quiet-color: var(--repage-muted);
+  --body-medium-color: var(--repage-paper);
+  --body-loud-color: var(--repage-paper);
+  --header-color: var(--repage-paper);
+  --header-branding-color: var(--repage-paper);
+  --header-link-color: var(--repage-paper);
+  --header-bg: #141e30;
+  --breadcrumbs-fg: var(--repage-muted);
+  --breadcrumbs-link-fg: var(--repage-muted);
+  --breadcrumbs-bg: transparent;
+  --link-fg: var(--repage-violet);
+  --link-hover-color: var(--repage-violet);
+  --link-selected-fg: var(--repage-paper);
+  --darkened-bg: transparent;
+  --selected-bg: rgba(141, 134, 255, 0.12);
+  --selected-row: rgba(141, 134, 255, 0.12);
+  --hairline-color: var(--repage-line);
+  --border-color: #4b5668;
+  --error-fg: #e29b9b;
+  --message-success-bg: rgba(141, 134, 255, 0.14);
+  --message-warning-bg: rgba(141, 134, 255, 0.14);
+  --message-error-bg: rgba(226, 155, 155, 0.14);
+  --button-fg: var(--repage-paper);
+  --button-bg: #182235;
+  --default-button-bg: var(--repage-violet);
+  --button-hover-bg: var(--repage-violet);
+  --default-button-hover-bg: var(--repage-violet);
+  --close-button-bg: var(--repage-ink);
+  --delete-button-bg: var(--repage-ink);
+  --object-tools-bg: var(--repage-graphite);
+  --object-tools-hover-bg: var(--repage-violet);
+  color-scheme: dark;
 }
 
 body,
@@ -25,6 +101,24 @@ textarea,
 select,
 button {
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+body,
+#container,
+#nav-sidebar,
+.main,
+#content,
+#content-main {
+  background: var(--body-bg);
+  color: var(--body-fg);
+}
+
+input,
+textarea,
+select {
+  background: var(--repage-surface);
+  border-color: var(--border-color);
+  color: var(--body-fg);
 }
 
 #header {
@@ -81,6 +175,33 @@ button {
   max-width: 1440px;
 }
 
+div.breadcrumbs {
+  background: transparent;
+  border-bottom: 1px solid var(--hairline-color);
+  color: var(--breadcrumbs-fg);
+  padding: 10px 40px;
+}
+
+div.breadcrumbs a {
+  color: var(--breadcrumbs-link-fg);
+}
+
+#nav-sidebar {
+  border-right-color: var(--hairline-color);
+}
+
+#nav-sidebar .module,
+#nav-sidebar .module caption,
+#nav-sidebar .module th,
+#nav-sidebar .module td {
+  background: transparent;
+}
+
+#nav-sidebar .current-model {
+  background: var(--selected-row);
+  border-left: 2px solid var(--repage-violet);
+}
+
 .repage-page-intro,
 .repage-login-intro {
   margin-bottom: 28px;
@@ -114,9 +235,185 @@ button {
 
 .module,
 #content-related .module {
-  border: 1px solid var(--repage-line);
-  border-radius: 10px;
-  overflow: hidden;
+  border: 0;
+  border-radius: 0;
+  overflow: visible;
+}
+
+#toolbar {
+  background: transparent;
+  border-bottom: 1px solid var(--hairline-color);
+  border-top: 1px solid var(--hairline-color);
+  padding: 12px 0;
+}
+
+#toolbar form input[type="submit"] {
+  background: var(--body-bg);
+  box-shadow: none;
+}
+
+#changelist-filter {
+  background: transparent;
+  border-left: 1px solid var(--hairline-color);
+  margin-left: 28px;
+}
+
+#changelist-filter h2 {
+  background: transparent;
+  border-bottom: 1px solid var(--hairline-color);
+  color: var(--body-fg);
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  padding: 10px 15px 12px;
+}
+
+#changelist-filter li.selected {
+  border-left-color: var(--repage-violet);
+}
+
+#changelist-filter li.selected a {
+  color: var(--link-selected-fg);
+  font-weight: 600;
+}
+
+#changelist table {
+  background: transparent;
+  border-collapse: collapse;
+}
+
+#changelist table thead th,
+#changelist table tbody td,
+#changelist table tbody th {
+  border-bottom: 1px solid var(--hairline-color);
+}
+
+#changelist table thead th {
+  color: var(--body-quiet-color);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+#changelist table tbody tr,
+#changelist table tbody tr:nth-child(odd),
+#changelist table tbody tr:nth-child(even) {
+  background: transparent;
+}
+
+#changelist table tbody tr:hover,
+#changelist tbody tr.selected,
+#changelist tbody tr:has(.action-select:checked) {
+  background: var(--selected-row);
+}
+
+#changelist table tbody td,
+#changelist table tbody th {
+  padding-bottom: 11px;
+  padding-top: 11px;
+}
+
+.repage-status {
+  align-items: center;
+  display: inline-flex;
+  gap: 7px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.repage-status__dot {
+  background: currentColor;
+  border-radius: 50%;
+  display: inline-block;
+  height: 8px;
+  width: 8px;
+}
+
+.repage-status--new,
+.repage-status--in-progress { color: var(--repage-violet); }
+.repage-status--delivered { color: var(--body-fg); }
+.repage-status--maintenance { color: var(--repage-muted); }
+.repage-status--archived { color: var(--repage-muted); opacity: 0.8; }
+
+.field-message .readonly {
+  line-height: 1.65;
+  max-width: 72ch;
+  white-space: pre-wrap;
+}
+
+.field-contact_actions .readonly {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.repage-contact-action {
+  font-weight: 600;
+}
+
+fieldset.repage-fieldset {
+  background: transparent;
+  border-top: 1px solid var(--repage-line);
+  margin-top: 28px;
+  padding-top: 18px;
+}
+
+fieldset.repage-fieldset .fieldset-heading {
+  background: transparent;
+  border: 0;
+  color: var(--body-fg);
+  font-size: 1rem;
+  font-weight: 600;
+  padding: 0 0 12px;
+}
+
+fieldset.repage-fieldset .form-row {
+  background: transparent;
+}
+
+.submit-row {
+  background: transparent;
+  border: 0;
+  border-top: 1px solid var(--hairline-color);
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.aligned .form-row .readonly {
+  color: var(--body-fg);
+  padding-bottom: 6px;
+  padding-top: 6px;
+}
+
+.theme-choice {
+  align-items: center;
+  display: inline-flex;
+  gap: 4px;
+  margin-left: 10px;
+}
+
+.theme-choice button {
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  color: var(--header-link-color);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.65rem;
+  letter-spacing: 0.06em;
+  padding: 3px 5px;
+  text-transform: uppercase;
+}
+
+.theme-choice button[aria-pressed="true"] {
+  border-color: rgba(245, 242, 236, 0.45);
+  color: var(--repage-paper);
+}
+
+.theme-choice button:focus,
+.theme-choice button:hover {
+  border-color: var(--repage-violet);
+  color: var(--repage-paper);
 }
 
 .login #container {

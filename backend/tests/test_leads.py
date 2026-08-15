@@ -303,10 +303,10 @@ def test_admin_registers_lead_with_search_filters_and_archive_action():
         'email',
         'whatsapp_display',
         'project_type',
-        'status',
+        'status_display',
         'created_at',
     )
-    assert model_admin.list_filter == ('status', 'project_type', 'created_at')
+    assert model_admin.list_filter == ('status', 'project_type', 'source', 'created_at')
     assert model_admin.search_fields == (
         'name',
         'email',
@@ -338,12 +338,62 @@ def test_admin_registers_lead_with_search_filters_and_archive_action():
         'privacy_policy_version',
         'created_at',
         'updated_at',
+        'contact_actions',
     }
     assert {'email', 'whatsapp', 'project_type', 'status'}.isdisjoint(
         model_admin.get_readonly_fields(None, lead)
     )
     assert model_admin.form is LeadAdminForm
     assert model_admin.whatsapp_display(lead) == '(11) 99999-9999'
+
+
+def test_admin_lead_fieldsets_preserve_operational_and_historical_boundaries():
+    model_admin = admin.site._registry[Lead]
+    add_fields = model_admin.get_fieldsets(None)[0][1]['fields']
+    change_fieldsets = model_admin.get_fieldsets(None, Lead())[0:]
+    change_fields = [field for _, options in change_fieldsets for field in options['fields']]
+
+    assert add_fields == (
+        'name',
+        'email',
+        'whatsapp',
+        'project_type',
+        'business_name',
+        'message',
+        'acquisition_source',
+    )
+    assert {'email', 'whatsapp', 'project_type', 'status'}.issubset(change_fields)
+    assert {'id', 'source', 'acquisition_source', 'message'}.issubset(change_fields)
+    assert {'email', 'whatsapp', 'project_type', 'status'}.isdisjoint(
+        model_admin.get_readonly_fields(None, Lead())
+    )
+
+
+def test_admin_status_display_has_text_and_distinct_visual_classes():
+    model_admin = admin.site._registry[Lead]
+    rendered = {
+        status: str(model_admin.status_display(Lead(status=status)))
+        for status in Lead.Status.values
+    }
+
+    assert all(Lead(status=status).get_status_display() in html for status, html in rendered.items())
+    assert all('repage-status__dot' in html for html in rendered.values())
+    assert len({html.split('repage-status--', 1)[1].split('"', 1)[0] for html in rendered.values()}) == 5
+
+
+def test_admin_contact_actions_use_explicit_safe_destinations():
+    model_admin = admin.site._registry[Lead]
+    html = str(
+        model_admin.contact_actions(
+            Lead(email='contato@example.test', whatsapp='+5511999999999')
+        )
+    )
+
+    assert 'mailto:contato@example.test' in html
+    assert 'https://wa.me/5511999999999' in html
+    assert 'target="_blank"' in html
+    assert 'noopener noreferrer' in html
+    assert 'text=' not in html
 
 
 @pytest.mark.django_db

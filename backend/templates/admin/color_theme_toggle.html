@@ -1,0 +1,22 @@
+{% load i18n %}
+<span class="theme-choice" role="group" aria-label="Tema da administração">
+  <button type="button" data-theme-choice="light" aria-pressed="false">{% translate 'Claro' %}</button>
+  <button type="button" data-theme-choice="dark" aria-pressed="false">{% translate 'Escuro' %}</button>
+</span>
+<script>
+  (() => {
+    const choices = document.querySelectorAll('[data-theme-choice]');
+    const applyTheme = (theme) => {
+      const selected = theme === 'dark' ? 'dark' : 'light';
+      document.documentElement.dataset.theme = selected;
+      localStorage.setItem('theme', selected);
+      choices.forEach((choice) => {
+        choice.setAttribute('aria-pressed', String(choice.dataset.themeChoice === selected));
+      });
+    };
+    applyTheme(localStorage.getItem('theme'));
+    choices.forEach((choice) => {
+      choice.addEventListener('click', () => applyTheme(choice.dataset.themeChoice));
+    });
+  })();
+</script>
