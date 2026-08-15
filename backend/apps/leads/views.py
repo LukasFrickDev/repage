@@ -12,6 +12,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .models import EmailDelivery, IdempotencyRecord, Lead
+from .email_service import process_delivery
 from .protection import (
     ProtectionUnavailable,
     RateLimitExceeded,
@@ -244,6 +245,8 @@ class LeadCreateView(APIView):
 
         duplicate = find_duplicate_lead(values, fingerprint)
         expires_at = timezone.now() + timedelta(seconds=settings.IDEMPOTENCY_TTL_SECONDS)
+        delivery_ids = []
+        created_new_lead = duplicate is None
         try:
             with transaction.atomic():
                 IdempotencyRecord.objects.filter(
@@ -259,6 +262,9 @@ class LeadCreateView(APIView):
                     EmailDelivery.objects.create(
                         lead=lead,
                         kind=EmailDelivery.Kind.VISITOR_CONFIRMATION,
+                    )
+                    delivery_ids = list(
+                        EmailDelivery.objects.filter(lead=lead).values_list('id', flat=True)
                     )
                 else:
                     lead = duplicate
@@ -297,6 +303,16 @@ class LeadCreateView(APIView):
                 request_id,
                 http_status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
+
+        if created_new_lead:
+            for delivery_id in delivery_ids:
+                try:
+                    process_delivery(delivery_id)
+                except DatabaseError:
+                    logger.error(
+                        'email_delivery_persistence_failed',
+                        extra={'delivery_id': str(delivery_id), 'request_id': str(request_id)},
+                    )
 
         payload = dict(SUCCESS_PAYLOAD)
         payload['request_id'] = str(request_id)

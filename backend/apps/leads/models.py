@@ -64,7 +64,7 @@ class EmailDelivery(models.Model):
     kind = models.CharField(max_length=32, choices=Kind.choices)
     status = models.CharField(max_length=16, choices=Status.choices, default=Status.PENDING)
     attempts = models.PositiveIntegerField(default=0)
-    next_attempt_at = models.DateTimeField(default=timezone.now)
+    next_attempt_at = models.DateTimeField(default=timezone.now, null=True, blank=True)
     last_attempt_at = models.DateTimeField(null=True, blank=True)
     last_error_code = models.CharField(max_length=64, blank=True, default='')
     sent_at = models.DateTimeField(null=True, blank=True)

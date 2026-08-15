@@ -1,6 +1,7 @@
 import uuid
 from concurrent.futures import ThreadPoolExecutor
 from datetime import timedelta
+from unittest.mock import patch
 
 import pytest
 from django.contrib import admin
@@ -8,14 +9,17 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Permission
 from django.conf import settings
 from django.core.cache import caches
-from django.db import IntegrityError
+from django.core import mail
+from django.db import IntegrityError, connections
 from django.core.management import call_command
 from django.test import Client
+from django.test import override_settings
 from django.utils import timezone
 from django.urls import reverse
 from rest_framework.test import APIClient
 
 from apps.leads.admin import LeadAdmin, LeadAdminForm
+from apps.leads.email_service import build_message, claim_delivery, process_delivery
 from apps.leads.models import EmailDelivery, IdempotencyRecord, Lead
 from apps.leads.serializers import LeadSerializer
 from apps.leads.security import canonicalize, protected_cache_key, protected_fingerprint
@@ -493,11 +497,17 @@ def test_concurrent_same_key_creates_one_lead_and_two_deliveries():
     key = '00000000-0000-4000-8000-000000000009'
 
     def submit():
-        client = APIClient()
-        return client.post('/api/v1/leads/', payload(), format='json', **api_headers(key))
+        try:
+            client = APIClient()
+            return client.post('/api/v1/leads/', payload(), format='json', **api_headers(key))
+        finally:
+            connections.close_all()
 
-    with ThreadPoolExecutor(max_workers=2) as executor:
-        responses = list(executor.map(lambda _: submit(), range(2)))
+    try:
+        with ThreadPoolExecutor(max_workers=2) as executor:
+            responses = list(executor.map(lambda _: submit(), range(2)))
+    finally:
+        connections.close_all()
 
     assert [response.status_code for response in responses] == [201, 201]
     assert Lead.objects.count() == 1
@@ -524,6 +534,138 @@ def test_cleanup_idempotency_removes_only_expired_records():
 
     assert IdempotencyRecord.objects.count() == 1
     assert IdempotencyRecord.objects.get(pk=active.pk).expires_at > timezone.now()
+
+
+def email_lead():
+    return Lead.objects.create(
+        name='Ana Souza', email='ana@example.com', whatsapp='+5511999999999',
+        project_type=Lead.ProjectType.INSTITUTIONAL_SITE,
+        business_name='Negócio fictício', message='Mensagem operacional',
+        source=Lead.Source.WEBSITE,
+    )
+
+
+@pytest.mark.django_db
+@override_settings(EMAIL_FROM_ADDRESS='from@example.com', EMAIL_INTERNAL_RECIPIENT='internal@example.com')
+def test_email_service_builds_plain_text_internal_and_visitor_messages():
+    lead = email_lead()
+    internal = EmailDelivery.objects.create(lead=lead, kind=EmailDelivery.Kind.INTERNAL_NOTIFICATION)
+    visitor = EmailDelivery.objects.create(lead=lead, kind=EmailDelivery.Kind.VISITOR_CONFIRMATION)
+
+    internal_message = build_message(internal)
+    visitor_message = build_message(visitor)
+
+    assert internal_message.subject == '[Repage] Nova solicitação de orçamento'
+    assert internal_message.from_email == 'from@example.com'
+    assert internal_message.to == ['internal@example.com']
+    assert internal_message.reply_to == [lead.email]
+    assert internal_message.content_subtype == 'plain'
+    assert 'Mensagem operacional' in internal_message.body
+    assert visitor_message.subject == 'Recebemos sua solicitação | Repage'
+    assert visitor_message.to == [lead.email]
+    assert 'não representa orçamento ou aceite do projeto' in visitor_message.body
+    assert 'Mensagem operacional' not in visitor_message.body
+
+
+@pytest.mark.django_db
+@override_settings(EMAIL_FROM_ADDRESS='from@example.com', EMAIL_INTERNAL_RECIPIENT='internal@example.com')
+def test_email_service_success_updates_delivery_once():
+    lead = email_lead()
+    delivery = EmailDelivery.objects.create(lead=lead, kind=EmailDelivery.Kind.VISITOR_CONFIRMATION)
+
+    process_delivery(delivery.id)
+    delivery.refresh_from_db()
+
+    assert len(mail.outbox) == 1
+    assert delivery.status == EmailDelivery.Status.SENT
+    assert delivery.attempts == 1
+    assert delivery.last_attempt_at is not None
+    assert delivery.sent_at is not None
+    assert delivery.last_error_code == ''
+    assert delivery.next_attempt_at is None
+    assert process_delivery(delivery.id) is None
+    assert len(mail.outbox) == 1
+
+
+@pytest.mark.django_db
+@override_settings(EMAIL_FROM_ADDRESS='from@example.com', EMAIL_INTERNAL_RECIPIENT='internal@example.com')
+def test_email_service_sanitizes_failure_and_schedules_retry():
+    lead = email_lead()
+    delivery = EmailDelivery.objects.create(lead=lead, kind=EmailDelivery.Kind.INTERNAL_NOTIFICATION)
+
+    with patch('django.core.mail.EmailMessage.send', side_effect=TimeoutError('secret raw error')):
+        process_delivery(delivery.id)
+    delivery.refresh_from_db()
+
+    assert delivery.status == EmailDelivery.Status.FAILED
+    assert delivery.attempts == 1
+    assert delivery.last_error_code == 'timeout'
+    assert 'secret raw error' not in delivery.last_error_code
+    assert delivery.next_attempt_at is not None
+    assert delivery.sent_at is None
+
+
+@pytest.mark.django_db
+@override_settings(EMAIL_FROM_ADDRESS='from@example.com', EMAIL_INTERNAL_RECIPIENT='internal@example.com')
+def test_email_deliveries_are_processed_independently():
+    lead = email_lead()
+    internal = EmailDelivery.objects.create(lead=lead, kind=EmailDelivery.Kind.INTERNAL_NOTIFICATION)
+    visitor = EmailDelivery.objects.create(lead=lead, kind=EmailDelivery.Kind.VISITOR_CONFIRMATION)
+
+    with patch('django.core.mail.EmailMessage.send', side_effect=[TimeoutError('secret'), 1]) as mocked_send:
+        process_delivery(internal.id)
+        process_delivery(visitor.id)
+    internal.refresh_from_db()
+    visitor.refresh_from_db()
+
+    assert internal.status == EmailDelivery.Status.FAILED
+    assert visitor.status == EmailDelivery.Status.SENT
+    assert mocked_send.call_count == 2
+    assert internal.attempts == 1
+    assert visitor.attempts == 1
+    assert internal.last_error_code == 'timeout'
+    assert internal.next_attempt_at is not None
+    assert visitor.sent_at is not None
+    assert visitor.next_attempt_at is None
+
+
+@pytest.mark.django_db
+@override_settings(
+    EMAIL_FROM_ADDRESS='from@example.com',
+    EMAIL_INTERNAL_RECIPIENT='internal@example.com',
+    EMAIL_RETRY_DELAYS_SECONDS=(900, 3600, 21600, 86400),
+)
+def test_fifth_email_failure_is_terminal_and_not_due_for_retry():
+    lead = email_lead()
+    delivery = EmailDelivery.objects.create(lead=lead, kind=EmailDelivery.Kind.INTERNAL_NOTIFICATION)
+
+    with patch('django.core.mail.EmailMessage.send', side_effect=TimeoutError('secret')) as send:
+        for attempt in range(5):
+            process_delivery(delivery.id)
+            if attempt < 4:
+                EmailDelivery.objects.filter(pk=delivery.pk).update(
+                    next_attempt_at=timezone.now() - timedelta(seconds=1)
+                )
+    delivery.refresh_from_db()
+
+    assert send.call_count == 5
+    assert delivery.status == EmailDelivery.Status.FAILED
+    assert delivery.attempts == 5
+    assert delivery.next_attempt_at is None
+    assert process_delivery(delivery.id) is None
+
+
+@pytest.mark.django_db
+def test_claim_lease_prevents_second_worker_until_expired():
+    lead = email_lead()
+    delivery = EmailDelivery.objects.create(lead=lead, kind=EmailDelivery.Kind.INTERNAL_NOTIFICATION)
+
+    first_claim = claim_delivery(delivery.id)
+    second_claim = claim_delivery(delivery.id)
+    assert first_claim is not None
+    assert second_claim is None
+    EmailDelivery.objects.filter(pk=delivery.pk).update(next_attempt_at=timezone.now() - timedelta(seconds=1))
+    assert claim_delivery(delivery.id) is not None
 
 
 @pytest.mark.django_db

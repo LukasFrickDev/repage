@@ -162,6 +162,12 @@ LEAD_RATE_LIMIT_EMAIL_COUNT = env_int('LEAD_RATE_LIMIT_EMAIL_COUNT', 3, minimum=
 LEAD_RATE_LIMIT_EMAIL_WINDOW_SECONDS = env_int('LEAD_RATE_LIMIT_EMAIL_WINDOW_SECONDS', 1800, minimum=1)
 LEAD_RATE_LIMIT_PHONE_COUNT = env_int('LEAD_RATE_LIMIT_PHONE_COUNT', 3, minimum=1)
 LEAD_RATE_LIMIT_PHONE_WINDOW_SECONDS = env_int('LEAD_RATE_LIMIT_PHONE_WINDOW_SECONDS', 1800, minimum=1)
+EMAIL_DELIVERY_LEASE_SECONDS = env_int('EMAIL_DELIVERY_LEASE_SECONDS', 300, minimum=1)
+EMAIL_RETRY_BATCH_SIZE = env_int('EMAIL_RETRY_BATCH_SIZE', 10, minimum=1)
+EMAIL_RETRY_DELAYS_SECONDS = tuple(
+    env_int(f'EMAIL_RETRY_DELAY_{index}_SECONDS', value, minimum=1)
+    for index, value in enumerate((900, 3600, 21600, 86400), start=1)
+)
 
 EMAIL_FROM_ADDRESS = (
     required_env('EMAIL_FROM_ADDRESS')
@@ -173,10 +179,31 @@ EMAIL_INTERNAL_RECIPIENT = (
     if ENVIRONMENT == 'production'
     else os.getenv('EMAIL_INTERNAL_RECIPIENT', '').strip()
 )
-EMAIL_BACKEND = os.getenv(
-    'EMAIL_BACKEND',
-    'django.core.mail.backends.locmem.EmailBackend',
-).strip()
+if ENVIRONMENT == 'production':
+    EMAIL_BACKEND = os.getenv(
+        'EMAIL_BACKEND',
+        'django.core.mail.backends.smtp.EmailBackend',
+    ).strip()
+    if EMAIL_BACKEND != 'django.core.mail.backends.smtp.EmailBackend':
+        raise ImproperlyConfigured('EMAIL_BACKEND deve usar o backend SMTP nativo em produção.')
+    EMAIL_HOST = required_env('EMAIL_HOST')
+    EMAIL_PORT = env_int('EMAIL_PORT', 587, minimum=1)
+    EMAIL_HOST_USER = required_env('EMAIL_HOST_USER')
+    EMAIL_HOST_PASSWORD = required_env('EMAIL_HOST_PASSWORD')
+else:
+    EMAIL_BACKEND = os.getenv(
+        'EMAIL_BACKEND',
+        'django.core.mail.backends.locmem.EmailBackend',
+    ).strip()
+    EMAIL_HOST = os.getenv('EMAIL_HOST', '').strip()
+    EMAIL_PORT = env_int('EMAIL_PORT', 587, minimum=1)
+    EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '').strip()
+    EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
+EMAIL_USE_TLS = env_bool('EMAIL_USE_TLS', False)
+EMAIL_USE_SSL = env_bool('EMAIL_USE_SSL', False)
+if EMAIL_USE_TLS and EMAIL_USE_SSL:
+    raise ImproperlyConfigured('EMAIL_USE_TLS e EMAIL_USE_SSL não podem estar ativos simultaneamente.')
+EMAIL_TIMEOUT = env_int('EMAIL_TIMEOUT', 5, minimum=1)
 DEFAULT_FROM_EMAIL = EMAIL_FROM_ADDRESS
 
 REST_FRAMEWORK = {

@@ -74,6 +74,13 @@ def load_settings_with_environment(**overrides):
         'POSTGRES_PORT',
         'EMAIL_FROM_ADDRESS',
         'EMAIL_INTERNAL_RECIPIENT',
+        'EMAIL_HOST',
+        'EMAIL_PORT',
+        'EMAIL_HOST_USER',
+        'EMAIL_HOST_PASSWORD',
+        'EMAIL_USE_TLS',
+        'EMAIL_USE_SSL',
+        'EMAIL_TIMEOUT',
         'IDEMPOTENCY_TTL_SECONDS',
         'LEAD_DUPLICATE_WINDOW_SECONDS',
         'LEAD_MIN_SUBMISSION_SECONDS',
@@ -114,6 +121,10 @@ def test_phase_one_cache_and_protection_settings():
     }
     assert settings.CACHES['lead_protection']['BACKEND'] == 'django.core.cache.backends.locmem.LocMemCache'
     assert settings.EMAIL_BACKEND == 'django.core.mail.backends.locmem.EmailBackend'
+    assert settings.EMAIL_TIMEOUT == 5
+    assert settings.EMAIL_DELIVERY_LEASE_SECONDS == 300
+    assert settings.EMAIL_RETRY_BATCH_SIZE == 10
+    assert settings.EMAIL_RETRY_DELAYS_SECONDS == (900, 3600, 21600, 86400)
 
 
 @pytest.mark.parametrize(
@@ -148,6 +159,13 @@ def test_production_rejects_missing_critical_configuration(missing_name):
         'POSTGRES_PORT': '5432',
         'EMAIL_FROM_ADDRESS': 'notifications@example.com',
         'EMAIL_INTERNAL_RECIPIENT': 'contact@example.com',
+        'EMAIL_HOST': 'smtp.example.internal',
+        'EMAIL_PORT': '587',
+        'EMAIL_HOST_USER': 'smtp-user',
+        'EMAIL_HOST_PASSWORD': 'production-only-test-password',
+        'EMAIL_USE_TLS': 'True',
+        'EMAIL_USE_SSL': 'False',
+        'EMAIL_TIMEOUT': '5',
     }
     production_environment.pop(missing_name)
 
