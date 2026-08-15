@@ -1,6 +1,6 @@
 # 0007 — E-mails, idempotência e proteção
 
-- **Status:** draft
+- **Status:** approved
 - **Responsável:** Lukas Frick
 - **Data:** 15 de agosto de 2026
 - **Branch-base:** `main`
@@ -420,15 +420,29 @@ Falha SMTP após commit continua retornando `201`.
 
 ## 26. Endereços lógicos aprovados
 
-Remetente:
+Todos os endereços operacionais devem vir de configuração de ambiente. O código não deve espalhar endereços por services, views, templates ou testes.
 
-`notificacoes@repage.com.br`
+Remetente (`EMAIL_FROM_ADDRESS`):
 
-Destinatário interno:
+Development inicial:
 
-`contato@repage.com.br`
+`EMAIL_FROM_ADDRESS=contatolukasfrick@gmail.com`
 
-Devem ser configuráveis por ambiente.
+Production futura:
+
+`EMAIL_FROM_ADDRESS=notificacoes@repage.com.br`
+
+Destinatário interno (`EMAIL_INTERNAL_RECIPIENT`):
+
+Development inicial:
+
+`EMAIL_INTERNAL_RECIPIENT=contatolukasfrick@gmail.com`
+
+Production futura:
+
+`EMAIL_INTERNAL_RECIPIENT=contato@repage.com.br`
+
+A troca entre development e production exige somente configuração do ambiente, sem alteração do código.
 
 Não escolher provedor SMTP nesta spec.
 
@@ -438,6 +452,8 @@ Development/test:
 `django.core.mail.backends.locmem.EmailBackend`
 
 Não usar console backend para conteúdo com PII.
+
+A configuração lógica de endereços para development não implica envio externo real durante testes.
 
 Production:
 backend SMTP nativo do Django, configurado por ambiente.
@@ -477,10 +493,10 @@ Assunto:
 `[Repage] Nova solicitação de orçamento`
 
 From:
-`notificacoes@repage.com.br`
+`EMAIL_FROM_ADDRESS` (em production, o valor planejado é `notificacoes@repage.com.br`)
 
 To:
-`contato@repage.com.br`
+`EMAIL_INTERNAL_RECIPIENT` (em production, o valor planejado é `contato@repage.com.br`)
 
 Reply-To:
 e-mail validado atual do Lead.
@@ -504,7 +520,7 @@ Assunto:
 `Recebemos sua solicitação | Repage`
 
 From:
-`notificacoes@repage.com.br`
+`EMAIL_FROM_ADDRESS` (em production, o valor planejado é `notificacoes@repage.com.br`)
 
 To:
 e-mail validado atual do Lead.
@@ -719,7 +735,11 @@ E-mail:
 - lease;
 - batch size.
 
-`.env.example` só com valores seguros e placeholders.
+Endereços:
+- `EMAIL_FROM_ADDRESS`;
+- `EMAIL_INTERNAL_RECIPIENT`.
+
+O `.env` real é o ponto operacional local para os valores e permanece fora do Git. Não deve conter credenciais versionadas. O `.env.example` documenta as variáveis com valores seguros ou exemplos adequados.
 
 ## 45. Migrations e cache table
 
