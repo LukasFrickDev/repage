@@ -23,7 +23,7 @@ Código, migrations, mídia estática e documentação vivem no GitHub. Hospedag
 ### 1.7 Operação verificável
 Deploy, backup, restauração e health checks exigem evidência.
 ## 2. Arquitetura atual
-Estado atual ao concluir a Entrega 4:
+Estado atual ao concluir a Entrega 5:
 - React;
 - TypeScript;
 - Vite;
@@ -37,9 +37,11 @@ Estado atual ao concluir a Entrega 4:
 - fonte tipada de projetos;
 - manifesto/readiness de mídia e publicação;
 - testes frontend e Playwright Test configurados;
-- sem backend;
-- sem PostgreSQL;
-- formulário sem persistência;
+- backend Django/DRF materializado;
+- PostgreSQL configurado como banco principal;
+- `apps/core` e `apps/leads` materializados;
+- API pública de Lead e Django Admin operacionais;
+- formulário público integrado com persistência real;
 - tokens em `frontend/src/styles/theme.ts`.
 Dependências aprovadas para a arquitetura-alvo podem ainda não estar instaladas. O manifesto do projeto é a fonte do estado instalado.
 ## 3. Arquitetura-alvo
@@ -550,6 +552,10 @@ normal de `updated_at`. Os demais dados originais permanecem somente leitura,
 incluindo a mensagem, que continua disponível no detalhe. A V1 não mantém
 histórico de alterações administrativas, audit log customizado ou cópia paralela.
 Leads manuais usam `source=manual`, status inicial `new` e não registram ciência ou versão de Política de Privacidade.
+`source` permanece a entrada técnica (`website` ou `manual`); `acquisition_source`
+registra origem comercial opcional de Leads manuais, fica readonly após a criação
+e é pesquisável. A Entrega 6 futura refinará visual e ergonomicamente este
+Django Admin, sem introduzir painel React ou autenticação própria.
 ## 39. Privacidade e consentimento
 Categorias:
 - necessários;

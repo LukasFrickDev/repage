@@ -1,6 +1,6 @@
 # 0005 — Backend, persistência de leads e formulário
 
-- **Status:** approved
+- **Status:** implemented
 - **Responsável:** Lukas Frick
 - **Data:** 14 de agosto de 2026
 - **Branch-base:** `main`
@@ -43,7 +43,7 @@ A conversão principal definida no Produto é:
 
 A persistência do Lead define sucesso.
 
-## 2. Fronteira com a Entrega 6
+## 2. Fronteira com a Entrega 7
 
 A Arquitetura e os AGENTS descrevem o fluxo final da V1, que inclui também:
 
@@ -59,7 +59,7 @@ A Arquitetura e os AGENTS descrevem o fluxo final da V1, que inclui também:
 - retentativas;
 - reenvio.
 
-Esses itens pertencem à **Entrega 6 — E-mails, idempotência e proteção**.
+Esses itens pertencem à **Entrega 7 — E-mails, idempotência e proteção**.
 
 A 0005 materializa somente o núcleo necessário para receber, validar e persistir um Lead real.
 
@@ -67,7 +67,7 @@ Nesta entrega, o fluxo termina em:
 
 `formulário → validação → API → persistência do Lead → resposta`
 
-A Entrega 6 posteriormente evolui esse fluxo para:
+A Entrega 7 posteriormente evolui esse fluxo para:
 
 `formulário → proteção/idempotência → persistência → EmailDelivery → envio/retentativa → resposta`
 
@@ -118,7 +118,7 @@ Ao concluir:
 - sucesso visual significa persistência confirmada;
 - erro não remove os dados preenchidos;
 - nenhum dado pessoal aparece em URL, Analytics ou logs;
-- nenhuma funcionalidade da Entrega 6 foi antecipada.
+- nenhuma funcionalidade da Entrega 7 foi antecipada.
 
 ## 5. Stack da entrega
 
@@ -431,7 +431,7 @@ A 0005 pode implementar o mecanismo técnico de ciência e versão para desenvol
 
 A versão utilizada nesta etapa deve ser explicitamente identificada como **pré-lançamento** na configuração.
 
-A Entrega 7 deverá substituir essa versão pela política revisada antes da produção pública.
+A Entrega 8 deverá substituir essa versão pela política revisada antes da produção pública.
 
 Nenhum teste local com dados fictícios deve ser tratado como consentimento real de usuário.
 
@@ -592,7 +592,7 @@ Não afirmar:
 
 quando houver falha de rede ambígua e o cliente não puder saber se o servidor persistiu antes da conexão cair.
 
-Essa limitação será resolvida de forma mais robusta com idempotência na 0006.
+Essa limitação será resolvida de forma mais robusta com idempotência na Entrega 7.
 
 ## 19. Request ID
 
@@ -962,7 +962,7 @@ Responsabilidades:
 
 Não chamar `fetch` diretamente de vários componentes.
 
-Não implementar retry automático nesta entrega.
+Não implementar retry automático nesta entrega; esse recurso pertence à Entrega 7.
 
 Retry automático sem idempotência pode duplicar Lead.
 
@@ -1043,7 +1043,7 @@ A interface não pode afirmar com certeza que o Lead não foi criado quando isso
 
 Permitir nova tentativa somente por ação consciente do visitante.
 
-A 0006 resolverá retries de forma idempotente.
+A Entrega 7 resolverá retries de forma idempotente.
 
 ## 41. Movimento da seção de contato
 
@@ -1139,7 +1139,7 @@ Não registrar payload no console.
 
 Não usar dados do formulário para montar HTML não escapado.
 
-## 46. Entrega 6 explicitamente fora de escopo
+## 46. Entrega 7 explicitamente fora de escopo
 
 Não criar nesta spec:
 
@@ -1403,7 +1403,7 @@ Também:
 - verificar readiness;
 - realizar smoke da API.
 
-Não exigir `check --deploy` como prova de produção nesta entrega, porque deploy pertence à Entrega 9.
+Não exigir `check --deploy` como prova de produção nesta entrega, porque deploy pertence à Entrega 10.
 
 ## 55. Comandos finais — frontend
 
@@ -1439,75 +1439,75 @@ Nenhum deles pode ser commitado indevidamente.
 
 ## 57. Critérios de aceite
 
-- [ ] Backend Django existe.
-- [ ] DRF está configurado.
-- [ ] PostgreSQL é o banco principal.
-- [ ] SQLite não é usado como banco principal.
-- [ ] `apps/core` existe.
-- [ ] `apps/leads` existe.
-- [ ] `Lead` usa UUID.
-- [ ] Campos do Lead correspondem ao contrato.
-- [ ] Status possui somente `new`, `in_progress`, `delivered`, `maintenance` e `archived`.
-- [ ] Migration está versionada.
-- [ ] `POST /api/v1/leads/` existe.
-- [ ] Payload válido persiste exatamente um Lead por requisição nesta entrega.
-- [ ] Payload inválido não persiste.
-- [ ] Campos desconhecidos são rejeitados.
-- [ ] API não possui listagem pública de Leads.
-- [ ] API não possui detalhe público de Lead.
-- [ ] Resposta de sucesso não expõe dados pessoais.
-- [ ] Erros não expõem detalhes internos.
-- [ ] Request ID funciona.
-- [ ] `/health/` funciona.
-- [ ] `/health/ready/` verifica PostgreSQL.
-- [ ] Readiness não depende de SMTP.
-- [ ] Django Admin exige autenticação.
-- [ ] Lead aparece no Admin.
-- [ ] Busca e filtros básicos funcionam.
-- [ ] Arquivamento funciona sem exclusão.
-- [ ] React Hook Form está integrado.
-- [ ] Zod está integrado.
-- [ ] Formulário possui os campos aprovados.
-- [ ] Faixa de investimento não foi adicionada.
-- [ ] Checkbox de privacidade é obrigatório e não vem marcado.
-- [ ] Versão da política é persistida.
-- [ ] Versão pré-lançamento está identificada como não final.
-- [ ] Formulário possui labels persistentes.
-- [ ] Erros por campo funcionam.
-- [ ] Resumo de erros funciona.
-- [ ] Foco vai para o primeiro erro.
-- [ ] Loading impede clique duplicado da tentativa corrente.
-- [ ] Sucesso só aparece depois de `201`.
-- [ ] Erro preserva dados.
-- [ ] Não existe retry automático.
-- [ ] Formulário não coloca dados pessoais em URL.
-- [ ] Formulário não persiste dados no browser.
-- [ ] Dados pessoais não são logados integralmente.
-- [ ] Contato mantém identidade visual aprovada.
-- [ ] Movimento estabiliza durante interação com o formulário.
-- [ ] Mobile usa uma coluna.
-- [ ] Teclado e foco funcionam.
-- [ ] `prefers-reduced-motion` funciona.
-- [ ] Smoke full stack com PostgreSQL real foi aprovado.
-- [ ] Lead submetido pelo frontend foi verificado no Admin.
-- [ ] Nenhum `EmailDelivery` foi criado.
-- [ ] Nenhum `IdempotencyRecord` foi criado.
-- [ ] Nenhum honeypot foi criado.
-- [ ] Nenhum throttling foi criado.
-- [ ] Nenhum e-mail foi implementado.
-- [ ] Nenhum retry backend foi implementado.
-- [ ] Lint frontend aprovado.
-- [ ] Typecheck frontend aprovado.
-- [ ] Testes frontend aprovados.
-- [ ] Playwright aprovado.
-- [ ] Build frontend aprovado.
-- [ ] `python manage.py check` aprovado.
-- [ ] Migration check aprovado.
-- [ ] Ruff aprovado.
-- [ ] Pytest aprovado.
-- [ ] `git diff --check` aprovado.
-- [ ] Documentação reconciliada.
-- [ ] Spec marcada `implemented` somente após todos os requisitos.
+- [x] Backend Django existe.
+- [x] DRF está configurado.
+- [x] PostgreSQL é o banco principal.
+- [x] SQLite não é usado como banco principal.
+- [x] `apps/core` existe.
+- [x] `apps/leads` existe.
+- [x] `Lead` usa UUID.
+- [x] Campos do Lead correspondem ao contrato.
+- [x] Status possui somente `new`, `in_progress`, `delivered`, `maintenance` e `archived`.
+- [x] Migration está versionada.
+- [x] `POST /api/v1/leads/` existe.
+- [x] Payload válido persiste exatamente um Lead por requisição nesta entrega.
+- [x] Payload inválido não persiste.
+- [x] Campos desconhecidos são rejeitados.
+- [x] API não possui listagem pública de Leads.
+- [x] API não possui detalhe público de Lead.
+- [x] Resposta de sucesso não expõe dados pessoais.
+- [x] Erros não expõem detalhes internos.
+- [x] Request ID funciona.
+- [x] `/health/` funciona.
+- [x] `/health/ready/` verifica PostgreSQL.
+- [x] Readiness não depende de SMTP.
+- [x] Django Admin exige autenticação.
+- [x] Lead aparece no Admin.
+- [x] Busca e filtros básicos funcionam.
+- [x] Arquivamento funciona sem exclusão.
+- [x] React Hook Form está integrado.
+- [x] Zod está integrado.
+- [x] Formulário possui os campos aprovados.
+- [x] Faixa de investimento não foi adicionada.
+- [x] Checkbox de privacidade é obrigatório e não vem marcado.
+- [x] Versão da política é persistida.
+- [x] Versão pré-lançamento está identificada como não final.
+- [x] Formulário possui labels persistentes.
+- [x] Erros por campo funcionam.
+- [x] Resumo de erros funciona.
+- [x] Foco vai para o primeiro erro.
+- [x] Loading impede clique duplicado da tentativa corrente.
+- [x] Sucesso só aparece depois de `201`.
+- [x] Erro preserva dados.
+- [x] Não existe retry automático.
+- [x] Formulário não coloca dados pessoais em URL.
+- [x] Formulário não persiste dados no browser.
+- [x] Dados pessoais não são logados integralmente.
+- [x] Contato mantém identidade visual aprovada.
+- [x] Movimento estabiliza durante interação com o formulário.
+- [x] Mobile usa uma coluna.
+- [x] Teclado e foco funcionam.
+- [x] `prefers-reduced-motion` funciona.
+- [x] Smoke full stack com PostgreSQL real foi aprovado.
+- [x] Lead submetido pelo frontend foi verificado no Admin.
+- [x] Nenhum `EmailDelivery` foi criado.
+- [x] Nenhum `IdempotencyRecord` foi criado.
+- [x] Nenhum honeypot foi criado.
+- [x] Nenhum throttling foi criado.
+- [x] Nenhum e-mail foi implementado.
+- [x] Nenhum retry backend foi implementado.
+- [x] Lint frontend aprovado.
+- [x] Typecheck frontend aprovado.
+- [x] Testes frontend aprovados.
+- [x] Playwright aprovado.
+- [x] Build frontend aprovado.
+- [x] `python manage.py check` aprovado.
+- [x] Migration check aprovado.
+- [x] Ruff aprovado.
+- [x] Pytest aprovado.
+- [x] `git diff --check` aprovado.
+- [x] Documentação reconciliada.
+- [x] Spec marcada `implemented` somente após todos os requisitos.
 
 ## 58. Documentação no fechamento
 
@@ -1517,10 +1517,11 @@ Quando a entrega estiver concluída:
 - atualizar `docs/specs/README.md`;
 - atualizar `docs/ROADMAP.md`:
   - Entrega 5 concluída;
-  - Entrega 6 próxima;
+  - Entrega 6 — Experiência administrativa Repage — próxima;
+  - e-mails, idempotência e proteção na Entrega 7;
 - atualizar `docs/README.md` se o estado executivo exigir;
 - atualizar o bloco de arquitetura atual para registrar backend/PostgreSQL/formulário materializados;
-- não alterar arquitetura-alvo apenas porque uma parte dela ainda pertence à 0006;
+- não alterar arquitetura-alvo apenas porque uma parte dela ainda pertence às Entregas 7 ou posteriores;
 - atualizar `backend/AGENTS.md` ou `frontend/AGENTS.md` somente se surgir regra operacional duradoura nova;
 - criar ADR somente diante de decisão estrutural real com alternativas relevantes.
 
@@ -1530,13 +1531,16 @@ A conclusão da 0005 não significa que o fluxo de lead esteja totalmente resili
 
 Estado esperado:
 
-`persistência real concluída → Entrega 6 torna o fluxo resiliente`
+`persistência real concluída → Entrega 6 refina a experiência administrativa → Entrega 7 torna o fluxo resiliente`
 
 Próxima entrega:
 
-**Entrega 6 — E-mails, idempotência e proteção**
+**Entrega 6 — Experiência administrativa Repage**
 
-Não antecipar Entrega 7 ou posteriores.
+A resiliência completa do fluxo permanece pendente para a **Entrega 7 — E-mails,
+idempotência e proteção**.
+
+Não antecipar a Entrega 7 ou posteriores.
 
 ## 60. Definição de pronto
 
@@ -1552,7 +1556,7 @@ A 0005 está pronta quando:
 - erro, loading e sucesso são acessíveis;
 - integração funciona em desktop e mobile;
 - um smoke full stack real comprova frontend → API → PostgreSQL → Admin;
-- nenhuma responsabilidade da Entrega 6 foi implementada;
+- nenhuma responsabilidade da Entrega 7 foi implementada;
 - todas as validações obrigatórias da entrega passaram;
 - documentação foi reconciliada;
 - a spec está `implemented`.
