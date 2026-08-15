@@ -264,7 +264,7 @@ describe('public routes', () => {
 
     const contact = document.getElementById('contato');
     expect(within(contact as HTMLElement).queryByRole('link', { name: 'Solicitar orçamento' })).not.toBeInTheDocument();
-    expect(within(contact as HTMLElement).queryByRole('button', { name: 'Solicitar orçamento' })).not.toBeInTheDocument();
+    expect(within(contact as HTMLElement).getByRole('button', { name: 'Solicitar orçamento' })).toBeInTheDocument();
   });
 
   it('renders the definitive homepage structure from the typed project and media sources', () => {
@@ -340,7 +340,7 @@ describe('public routes', () => {
 
     const contactSection = document.querySelector('[data-home-section="contact"]') as HTMLElement;
     expect(within(contactSection).queryByText(/em preparação|em breve/i)).not.toBeInTheDocument();
-    expect(within(contactSection).queryByRole('button')).not.toBeInTheDocument();
+    expect(within(contactSection).getByRole('form', { name: 'Solicitar orçamento' })).toBeInTheDocument();
   });
 
   it('moves focus to the destination heading after a route change', async () => {

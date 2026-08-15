@@ -1,6 +1,7 @@
 import { useReducedMotion, useScroll, useSpring, useTransform } from 'framer-motion';
 import { useRef } from 'react';
 import { finalCtaSectionContent } from '../../content/repageContent';
+import { LeadForm } from '../../features/lead-form';
 import * as S from './styles';
 
 export function FinalCtaSection() {
@@ -58,6 +59,7 @@ export function FinalCtaSection() {
         >
           {finalCtaSectionContent.description}
         </S.Description>
+        <LeadForm />
       </S.Content>
     </S.Section>
   );
