@@ -3,475 +3,195 @@ html[data-theme="light"] {
   --repage-ink: #101827;
   --repage-graphite: #182235;
   --repage-paper: #f5f2ec;
-  --repage-surface: #ffffff;
   --repage-violet: #6c63ff;
-  --repage-line: #d9d5ce;
-  --repage-muted: #5f6875;
-  --primary: var(--repage-violet);
-  --primary-fg: var(--repage-paper);
-  --secondary: var(--repage-ink);
-  --accent: var(--repage-violet);
-  --body-fg: var(--repage-ink);
-  --body-bg: var(--repage-paper);
-  --body-quiet-color: var(--repage-muted);
-  --body-medium-color: var(--repage-ink);
-  --body-loud-color: var(--repage-ink);
-  --header-color: var(--repage-paper);
-  --header-branding-color: var(--repage-paper);
-  --header-link-color: var(--repage-paper);
-  --header-bg: var(--repage-ink);
-  --breadcrumbs-fg: var(--repage-muted);
-  --breadcrumbs-link-fg: var(--repage-muted);
-  --breadcrumbs-bg: transparent;
-  --link-fg: #5148c4;
-  --link-hover-color: var(--repage-violet);
-  --link-selected-fg: var(--repage-ink);
-  --darkened-bg: transparent;
-  --selected-bg: rgba(108, 99, 255, 0.08);
-  --selected-row: rgba(108, 99, 255, 0.08);
-  --hairline-color: var(--repage-line);
-  --border-color: #bdb9b1;
-  --error-fg: #8b3030;
-  --message-success-bg: rgba(108, 99, 255, 0.1);
-  --message-warning-bg: rgba(108, 99, 255, 0.1);
-  --message-error-bg: rgba(139, 48, 48, 0.1);
-  --button-fg: var(--repage-paper);
-  --button-bg: var(--repage-ink);
-  --default-button-bg: var(--repage-violet);
-  --button-hover-bg: var(--repage-violet);
-  --default-button-hover-bg: var(--repage-ink);
-  --close-button-bg: var(--repage-muted);
-  --delete-button-bg: #7b3434;
-  --object-tools-bg: var(--repage-ink);
-  --object-tools-hover-bg: var(--repage-violet);
+  --repage-mist: #b9c0cc;
+  --repage-surface: var(--repage-paper);
+  --repage-line: rgba(16, 24, 39, 0.18);
+  --repage-muted: rgba(16, 24, 39, 0.7);
+  --primary: var(--repage-violet); --primary-fg: var(--repage-paper); --secondary: var(--repage-ink); --accent: var(--repage-violet);
+  --body-fg: var(--repage-ink); --body-bg: var(--repage-paper); --body-quiet-color: var(--repage-muted); --body-medium-color: var(--repage-ink); --body-loud-color: var(--repage-ink);
+  --header-color: var(--repage-paper); --header-branding-color: var(--repage-paper); --header-link-color: var(--repage-paper); --header-bg: var(--repage-ink);
+  --breadcrumbs-fg: var(--repage-muted); --breadcrumbs-link-fg: var(--repage-ink); --breadcrumbs-bg: transparent;
+  --link-fg: var(--repage-violet); --link-hover-color: var(--repage-ink); --link-selected-fg: var(--repage-ink);
+  --darkened-bg: transparent; --selected-bg: rgba(108, 99, 255, 0.1); --selected-row: rgba(108, 99, 255, 0.1);
+  --hairline-color: var(--repage-line); --border-color: rgba(16, 24, 39, 0.42); --error-fg: var(--repage-ink);
+  --message-success-bg: rgba(108, 99, 255, 0.12); --message-warning-bg: rgba(108, 99, 255, 0.12); --message-error-bg: rgba(108, 99, 255, 0.16);
+  --button-fg: var(--repage-paper); --button-bg: var(--repage-ink); --default-button-bg: var(--repage-violet); --button-hover-bg: var(--repage-graphite); --default-button-hover-bg: var(--repage-ink);
+  --close-button-bg: var(--repage-ink); --delete-button-bg: var(--repage-ink); --object-tools-bg: var(--repage-ink); --object-tools-hover-bg: var(--repage-graphite);
   color-scheme: light;
 }
 
 html[data-theme="dark"] {
-  --repage-ink: #101827;
-  --repage-graphite: #182235;
-  --repage-paper: #f5f2ec;
-  --repage-surface: #182235;
-  --repage-violet: #6c63ff;
-  --repage-line: #354052;
-  --repage-muted: #b9c0cc;
-  --primary: var(--repage-violet);
-  --primary-fg: var(--repage-paper);
-  --secondary: #141e30;
-  --accent: var(--repage-violet);
-  --body-fg: var(--repage-paper);
-  --body-bg: var(--repage-ink);
-  --body-quiet-color: var(--repage-muted);
-  --body-medium-color: var(--repage-paper);
-  --body-loud-color: var(--repage-paper);
-  --header-color: var(--repage-paper);
-  --header-branding-color: var(--repage-paper);
-  --header-link-color: var(--repage-paper);
-  --header-bg: #141e30;
-  --breadcrumbs-fg: var(--repage-muted);
-  --breadcrumbs-link-fg: var(--repage-muted);
-  --breadcrumbs-bg: transparent;
-  --link-fg: var(--repage-violet);
-  --link-hover-color: var(--repage-violet);
-  --link-selected-fg: var(--repage-paper);
-  --darkened-bg: transparent;
-  --selected-bg: rgba(141, 134, 255, 0.12);
-  --selected-row: rgba(141, 134, 255, 0.12);
-  --hairline-color: var(--repage-line);
-  --border-color: #4b5668;
-  --error-fg: #e29b9b;
-  --message-success-bg: rgba(141, 134, 255, 0.14);
-  --message-warning-bg: rgba(141, 134, 255, 0.14);
-  --message-error-bg: rgba(226, 155, 155, 0.14);
-  --button-fg: var(--repage-paper);
-  --button-bg: #182235;
-  --default-button-bg: var(--repage-violet);
-  --button-hover-bg: var(--repage-violet);
-  --default-button-hover-bg: var(--repage-violet);
-  --close-button-bg: var(--repage-ink);
-  --delete-button-bg: var(--repage-ink);
-  --object-tools-bg: var(--repage-graphite);
-  --object-tools-hover-bg: var(--repage-violet);
+  --repage-ink: #101827; --repage-graphite: #182235; --repage-paper: #f5f2ec; --repage-violet: #6c63ff; --repage-mist: #b9c0cc;
+  --repage-surface: var(--repage-graphite); --repage-line: rgba(245, 242, 236, 0.24); --repage-muted: var(--repage-mist);
+  --primary: var(--repage-violet); --primary-fg: var(--repage-paper); --secondary: var(--repage-graphite); --accent: var(--repage-violet);
+  --body-fg: var(--repage-paper); --body-bg: var(--repage-ink); --body-quiet-color: var(--repage-mist); --body-medium-color: var(--repage-paper); --body-loud-color: var(--repage-paper);
+  --header-color: var(--repage-paper); --header-branding-color: var(--repage-paper); --header-link-color: var(--repage-paper); --header-bg: var(--repage-graphite);
+  --breadcrumbs-fg: var(--repage-mist); --breadcrumbs-link-fg: var(--repage-paper); --breadcrumbs-bg: transparent;
+  --link-fg: var(--repage-violet); --link-hover-color: var(--repage-paper); --link-selected-fg: var(--repage-paper);
+  --darkened-bg: transparent; --selected-bg: rgba(108, 99, 255, 0.16); --selected-row: rgba(108, 99, 255, 0.16);
+  --hairline-color: var(--repage-line); --border-color: rgba(245, 242, 236, 0.42); --error-fg: var(--repage-paper);
+  --message-success-bg: rgba(108, 99, 255, 0.2); --message-warning-bg: rgba(108, 99, 255, 0.2); --message-error-bg: rgba(108, 99, 255, 0.24);
+  --button-fg: var(--repage-paper); --button-bg: var(--repage-graphite); --default-button-bg: var(--repage-violet); --button-hover-bg: var(--repage-violet); --default-button-hover-bg: var(--repage-paper);
+  --close-button-bg: var(--repage-ink); --delete-button-bg: var(--repage-ink); --object-tools-bg: var(--repage-graphite); --object-tools-hover-bg: var(--repage-violet);
   color-scheme: dark;
 }
 
-body,
-input,
-textarea,
-select,
-button {
-  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-}
+/* Foundations */
+body, input, textarea, select, button { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+body { background: var(--body-bg); color: var(--body-fg); font-size: 14px; line-height: 1.5; overflow-x: hidden; }
+#container, .main, #content, #content-main, #nav-sidebar { background: var(--body-bg); color: var(--body-fg); }
+#container, #content-main, #changelist, #changelist .changelist-form-container { min-width: 0; }
+#main.shifted > #nav-sidebar + .content { flex: 1 1 auto; max-width: calc(100% - 304px); }
+a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, summary:focus-visible { outline: 2px solid var(--repage-violet); outline-offset: 3px; }
+input:not([type="checkbox"]):not([type="radio"]), textarea, select { background: var(--repage-surface); border-color: var(--border-color); border-radius: 6px; box-sizing: border-box; color: var(--body-fg); font-size: 14px; min-height: 40px; padding: 8px 11px; }
+textarea { line-height: 1.55; }
+input:focus, select:focus, textarea:focus { border-color: var(--repage-violet); box-shadow: 0 0 0 2px rgba(108, 99, 255, 0.2); }
+button, input[type="submit"], .button, .object-tools a { border-radius: 6px; font-size: 13px; font-weight: 600; min-height: 40px; padding: 9px 14px; }
+.skip-to-content-link:focus { background: var(--repage-paper); color: var(--repage-ink); }
 
-body,
-#container,
-#nav-sidebar,
-.main,
-#content,
-#content-main {
-  background: var(--body-bg);
-  color: var(--body-fg);
-}
+/* Shell */
+#header { background: var(--header-bg); min-height: 76px; padding: 0 36px; }
+#branding { align-items: center; display: flex; min-height: 76px; }
+.repage-brand a { align-items: center; display: inline-flex; gap: 15px; }
+.repage-brand__logo { display: block; height: 40px; width: 40px; }
+.repage-brand__context { border-left: 1px solid rgba(245, 242, 236, 0.35); color: var(--repage-paper); font-size: 15px; font-weight: 650; padding-left: 15px; }
+.repage-admin-label { color: rgba(245, 242, 236, 0.72); font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; }
+#user-tools { font-size: 13px; line-height: 1.5; }
+#user-tools a, #user-tools button { text-decoration-thickness: 2px; text-underline-offset: 3px; }
+div.breadcrumbs { background: transparent; border-bottom: 1px solid var(--hairline-color); color: var(--breadcrumbs-fg); font-size: 13px; padding: 11px 40px; }
+div.breadcrumbs a { color: var(--breadcrumbs-link-fg); }
+#content { box-sizing: border-box; max-width: 1440px; padding: 34px 40px 48px; width: 100%; }
+#content h1 { color: var(--body-fg); font-size: clamp(28px, 2.5vw, 38px); letter-spacing: -0.03em; line-height: 1.15; margin-bottom: 28px; }
+.module, #content-related .module { background: transparent; border: 0; border-radius: 0; overflow: visible; }
 
-input,
-textarea,
-select {
-  background: var(--repage-surface);
-  border-color: var(--border-color);
-  color: var(--body-fg);
-}
+/* Native navigation */
+#nav-sidebar { border-right: 1px solid var(--hairline-color); flex: 0 0 280px; padding-top: 16px; width: 280px; }
+#nav-sidebar .module, #nav-sidebar .module caption, #nav-sidebar .module th, #nav-sidebar .module td { background: transparent; }
+#nav-sidebar .module caption { color: var(--body-fg); font-size: 11px; font-weight: 700; letter-spacing: 0.1em; padding: 14px 18px 8px; text-transform: uppercase; }
+#nav-sidebar .module th, #nav-sidebar .module td { color: var(--body-fg); font-size: 14px; padding-bottom: 9px; padding-top: 9px; }
+#nav-sidebar .module th a { color: var(--body-fg); font-weight: 600; }
+#nav-sidebar .addlink { color: var(--link-fg); font-size: 12px; opacity: 0.8; }
+#nav-sidebar .current-model { background: var(--selected-row); border-left: 2px solid var(--repage-violet); }
+#nav-sidebar .module tr:hover th, #nav-sidebar .module tr:hover td, #nav-sidebar .module tr:focus-within th, #nav-sidebar .module tr:focus-within td { background: var(--selected-bg); }
 
-#header {
-  background: var(--repage-ink);
-  min-height: 68px;
-  padding: 0 28px;
-}
+/* Changelist */
+#changelist { align-items: flex-start; gap: 0; overflow: visible; }
+#changelist .changelist-form-container { min-width: 0; }
+.object-tools { margin-bottom: 24px; }
+#toolbar { background: transparent; border-bottom: 1px solid var(--hairline-color); border-top: 1px solid var(--hairline-color); padding: 18px 0; }
+#changelist-search > div { align-items: center; display: flex; gap: 10px; }
+#toolbar form #searchbar { height: 42px; max-width: 420px; }
+#toolbar form input[type="submit"] { background: var(--body-bg); box-shadow: none; }
+#changelist .actions { border-bottom: 1px solid var(--hairline-color); font-size: 13px; padding: 16px 0; }
+#changelist .actions select { min-height: 40px; }
+#changelist-form .results { max-width: 100%; overflow-x: auto; overscroll-behavior-inline: contain; }
+#changelist-form .results table { min-width: 760px; }
+#changelist table { background: transparent; border-collapse: collapse; }
+#changelist table thead th, #changelist table tbody td, #changelist table tbody th { border-bottom: 1px solid var(--hairline-color); }
+#changelist table thead th { color: var(--body-quiet-color); font-size: 11px; letter-spacing: 0.1em; padding: 13px 12px; text-transform: uppercase; }
+#changelist table tbody tr, #changelist table tbody tr:nth-child(odd), #changelist table tbody tr:nth-child(even) { background: transparent; }
+#changelist table tbody tr:hover, #changelist tbody tr.selected, #changelist tbody tr:has(.action-select:checked) { background: var(--selected-row); }
+#changelist table tbody td, #changelist table tbody th { font-size: 14px; line-height: 1.35; padding: 16px 12px; }
+#changelist table tbody th a { font-weight: 650; }
+#changelist .paginator { border-bottom: 1px solid var(--hairline-color); border-top: 0; font-size: 13px; padding: 15px 0; }
+#changelist-filter { background: transparent; border-left: 1px solid var(--hairline-color); flex: 0 0 220px; margin-left: 28px; min-width: 220px; padding-left: 4px; }
+#changelist-filter h2 { background: transparent; border-bottom: 1px solid var(--hairline-color); color: var(--body-fg); font-size: 11px; font-weight: 700; letter-spacing: 0.12em; padding: 13px 18px 15px; text-transform: uppercase; }
+#changelist-filter h3 { color: var(--body-fg); font-size: 13px; font-weight: 650; margin: 22px 18px 8px; }
+#changelist-filter ul { margin: 0 18px; }
+#changelist-filter li { font-size: 14px; line-height: 1.5; padding: 4px 0; }
+#changelist-filter li.selected { border-left-color: var(--repage-violet); }
+#changelist-filter li.selected a { color: var(--link-selected-fg); font-weight: 650; }
 
-#branding {
-  display: flex;
-  align-items: center;
-  min-height: 68px;
-}
-
-.repage-brand a {
-  align-items: center;
-  display: inline-flex;
-  gap: 14px;
-}
-
-.repage-brand__logo {
-  display: block;
-  height: 34px;
-  width: 34px;
-}
-
-.repage-brand__context {
-  border-left: 1px solid rgba(245, 242, 236, 0.35);
-  color: var(--repage-paper);
-  font-size: 14px;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  padding-left: 14px;
-}
-
-.repage-admin-label {
-  color: rgba(245, 242, 236, 0.7);
-  font-size: 12px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-#user-tools {
-  line-height: 1.5;
-}
-
-#user-tools a,
-#user-tools button {
-  text-decoration-thickness: 2px;
-  text-underline-offset: 3px;
-}
-
-#content {
-  max-width: 1440px;
-}
-
-div.breadcrumbs {
-  background: transparent;
-  border-bottom: 1px solid var(--hairline-color);
-  color: var(--breadcrumbs-fg);
-  padding: 10px 40px;
-}
-
-div.breadcrumbs a {
-  color: var(--breadcrumbs-link-fg);
-}
-
-#nav-sidebar {
-  border-right-color: var(--hairline-color);
-}
-
-#nav-sidebar .module,
-#nav-sidebar .module caption,
-#nav-sidebar .module th,
-#nav-sidebar .module td {
-  background: transparent;
-}
-
-#nav-sidebar .current-model {
-  background: var(--selected-row);
-  border-left: 2px solid var(--repage-violet);
-}
-
-.repage-page-intro,
-.repage-login-intro {
-  margin-bottom: 28px;
-  max-width: 700px;
-}
-
-.repage-page-intro h1,
-.repage-login-intro h1 {
-  color: var(--repage-ink);
-  font-size: clamp(26px, 3vw, 38px);
-  letter-spacing: -0.03em;
-  margin: 0 0 8px;
-}
-
-.repage-page-intro p:last-child,
-.repage-login-intro p:last-child {
-  color: var(--repage-muted);
-  font-size: 15px;
-  line-height: 1.6;
-  margin: 0;
-}
-
-.repage-eyebrow {
-  color: var(--repage-violet) !important;
-  font-size: 11px !important;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  margin: 0 0 10px !important;
-  text-transform: uppercase;
-}
-
-.module,
-#content-related .module {
-  border: 0;
-  border-radius: 0;
-  overflow: visible;
-}
-
-#toolbar {
-  background: transparent;
-  border-bottom: 1px solid var(--hairline-color);
-  border-top: 1px solid var(--hairline-color);
-  padding: 12px 0;
-}
-
-#toolbar form input[type="submit"] {
-  background: var(--body-bg);
-  box-shadow: none;
-}
-
-#changelist-filter {
-  background: transparent;
-  border-left: 1px solid var(--hairline-color);
-  margin-left: 28px;
-}
-
-#changelist-filter h2 {
-  background: transparent;
-  border-bottom: 1px solid var(--hairline-color);
-  color: var(--body-fg);
-  font-size: 0.75rem;
-  letter-spacing: 0.12em;
-  padding: 10px 15px 12px;
-}
-
-#changelist-filter li.selected {
-  border-left-color: var(--repage-violet);
-}
-
-#changelist-filter li.selected a {
-  color: var(--link-selected-fg);
-  font-weight: 600;
-}
-
-#changelist table {
-  background: transparent;
-  border-collapse: collapse;
-}
-
-#changelist table thead th,
-#changelist table tbody td,
-#changelist table tbody th {
-  border-bottom: 1px solid var(--hairline-color);
-}
-
-#changelist table thead th {
-  color: var(--body-quiet-color);
-  font-size: 0.72rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-#changelist table tbody tr,
-#changelist table tbody tr:nth-child(odd),
-#changelist table tbody tr:nth-child(even) {
-  background: transparent;
-}
-
-#changelist table tbody tr:hover,
-#changelist tbody tr.selected,
-#changelist tbody tr:has(.action-select:checked) {
-  background: var(--selected-row);
-}
-
-#changelist table tbody td,
-#changelist table tbody th {
-  padding-bottom: 11px;
-  padding-top: 11px;
-}
-
-.repage-status {
-  align-items: center;
-  display: inline-flex;
-  gap: 7px;
-  font-weight: 600;
-  white-space: nowrap;
-}
-
-.repage-status__dot {
-  background: currentColor;
-  border-radius: 50%;
-  display: inline-block;
-  height: 8px;
-  width: 8px;
-}
-
-.repage-status--new,
-.repage-status--in-progress { color: var(--repage-violet); }
+/* Lead detail and manual creation */
+#content-main > form > .aligned, #content-main > form > fieldset { max-width: 1040px; }
+fieldset.repage-fieldset { background: transparent; border-top: 1px solid var(--hairline-color); margin-top: 34px; padding-top: 22px; }
+fieldset.repage-fieldset .fieldset-heading { background: transparent; border: 0; color: var(--body-fg); font-size: 17px; font-weight: 650; padding: 0 0 16px; }
+fieldset.repage-fieldset .form-row { background: transparent; }
+.aligned label { color: var(--body-quiet-color); font-size: 13px; font-weight: 650; }
+.aligned .form-row input, .aligned .form-row select, .aligned .form-row textarea { box-sizing: border-box; max-width: min(100%, 720px); }
+.aligned .form-row textarea { min-height: 9rem; }
+.aligned .form-row .readonly { color: var(--body-fg); font-size: 14px; line-height: 1.6; padding-bottom: 8px; padding-top: 8px; }
+.field-message .readonly { line-height: 1.7; max-width: 72ch; overflow-wrap: anywhere; white-space: pre-wrap; }
+.field-contact_actions .readonly { align-items: center; display: flex; flex-wrap: wrap; gap: 10px; }
+.repage-contact-action, .repage-status { font-weight: 650; }
+.repage-status { align-items: center; display: inline-flex; gap: 7px; white-space: nowrap; }
+.repage-status__dot { background: currentColor; border-radius: 50%; display: inline-block; height: 8px; width: 8px; }
+.repage-status--new, .repage-status--in-progress { color: var(--repage-violet); }
 .repage-status--delivered { color: var(--body-fg); }
-.repage-status--maintenance { color: var(--repage-muted); }
-.repage-status--archived { color: var(--repage-muted); opacity: 0.8; }
+.repage-status--maintenance, .repage-status--archived { color: var(--body-quiet-color); }
+.submit-row { background: transparent; border: 0; border-top: 1px solid var(--hairline-color); margin-top: 28px; padding-left: 0; padding-right: 0; }
 
-.field-message .readonly {
-  line-height: 1.65;
-  max-width: 72ch;
-  white-space: pre-wrap;
-}
+/* Theme toggle */
+.repage-theme-toggle { align-items: center; background: transparent; border: 1px solid rgba(245, 242, 236, 0.38); border-radius: 999px; color: var(--repage-paper); cursor: pointer; display: inline-flex; height: 38px; justify-content: center; margin-left: 14px; min-height: 38px; padding: 8px; width: 38px; }
+.repage-theme-toggle svg { fill: none; height: 18px; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.7; width: 18px; }
+.repage-theme-toggle__moon { display: none; fill: currentColor !important; stroke: none !important; }
+html[data-theme="dark"] .repage-theme-toggle__sun { display: none; }
+html[data-theme="dark"] .repage-theme-toggle__moon { display: block; }
+.repage-theme-toggle:hover, .repage-theme-toggle:focus-visible { background: var(--repage-violet); border-color: var(--repage-violet); color: var(--repage-paper); }
 
-.field-contact_actions .readonly {
-  align-items: center;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-}
+/* Login: natural page scrolling is intentional for short viewports. */
+.login { height: auto; min-height: 100%; }
+.login #container { height: auto; margin: clamp(24px, 8vh, 96px) auto; min-height: 0; overflow: visible; width: min(500px, calc(100% - 32px)); }
+.login #header { justify-content: space-between; min-height: 76px; }
+.login #content { max-width: none; padding: 32px; }
+.login #content-main { background: var(--repage-surface); border: 1px solid var(--hairline-color); border-radius: 10px; padding: 28px; }
+.repage-login-intro { margin-bottom: 26px; }
+.repage-login-intro h1 { color: var(--body-fg); font-size: 30px; letter-spacing: -0.03em; line-height: 1.15; margin: 0 0 8px; }
+.repage-login-intro p:last-child { color: var(--body-quiet-color); font-size: 15px; line-height: 1.6; margin: 0; }
+.repage-eyebrow { color: var(--repage-violet) !important; font-size: 11px !important; font-weight: 700; letter-spacing: 0.12em; margin: 0 0 10px !important; text-transform: uppercase; }
+.login .submit-row input { min-width: 120px; }
 
-.repage-contact-action {
-  font-weight: 600;
-}
-
-fieldset.repage-fieldset {
-  background: transparent;
-  border-top: 1px solid var(--repage-line);
-  margin-top: 28px;
-  padding-top: 18px;
-}
-
-fieldset.repage-fieldset .fieldset-heading {
-  background: transparent;
-  border: 0;
-  color: var(--body-fg);
-  font-size: 1rem;
-  font-weight: 600;
-  padding: 0 0 12px;
-}
-
-fieldset.repage-fieldset .form-row {
-  background: transparent;
-}
-
-.submit-row {
-  background: transparent;
-  border: 0;
-  border-top: 1px solid var(--hairline-color);
-  padding-left: 0;
-  padding-right: 0;
-}
-
-.aligned .form-row .readonly {
-  color: var(--body-fg);
-  padding-bottom: 6px;
-  padding-top: 6px;
-}
-
-.theme-choice {
-  align-items: center;
-  display: inline-flex;
-  gap: 4px;
-  margin-left: 10px;
-}
-
-.theme-choice button {
-  background: transparent;
-  border: 1px solid transparent;
-  border-radius: 4px;
-  color: var(--header-link-color);
-  cursor: pointer;
-  font: inherit;
-  font-size: 0.65rem;
-  letter-spacing: 0.06em;
-  padding: 3px 5px;
-  text-transform: uppercase;
-}
-
-.theme-choice button[aria-pressed="true"] {
-  border-color: rgba(245, 242, 236, 0.45);
-  color: var(--repage-paper);
-}
-
-.theme-choice button:focus,
-.theme-choice button:hover {
-  border-color: var(--repage-violet);
-  color: var(--repage-paper);
-}
-
-.login #container {
-  min-height: 100vh;
-}
-
-.login #content {
-  max-width: 480px;
-}
-
-.login #content-main {
-  background: var(--repage-surface);
-  border: 1px solid var(--repage-line);
-  border-radius: 12px;
-  box-shadow: 0 18px 50px rgba(16, 24, 39, 0.08);
-  padding: 28px;
-}
-
-.login .submit-row input {
-  min-width: 120px;
+@media (max-width: 1024px) {
+  #content { padding-left: 24px; padding-right: 24px; }
+  div.breadcrumbs { padding-left: 24px; padding-right: 24px; }
+  #header { gap: 10px 22px; padding: 14px 24px; }
+  #branding { min-height: 48px; }
+  #user-tools { float: none; margin-left: auto; }
+  #changelist-filter { flex-basis: 220px; margin-left: 24px; min-width: 220px; }
 }
 
 @media (max-width: 767px) {
-  #header {
-    padding: 0 16px;
-  }
-
-  #branding {
-    min-height: 60px;
-  }
-
-  .repage-admin-label {
-    display: none;
-  }
-
-  #user-tools {
-    font-size: 11px;
-    max-width: 48%;
-  }
-
-  #content {
-    padding: 20px 16px;
-  }
-
-  .login #content {
-    padding: 24px 16px;
-  }
-
-  .login #content-main {
-    padding: 20px;
-  }
+  #main.shifted > #nav-sidebar + .content { flex: 1 1 auto; max-width: 100%; }
+  body:not(.login) #header { align-items: stretch; display: flex; flex-direction: column; min-height: 132px; padding: 12px 16px; }
+  body:not(.login) #header #branding,
+  body:not(.login) #header #site-name { float: none; }
+  #branding { min-height: 46px; }
+  .repage-brand a { gap: 10px; }
+  .repage-brand__logo { height: 34px; width: 34px; }
+  .repage-brand__context { font-size: 13px; padding-left: 10px; }
+  body:not(.login) #header #user-tools { float: none; font-size: 12px; margin: 8px 0 0; max-width: 100%; min-width: 0; width: 100%; }
+  .repage-admin-label { display: none; }
+  .repage-theme-toggle { margin-left: 0; }
+  #content, div.breadcrumbs { padding-left: 16px; padding-right: 16px; }
+  #content { padding-bottom: 32px; padding-top: 24px; }
+  #content h1 { font-size: 28px; margin-bottom: 20px; }
+  #changelist { display: flex; flex-direction: column; }
+  .object-tools { display: flex; flex-wrap: wrap; gap: 8px; }
+  .object-tools li, .object-tools li + li { margin: 0; }
+  #toolbar { padding: 14px 0; }
+  #changelist-search > div { max-width: none; }
+  #toolbar form #searchbar { min-width: 0; }
+  #changelist .actions { gap: 8px; }
+  #changelist .actions .button { margin-left: 0; margin-right: 0; }
+  #changelist-filter { border-left: 0; border-top: 1px solid var(--hairline-color); flex-basis: auto; margin: 26px 0 0; min-width: 0; padding-left: 0; padding-top: 12px; width: auto; }
+  #changelist-filter h2 { padding-left: 0; padding-right: 0; }
+  #changelist-filter h3, #changelist-filter ul { margin-left: 0; margin-right: 0; }
+  #content-main > form > .aligned, #content-main > form > fieldset { max-width: none; }
+  fieldset.repage-fieldset { margin-top: 26px; padding-top: 16px; }
+  .aligned .form-row input, .aligned .form-row select, .aligned .form-row textarea { max-width: 100%; width: 100%; }
+  .field-contact_actions .readonly { align-items: flex-start; flex-direction: column; }
+  .submit-row { display: flex; flex-wrap: wrap; gap: 8px; }
+  .submit-row input, .submit-row a { margin: 0; }
+  .login #container { margin: 16px auto; width: min(500px, calc(100% - 24px)); }
+  body.login #header { align-items: center; flex-direction: row; flex-wrap: nowrap; justify-content: space-between; min-height: 64px; padding: 10px 14px; }
+  .login #branding { min-height: 44px; }
+  body.login #header #user-tools { flex: 0 0 auto; margin-left: auto; width: auto; }
+  .login #content { padding: 24px 18px; }
+  .login #content-main { padding: 20px; }
+  .repage-login-intro h1 { font-size: 27px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    scroll-behavior: auto !important;
-    transition-duration: 0.01ms !important;
-  }
+  *, *::before, *::after { scroll-behavior: auto !important; transition-duration: 0.01ms !important; }
 }

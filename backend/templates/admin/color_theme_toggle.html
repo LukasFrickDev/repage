@@ -1,22 +1,27 @@
 {% load i18n %}
-<span class="theme-choice" role="group" aria-label="Tema da administração">
-  <button type="button" data-theme-choice="light" aria-pressed="false">{% translate 'Claro' %}</button>
-  <button type="button" data-theme-choice="dark" aria-pressed="false">{% translate 'Escuro' %}</button>
-</span>
+<button class="repage-theme-toggle" type="button" data-theme-toggle aria-label="Ativar tema escuro" title="Ativar tema escuro">
+  <svg class="repage-theme-toggle__sun" aria-hidden="true" viewBox="0 0 24 24" focusable="false">
+    <circle cx="12" cy="12" r="4"></circle>
+    <path d="M12 2v2M12 20v2M4.93 4.93l1.42 1.42M17.65 17.65l1.42 1.42M2 12h2M20 12h2M4.93 19.07l1.42-1.42M17.65 6.35l1.42-1.42"></path>
+  </svg>
+  <svg class="repage-theme-toggle__moon" aria-hidden="true" viewBox="0 0 24 24" focusable="false">
+    <path d="M20.4 15.6A8.5 8.5 0 0 1 8.4 3.6 8.5 8.5 0 1 0 20.4 15.6Z"></path>
+  </svg>
+</button>
 <script>
   (() => {
-    const choices = document.querySelectorAll('[data-theme-choice]');
+    const toggle = document.querySelector('[data-theme-toggle]');
     const applyTheme = (theme) => {
       const selected = theme === 'dark' ? 'dark' : 'light';
       document.documentElement.dataset.theme = selected;
       localStorage.setItem('theme', selected);
-      choices.forEach((choice) => {
-        choice.setAttribute('aria-pressed', String(choice.dataset.themeChoice === selected));
-      });
+      const nextTheme = selected === 'dark' ? 'light' : 'dark';
+      toggle.setAttribute('aria-label', `Ativar tema ${nextTheme === 'dark' ? 'escuro' : 'claro'}`);
+      toggle.setAttribute('title', `Ativar tema ${nextTheme === 'dark' ? 'escuro' : 'claro'}`);
     };
     applyTheme(localStorage.getItem('theme'));
-    choices.forEach((choice) => {
-      choice.addEventListener('click', () => applyTheme(choice.dataset.themeChoice));
+    toggle.addEventListener('click', () => {
+      applyTheme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark');
     });
   })();
 </script>
