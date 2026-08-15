@@ -41,7 +41,12 @@ Não criar apps separados para `emails`, `notifications`, `api` ou `admin` sem d
 
 Não criar portfólio, CRM, cliente, projeto, pagamento ou contrato no backend da V1.
 
-Lead registra UUID, nome, e-mail, WhatsApp, tipo de projeto, marca/negócio, mensagem, origem, status, ciência e versão da política e timestamps. Status: `new` e `archived`. Arquivamento não é exclusão.
+Lead registra UUID, nome, e-mail, WhatsApp, tipo de projeto, marca/negócio,
+mensagem, `source`, `acquisition_source`, status, ciência e versão da política
+e timestamps. Status vigentes: `new`, `in_progress`, `delivered`, `maintenance`
+e `archived`. Arquivamento não é exclusão. `acquisition_source` é uma origem
+comercial opcional, distinta da origem técnica `source`, usada na criação
+manual.
 
 EmailDelivery representa notificação interna ou confirmação ao visitante, com status `pending`, `sent` ou `failed`, tentativas, próxima tentativa, timestamps e erro sanitizado.
 
@@ -122,7 +127,10 @@ Admin é provisório. Exigir conta individual, senha forte, sem compartilhamento
 
 Oferecer listagem, filtros, busca, leitura protegida, arquivamento, inspeção de entregas, reenvio e exclusão definitiva apenas por ação explícita de privacidade.
 
-Dados enviados são registro histórico; evitar edição livre.
+Depois da criação, `email`, `whatsapp`, `project_type` e `status` podem ser
+corrigidos in-place no mesmo Lead. Permanecem históricos e somente leitura:
+`name`, `business_name`, `message`, `source`, `acquisition_source`, ciência e
+versão da política, `id` e timestamps.
 
 ## Logs
 

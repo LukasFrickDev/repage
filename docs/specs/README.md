@@ -83,3 +83,4 @@ Somente spec aprovada orienta implementação planejada.
 | [`0002-project-content-and-media-preparation.md`](0002-project-content-and-media-preparation.md) | `implemented` | Preparação de conteúdo e mídias dos projetos |
 | [`0003-definitive-homepage.md`](0003-definitive-homepage.md) | `implemented` | Homepage definitiva |
 | [`0004-portfolio-and-cases.md`](0004-portfolio-and-cases.md) | `implemented` | Portfólio e seis cases |
+| [`0005-lead-intake-backend-and-form.md`](0005-lead-intake-backend-and-form.md) | `implemented` | Backend, persistência de leads e formulário |

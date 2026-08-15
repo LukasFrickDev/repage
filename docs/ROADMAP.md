@@ -3,7 +3,7 @@
 * **Status:** approved
 * **Responsável:** Lukas Frick
 * **Baseline:** `main`
-* **Última consolidação:** 13 de agosto de 2026
+* **Última consolidação:** 15 de agosto de 2026
 
 ## Objetivo da V1
 
@@ -20,10 +20,10 @@ A V1 deve servir como referência comercial da marca, apoiar prospecção e cond
 * A entrega 2 está concluída: conteúdo, dossiês e mídias reais dos seis projetos foram auditados e preparados; esse material foi integrado ao portfólio e aos cases na Entrega 4. A auditoria da área administrativa do DevSchedule não é mídia pública nem bloqueia esta entrega.
 * A entrega 3 está concluída: a homepage reúne os três destaques, ofertas, diferenciais, processo, Sobre e contato com conteúdo e mídias reais, com revisão visual humana e validações técnicas aprovadas.
 * A entrega 4 está concluída: `/portfolio` e os seis cases usam conteúdo e mídia reais, galerias, viewer, vídeos integrados, publicação validada e navegação compartilhada.
-* Formulário ainda sem persistência.
-* Backend, PostgreSQL e e-mails ainda inexistentes.
-* Consentimento, Analytics, SEO e prerender ainda inexistentes.
-* Testes automatizados estão configurados no frontend; CI/CD e deploy definitivo ainda inexistentes.
+* A entrega 5 está concluída: backend Django/DRF, PostgreSQL, API pública de Leads, Django Admin, formulário persistido e migrations versionadas foram validados.
+* A próxima entrega é a Experiência administrativa Repage no Django Admin existente.
+* E-mails, idempotência e proteção continuam pendentes para a Entrega 7.
+* Consentimento, Analytics, SEO, prerender, CI/CD, deploy e lançamento continuam pendentes nas entregas seguintes.
 
 ## Princípios de execução
 
@@ -45,11 +45,12 @@ A V1 deve servir como referência comercial da marca, apoiar prospecção e cond
 3. Homepage definitiva.
 4. Portfólio e seis cases.
 5. Backend, PostgreSQL, API, Admin e formulário.
-6. E-mails, idempotência e proteção.
-7. Consentimento, Analytics e páginas legais.
-8. SEO, sitemap e prerender.
-9. CI/CD, deploy, backups e observabilidade.
-10. QA final e lançamento.
+6. Experiência administrativa Repage.
+7. E-mails, idempotência e proteção.
+8. Consentimento, Analytics e páginas legais.
+9. SEO, sitemap e prerender.
+10. CI/CD, deploy, backups e observabilidade.
+11. QA final e lançamento.
 
 ## Entrega 1 — Fundação do frontend, roteamento e caminho de conversão
 
@@ -128,9 +129,25 @@ A V1 deve servir como referência comercial da marca, apoiar prospecção e cond
   **Dependências:** Entrega 1, contrato de campos, versão da política, PostgreSQL local e origens definidas.
   **Validações:** checks, migrations, Ruff, pytest, validações frontend, persistência, Admin, health, readiness e logs sanitizados.
   **Critério de conclusão:** envio válido persiste; envio inválido não persiste; falhas são recuperáveis e seguras.
-  **Spec:** obrigatória ao iniciar, coordenando API, persistência, Admin e formulário.
+  **Spec:** [`0005-lead-intake-backend-and-form.md`](specs/0005-lead-intake-backend-and-form.md) — `implemented`; coordena API, persistência, Admin e formulário.
 
-## Entrega 6 — E-mails, idempotência e proteção
+## Entrega 6 — Experiência administrativa Repage
+
+**Objetivo:** transformar o Django Admin funcional em uma experiência administrativa profissional e coerente com a identidade Repage, sem criar um painel React separado.
+**Resultado esperado:** login, navegação, listagem e detalhe de Leads ficam mais claros, acessíveis e responsivos, preservando autenticação, sessão, CSRF, permissões nativas e operações já aprovadas.
+**Escopo principal:**
+
+* Continuar usando Django Admin, sem SPA ou autenticação própria.
+* Aplicar identidade visual Repage ao login e às áreas administrativas.
+* Organizar header, títulos, navegação, lista e detalhe de Leads.
+* Preservar criação manual, operações e statuses já aprovados.
+* Refinar responsividade e acessibilidade aplicáveis ao uso administrativo.
+  **Dependências:** Entrega 5, revisão da experiência administrativa e definição da spec própria.
+  **Validações:** autenticação, permissões, CSRF, operações existentes, responsividade, acessibilidade e regressão do fluxo de Leads.
+  **Critério de conclusão:** Django Admin permanece a superfície administrativa funcional, com experiência visual e ergonômica aprovada.
+  **Spec:** obrigatória somente ao iniciar a entrega; não criar antecipadamente.
+
+## Entrega 7 — E-mails, idempotência e proteção
 
 **Objetivo:** tornar o fluxo confiável diante de falhas, repetição e abuso básico.
 **Resultado esperado:** Lead permanece salvo apesar do e-mail, retries não duplicam contatos e abusos são limitados sem CAPTCHA visível inicial.
@@ -145,7 +162,7 @@ A V1 deve servir como referência comercial da marca, apoiar prospecção e cond
   **Critério de conclusão:** falhas, repetições e abusos possuem comportamento previsível, testado e recuperável.
   **Spec:** obrigatória ao iniciar.
 
-## Entrega 7 — Consentimento, Analytics e páginas legais
+## Entrega 8 — Consentimento, Analytics e páginas legais
 
 **Objetivo:** implementar privacidade, preferências e medição condicionada.
 **Resultado esperado:** visitante controla categorias, Analytics só carrega quando autorizado e páginas legais revisadas ficam disponíveis.
@@ -155,12 +172,12 @@ A V1 deve servir como referência comercial da marca, apoiar prospecção e cond
 * Aceitar, rejeitar e personalizar categorias.
 * Políticas de Privacidade e Cookies e ciência no formulário.
 * Analytics condicionado, eventos centralizados e preparação futura para Ads.
-  **Dependências:** Entregas 5 e 6, revisão jurídica, versões das políticas, identificador do Analytics e eventos finais.
+  **Dependências:** Entregas 5, 6 e 7, revisão jurídica, versões das políticas, identificador do Analytics e eventos finais.
   **Validações:** não essenciais desativados por padrão, preferências persistidas, Analytics condicionado, ausência de dados pessoais e acessibilidade.
   **Critério de conclusão:** consentimento, páginas e Analytics funcionam de forma verificável e coerente com as políticas.
   **Spec:** obrigatória ao iniciar.
 
-## Entrega 8 — SEO, sitemap e prerender
+## Entrega 9 — SEO, sitemap e prerender
 
 **Objetivo:** tornar rotas públicas indexáveis, compartilháveis e renderizadas com HTML específico.
 **Resultado esperado:** cada rota e case possui HTML e metadados completos sem migração de framework.
@@ -170,12 +187,12 @@ A V1 deve servir como referência comercial da marca, apoiar prospecção e cond
 * Sitemap derivado, robots por ambiente e JSON-LD aplicável.
 * Seleção e integração do prerender.
 * HTML por rota e case, hidratação e falha de build diante de saída obrigatória ausente.
-  **Dependências:** Entregas 3, 4 e 7, conteúdo, slugs, imagens sociais, domínio e decisão do prerender.
+  **Dependências:** Entregas 3, 4 e 8, conteúdo, slugs, imagens sociais, domínio e decisão do prerender.
   **Validações:** HTML, metadados, canonical, sitemap, robots, rotas geradas, hidratação e build.
   **Critério de conclusão:** páginas publicáveis geram HTML e metadados completos por fontes centralizadas.
   **Spec:** obrigatória; a decisão estrutural de prerender pode exigir ADR.
 
-## Entrega 9 — CI/CD, deploy, backups e observabilidade
+## Entrega 10 — CI/CD, deploy, backups e observabilidade
 
 **Objetivo:** criar processo reproduzível e verificável de entrega e operação.
 **Resultado esperado:** pull requests são validados, deploys são controlados e produção possui health, logs, backups externos e recuperação documentada.
@@ -185,12 +202,12 @@ A V1 deve servir como referência comercial da marca, apoiar prospecção e cond
 * CI para frontend, backend e documentação.
 * Deploy, migrations, domínio, DNS, SSL, Passenger, cron e SMTP.
 * Smoke tests, logs, backups externos, restauração e runbooks.
-  **Dependências:** Entregas 5 a 8, hospedagem e provedores confirmados, acessos, retenções e GitHub Environments.
+  **Dependências:** Entregas 5 a 9, hospedagem e provedores confirmados, acessos, retenções e GitHub Environments.
   **Validações:** CI, deploy, health, readiness, HTTPS, headers, logs, backup, restauração, rollback e ausência de segredos.
   **Critério de conclusão:** frontend e backend podem ser implantados, verificados e recuperados por procedimentos com evidência.
   **Spec:** spec de infraestrutura ao iniciar; runbooks obrigatórios conforme o ambiente real.
 
-## Entrega 10 — QA final e lançamento
+## Entrega 11 — QA final e lançamento
 
 **Objetivo:** validar a V1 completa e liberar divulgação somente após evidências suficientes.
 **Resultado esperado:** Repage publicada no domínio definitivo, com conteúdo real, conversão funcional e riscos críticos resolvidos.

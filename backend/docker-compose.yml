@@ -1,0 +1,19 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: repage
+      POSTGRES_USER: repage
+      POSTGRES_PASSWORD: repage-local-only
+    ports:
+      - "5432:5432"
+    volumes:
+      - repage_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U repage -d repage"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  repage_postgres_data:

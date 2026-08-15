@@ -36,18 +36,20 @@ Conflitos reais devem ser relatados e corrigidos.
 
 ## Status atual
 
-Última consolidação: **13 de agosto de 2026**.
+Última consolidação: **15 de agosto de 2026**.
 
 Estado conhecido:
 
-- baseline em `main`;
+- baseline em `main`, com as Entregas 1–5 concluídas nesta branch de fechamento;
 - frontend React/TypeScript/Vite/Styled Components existente;
 - Framer Motion disponível;
 - Entregas 1–4 concluídas, incluindo homepage definitiva, portfólio e seis cases;
+- Entrega 5 concluída: backend Django/DRF, PostgreSQL, API de Leads, Django Admin e formulário persistido integrados e validados;
 - roteamento público já materializado;
-- Entrega 5 — Backend, banco, API, Admin e formulário persistido — como próxima entrega;
-- backend, banco, formulário persistido e demais entregas posteriores ainda pendentes;
-- arquitetura-alvo documentada.
+- próxima entrega: Entrega 6 — Experiência administrativa Repage no Django Admin;
+- e-mails, idempotência e proteção continuam pendentes para a Entrega 7;
+- demais entregas futuras continuam pendentes;
+- arquitetura-alvo documentada e estado materializado reconciliado.
 
 Não confundir arquitetura aprovada com funcionalidade já implementada.
 

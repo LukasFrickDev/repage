@@ -23,7 +23,7 @@ Código, migrations, mídia estática e documentação vivem no GitHub. Hospedag
 ### 1.7 Operação verificável
 Deploy, backup, restauração e health checks exigem evidência.
 ## 2. Arquitetura atual
-Estado atual ao concluir a Entrega 4:
+Estado atual ao concluir a Entrega 5:
 - React;
 - TypeScript;
 - Vite;
@@ -37,9 +37,11 @@ Estado atual ao concluir a Entrega 4:
 - fonte tipada de projetos;
 - manifesto/readiness de mídia e publicação;
 - testes frontend e Playwright Test configurados;
-- sem backend;
-- sem PostgreSQL;
-- formulário sem persistência;
+- backend Django/DRF materializado;
+- PostgreSQL configurado como banco principal;
+- `apps/core` e `apps/leads` materializados;
+- API pública de Lead e Django Admin operacionais;
+- formulário público integrado com persistência real;
 - tokens em `frontend/src/styles/theme.ts`.
 Dependências aprovadas para a arquitetura-alvo podem ainda não estar instaladas. O manifesto do projeto é a fonte do estado instalado.
 ## 3. Arquitetura-alvo
@@ -347,6 +349,7 @@ Campos semânticos aprovados:
 - `business_name`;
 - `message`;
 - `source`;
+- `acquisition_source`;
 - `status`;
 - `privacy_policy_acknowledged`;
 - `privacy_policy_version`;
@@ -361,8 +364,23 @@ Tipos de projeto:
 - ainda não sabe.
 Status da V1:
 - `new`;
+- `in_progress`;
+- `delivered`;
+- `maintenance`;
 - `archived`.
-Não antecipar pipeline de CRM. `archived` não significa exclusão.
+O status representa somente o valor operacional atual. Não há transições
+rígidas, histórico, eventos ou pipeline de CRM nesta V1. `archived` não
+significa exclusão.
+
+`Lead.source` possui somente `website` e `manual`: a API pública cria apenas Leads
+com `website`, enquanto `manual` é reservado à criação administrativa autenticada.
+Ciência e versão da Política de Privacidade pertencem ao fluxo público e não são
+falsificadas em Leads manuais.
+`source` representa a entrada técnica no sistema. `acquisition_source` é um
+texto livre opcional, limitado a 160 caracteres, para registrar a origem
+comercial de Leads manuais; recebe apenas trim, não possui enum ou tabela
+separada, e fica somente leitura após a criação. Leads públicos mantêm esse
+campo vazio e a API não o aceita.
 ## 25. Modelo EmailDelivery
 Relaciona-se ao Lead e representa:
 - `internal_notification`;
@@ -418,6 +436,7 @@ Corpo semântico:
   "source": "string controlada"
 }
 ```
+Na API pública, `source` é obrigatoriamente `website`; `manual` é exclusivo do Admin autenticado.
 Campos de proteção podem existir sem aparecer na experiência visível.
 O código HTTP e o envelope final devem ser consolidados na spec da API, sem alterar a semântica aprovada.
 ## 29. Respostas
@@ -511,6 +530,7 @@ Recursos:
 - filtros;
 - busca;
 - visualização;
+- criação manual de Lead;
 - arquivamento;
 - inspeção de entregas;
 - reenvio;
@@ -526,7 +546,16 @@ Proteção:
 - proteção de login;
 - logs de ações;
 - MFA ou restrição adicional quando viável.
-Dados do Lead são registro histórico; evitar edição livre.
+No Django Admin, `email`, `whatsapp`, `project_type` e `status` podem ser
+corrigidos in-place no mesmo Lead, com normalização compartilhada e atualização
+normal de `updated_at`. Os demais dados originais permanecem somente leitura,
+incluindo a mensagem, que continua disponível no detalhe. A V1 não mantém
+histórico de alterações administrativas, audit log customizado ou cópia paralela.
+Leads manuais usam `source=manual`, status inicial `new` e não registram ciência ou versão de Política de Privacidade.
+`source` permanece a entrada técnica (`website` ou `manual`); `acquisition_source`
+registra origem comercial opcional de Leads manuais, fica readonly após a criação
+e é pesquisável. A Entrega 6 futura refinará visual e ergonomicamente este
+Django Admin, sem introduzir painel React ou autenticação própria.
 ## 39. Privacidade e consentimento
 Categorias:
 - necessários;
