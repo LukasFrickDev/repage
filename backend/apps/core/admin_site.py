@@ -1,6 +1,5 @@
 from django.contrib import admin
-from django.contrib.auth.admin import GroupAdmin, UserAdmin
-from django.contrib.auth.models import Group, User
+from django.contrib.admin.apps import AdminConfig
 from django.shortcuts import redirect
 
 
@@ -14,6 +13,5 @@ class RepageAdminSite(admin.AdminSite):
         return redirect('admin:leads_lead_changelist')
 
 
-repage_admin_site = RepageAdminSite(name='admin')
-repage_admin_site.register(User, UserAdmin)
-repage_admin_site.register(Group, GroupAdmin)
+class RepageAdminConfig(AdminConfig):
+    default_site = 'apps.core.admin_site.RepageAdminSite'

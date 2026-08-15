@@ -1,19 +1,21 @@
 import pytest
+from django.contrib import admin
 from django.contrib.auth import get_user_model
 from django.test import Client
 from django.urls import reverse
 
-from apps.core.admin import repage_admin_site
+from apps.core.admin_site import RepageAdminSite
 from apps.leads.models import Lead
 
 
 def test_repage_admin_site_keeps_native_admin_identity():
-    assert repage_admin_site.name == 'admin'
-    assert repage_admin_site.site_header == 'Repage'
-    assert repage_admin_site.site_title == 'Repage Admin'
-    assert repage_admin_site.index_title == 'Administração'
-    assert Lead in repage_admin_site._registry
-    assert get_user_model() in repage_admin_site._registry
+    assert isinstance(admin.site, RepageAdminSite)
+    assert admin.site.name == 'admin'
+    assert admin.site.site_header == 'Repage'
+    assert admin.site.site_title == 'Repage Admin'
+    assert admin.site.index_title == 'Administração'
+    assert Lead in admin.site._registry
+    assert get_user_model() in admin.site._registry
 
 
 def test_admin_url_uses_repage_site_and_requires_authentication():

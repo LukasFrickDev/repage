@@ -4,8 +4,6 @@ from django import forms
 from django.contrib import admin
 from django.utils import timezone
 
-from apps.core.admin import repage_admin_site
-
 from .models import Lead
 from .serializers import (
     normalize_business_name,
@@ -102,6 +100,7 @@ def format_whatsapp(value):
     return value
 
 
+@admin.register(Lead)
 class LeadAdmin(admin.ModelAdmin):
     form = LeadAdminForm
     list_display = ('name', 'email', 'whatsapp_display', 'project_type', 'status', 'created_at')
@@ -128,6 +127,3 @@ class LeadAdmin(admin.ModelAdmin):
 
     def has_delete_permission(self, request, obj=None):
         return False
-
-
-repage_admin_site.register(Lead, LeadAdmin)
