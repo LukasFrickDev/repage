@@ -6,14 +6,16 @@ from django.contrib import admin
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Permission
 from django.conf import settings
+from django.db import IntegrityError
 from django.test import Client
 from django.utils import timezone
 from django.urls import reverse
 from rest_framework.test import APIClient
 
 from apps.leads.admin import LeadAdmin, LeadAdminForm
-from apps.leads.models import Lead
+from apps.leads.models import EmailDelivery, IdempotencyRecord, Lead
 from apps.leads.serializers import LeadSerializer
+from apps.leads.security import canonicalize, protected_fingerprint
 
 
 def payload(**overrides):
@@ -74,6 +76,86 @@ def test_lead_defaults_choices_and_representation():
     }
     assert set(Lead.Source.values) == {'website', 'manual'}
     assert str(lead) == 'Ana Souza — ana@example.com'
+
+
+@pytest.mark.django_db
+def test_email_delivery_has_safe_defaults_and_supported_values():
+    lead = Lead.objects.create(
+        name='Ana Souza', email='ana@example.com', whatsapp='+5511999999999',
+        project_type=Lead.ProjectType.INSTITUTIONAL_SITE, source=Lead.Source.WEBSITE,
+    )
+    delivery = EmailDelivery.objects.create(
+        lead=lead, kind=EmailDelivery.Kind.INTERNAL_NOTIFICATION,
+    )
+
+    assert delivery.status == EmailDelivery.Status.PENDING
+    assert delivery.attempts == 0
+    assert delivery.next_attempt_at is not None
+    assert delivery.last_attempt_at is None
+    assert delivery.sent_at is None
+    assert delivery.last_error_code == ''
+    assert set(EmailDelivery.Kind.values) == {'internal_notification', 'visitor_confirmation'}
+    assert set(EmailDelivery.Status.values) == {'pending', 'sent', 'failed'}
+
+
+@pytest.mark.django_db
+def test_email_delivery_kind_is_unique_per_lead():
+    lead = Lead.objects.create(
+        name='Ana Souza', email='ana@example.com', whatsapp='+5511999999999',
+        project_type=Lead.ProjectType.INSTITUTIONAL_SITE, source=Lead.Source.WEBSITE,
+    )
+    EmailDelivery.objects.create(lead=lead, kind=EmailDelivery.Kind.VISITOR_CONFIRMATION)
+
+    with pytest.raises(IntegrityError):
+        EmailDelivery.objects.create(lead=lead, kind=EmailDelivery.Kind.VISITOR_CONFIRMATION)
+
+
+@pytest.mark.django_db
+def test_idempotency_record_stores_only_safe_response_shape():
+    lead = Lead.objects.create(
+        name='Ana Souza', email='ana@example.com', whatsapp='+5511999999999',
+        project_type=Lead.ProjectType.INSTITUTIONAL_SITE, source=Lead.Source.WEBSITE,
+    )
+    record = IdempotencyRecord.objects.create(
+        key=uuid.uuid4(), fingerprint='a' * 64, lead=lead, response_status=201,
+        response_payload={'status': 'received', 'message': 'Recebemos sua solicitação.'},
+        expires_at=timezone.now() + timedelta(hours=24),
+    )
+
+    assert record.response_payload == {
+        'status': 'received', 'message': 'Recebemos sua solicitação.',
+    }
+
+
+@pytest.mark.django_db
+def test_idempotency_key_is_unique():
+    lead = Lead.objects.create(
+        name='Ana Souza', email='ana@example.com', whatsapp='+5511999999999',
+        project_type=Lead.ProjectType.INSTITUTIONAL_SITE, source=Lead.Source.WEBSITE,
+    )
+    key = uuid.uuid4()
+    values = {
+        'key': key, 'fingerprint': 'a' * 64, 'lead': lead, 'response_status': 201,
+        'response_payload': {'status': 'received'},
+        'expires_at': timezone.now() + timedelta(hours=24),
+    }
+    IdempotencyRecord.objects.create(**values)
+
+    with pytest.raises(IntegrityError):
+        IdempotencyRecord.objects.create(**values)
+
+
+def test_protected_fingerprint_is_deterministic_and_purpose_separated():
+    values = {'email': 'ana@example.com', 'name': 'Ana Souza'}
+
+    assert protected_fingerprint(values, purpose='lead-fingerprint') == protected_fingerprint(
+        {'name': 'Ana Souza', 'email': 'ana@example.com'}, purpose='lead-fingerprint',
+    )
+    assert protected_fingerprint(values, purpose='lead-fingerprint') != protected_fingerprint(
+        values, purpose='cache-email',
+    )
+    assert 'ana@example.com' not in protected_fingerprint(values, purpose='lead-fingerprint')
+    assert canonicalize({'b': 2, 'a': 1}) == b'{"a":1,"b":2}'
 
 
 @pytest.mark.parametrize(
@@ -454,7 +536,11 @@ def test_admin_edits_operational_fields_in_place_with_shared_normalization():
     assert lead.name == 'Lead Histórico'
     assert lead.business_name == 'Negócio histórico'
     assert lead.message == 'Mensagem integral fictícia'
-    assert [model.__name__ for model in Lead._meta.app_config.get_models()] == ['Lead']
+
+
+def test_phase_one_models_are_not_registered_in_admin():
+    assert EmailDelivery not in admin.site._registry
+    assert IdempotencyRecord not in admin.site._registry
 
 
 @pytest.mark.django_db

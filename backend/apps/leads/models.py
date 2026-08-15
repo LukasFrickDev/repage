@@ -1,6 +1,7 @@
 import uuid
 
 from django.db import models
+from django.utils import timezone
 
 
 class Lead(models.Model):
@@ -42,3 +43,58 @@ class Lead(models.Model):
 
     def __str__(self) -> str:
         return f'{self.name} — {self.email}'
+
+
+class EmailDelivery(models.Model):
+    class Kind(models.TextChoices):
+        INTERNAL_NOTIFICATION = 'internal_notification', 'Notificação interna'
+        VISITOR_CONFIRMATION = 'visitor_confirmation', 'Confirmação ao visitante'
+
+    class Status(models.TextChoices):
+        PENDING = 'pending', 'Pendente'
+        SENT = 'sent', 'Enviado'
+        FAILED = 'failed', 'Falhou'
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    lead = models.ForeignKey(
+        Lead,
+        on_delete=models.CASCADE,
+        related_name='email_deliveries',
+    )
+    kind = models.CharField(max_length=32, choices=Kind.choices)
+    status = models.CharField(max_length=16, choices=Status.choices, default=Status.PENDING)
+    attempts = models.PositiveIntegerField(default=0)
+    next_attempt_at = models.DateTimeField(default=timezone.now)
+    last_attempt_at = models.DateTimeField(null=True, blank=True)
+    last_error_code = models.CharField(max_length=64, blank=True, default='')
+    sent_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=('lead', 'kind'), name='unique_lead_email_delivery_kind'),
+        ]
+        indexes = [
+            models.Index(fields=('status', 'next_attempt_at'), name='email_delivery_due_idx'),
+        ]
+
+
+class IdempotencyRecord(models.Model):
+    key = models.UUIDField(unique=True)
+    fingerprint = models.CharField(max_length=64)
+    lead = models.ForeignKey(
+        Lead,
+        on_delete=models.CASCADE,
+        related_name='idempotency_records',
+    )
+    response_status = models.PositiveSmallIntegerField()
+    response_payload = models.JSONField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
+
+    class Meta:
+        indexes = [
+            models.Index(fields=('expires_at',), name='idempotency_expiry_idx'),
+            models.Index(fields=('fingerprint', 'created_at'), name='idempotency_fingerprint_idx'),
+        ]

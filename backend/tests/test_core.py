@@ -6,6 +6,7 @@ from pathlib import Path
 
 import pytest
 from django.db import OperationalError
+from django.conf import settings
 from django.test import Client
 
 
@@ -57,6 +58,11 @@ def load_settings_with_environment(**overrides):
         'POSTGRES_PASSWORD',
         'POSTGRES_HOST',
         'POSTGRES_PORT',
+        'EMAIL_FROM_ADDRESS',
+        'EMAIL_INTERNAL_RECIPIENT',
+        'IDEMPOTENCY_TTL_SECONDS',
+        'LEAD_DUPLICATE_WINDOW_SECONDS',
+        'EMAIL_BACKEND',
     ):
         environment.pop(name, None)
     environment.update(overrides)
@@ -76,6 +82,16 @@ def test_development_keeps_local_configuration_defaults():
     assert result.returncode == 0, result.stderr
 
 
+def test_phase_one_cache_and_protection_settings():
+    assert settings.IDEMPOTENCY_TTL_SECONDS == 86400
+    assert settings.LEAD_DUPLICATE_WINDOW_SECONDS == 300
+    assert settings.CACHES['lead_protection'] == {
+        'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
+        'LOCATION': 'repage_lead_protection_cache',
+    }
+    assert settings.EMAIL_BACKEND == 'django.core.mail.backends.locmem.EmailBackend'
+
+
 @pytest.mark.parametrize(
     'missing_name',
     [
@@ -89,6 +105,8 @@ def test_development_keeps_local_configuration_defaults():
         'POSTGRES_PASSWORD',
         'POSTGRES_HOST',
         'POSTGRES_PORT',
+        'EMAIL_FROM_ADDRESS',
+        'EMAIL_INTERNAL_RECIPIENT',
     ],
 )
 def test_production_rejects_missing_critical_configuration(missing_name):
@@ -104,6 +122,8 @@ def test_production_rejects_missing_critical_configuration(missing_name):
         'POSTGRES_PASSWORD': 'production-only-test-password',
         'POSTGRES_HOST': 'postgres.example.internal',
         'POSTGRES_PORT': '5432',
+        'EMAIL_FROM_ADDRESS': 'notifications@example.com',
+        'EMAIL_INTERNAL_RECIPIENT': 'contact@example.com',
     }
     production_environment.pop(missing_name)
 

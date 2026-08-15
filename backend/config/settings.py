@@ -17,6 +17,17 @@ def env_list(name: str, default: str = '') -> list[str]:
     return [item.strip() for item in os.getenv(name, default).split(',') if item.strip()]
 
 
+def env_int(name: str, default: int, *, minimum: int = 0) -> int:
+    value = os.getenv(name, str(default)).strip()
+    try:
+        parsed = int(value)
+    except ValueError as exc:
+        raise ImproperlyConfigured(f'{name} deve ser um inteiro.') from exc
+    if parsed < minimum:
+        raise ImproperlyConfigured(f'{name} deve ser maior ou igual a {minimum}.')
+    return parsed
+
+
 def required_env(name: str) -> str:
     value = os.getenv(name, '').strip()
     if not value:
@@ -102,6 +113,17 @@ else:
 
 DATABASES = {'default': {'ENGINE': 'django.db.backends.postgresql', **postgres_config}}
 
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'repage-default-cache',
+    },
+    'lead_protection': {
+        'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
+        'LOCATION': 'repage_lead_protection_cache',
+    },
+}
+
 LANGUAGE_CODE = 'pt-br'
 TIME_ZONE = 'America/Sao_Paulo'
 USE_I18N = True
@@ -128,6 +150,25 @@ PRIVACY_POLICY_VERSION = (
     if ENVIRONMENT == 'production'
     else os.getenv('PRIVACY_POLICY_VERSION', 'pre-launch-v1')
 )
+
+IDEMPOTENCY_TTL_SECONDS = env_int('IDEMPOTENCY_TTL_SECONDS', 86400, minimum=1)
+LEAD_DUPLICATE_WINDOW_SECONDS = env_int('LEAD_DUPLICATE_WINDOW_SECONDS', 300, minimum=1)
+
+EMAIL_FROM_ADDRESS = (
+    required_env('EMAIL_FROM_ADDRESS')
+    if ENVIRONMENT == 'production'
+    else os.getenv('EMAIL_FROM_ADDRESS', '').strip()
+)
+EMAIL_INTERNAL_RECIPIENT = (
+    required_env('EMAIL_INTERNAL_RECIPIENT')
+    if ENVIRONMENT == 'production'
+    else os.getenv('EMAIL_INTERNAL_RECIPIENT', '').strip()
+)
+EMAIL_BACKEND = os.getenv(
+    'EMAIL_BACKEND',
+    'django.core.mail.backends.locmem.EmailBackend',
+).strip()
+DEFAULT_FROM_EMAIL = EMAIL_FROM_ADDRESS
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [],
