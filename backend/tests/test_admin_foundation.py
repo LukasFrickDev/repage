@@ -28,9 +28,12 @@ def test_admin_url_uses_repage_site_and_requires_authentication():
 def test_admin_login_uses_repage_templates():
     login_response = Client().get(reverse('admin:login'))
     assert login_response.status_code == 200
-    assert 'Entrar na administração' in login_response.content.decode()
-    assert 'repage-admin/admin.css' in login_response.content.decode()
-    assert 'repage-admin/brand/favicon.svg' in login_response.content.decode()
+    content = login_response.content.decode()
+    assert 'Entrar na administração' in content
+    assert 'repage-admin/brand/logo.svg' in content
+    assert content.count('repage-admin/admin.css') == 1
+    assert content.index('admin/css/login.css') < content.index('repage-admin/admin.css')
+    assert 'repage-admin/brand/favicon.svg' not in content
 
 
 @pytest.mark.django_db

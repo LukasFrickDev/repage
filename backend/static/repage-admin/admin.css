@@ -150,6 +150,30 @@ input[type="submit"],
   min-height: 40px;
 }
 
+#changelist-search > div {
+  align-items: center;
+  display: flex;
+  gap: 4px;
+}
+
+#changelist-search input[type="text"],
+#changelist-search input[type="submit"] {
+  box-sizing: border-box;
+  height: 40px;
+  min-height: 40px;
+}
+
+.object-tools a.addlink {
+  align-items: center;
+  box-sizing: border-box;
+  display: inline-flex;
+  justify-content: center;
+  line-height: 1.2;
+  min-height: 40px;
+  padding-bottom: 8px;
+  padding-top: 8px;
+}
+
 #header {
   background: var(--repage-ink);
   min-height: 78px;
@@ -256,13 +280,11 @@ div.breadcrumbs a {
   border-left: 2px solid var(--repage-violet);
 }
 
-.repage-page-intro,
 .repage-login-intro {
   margin-bottom: 28px;
   max-width: 700px;
 }
 
-.repage-page-intro h1,
 .repage-login-intro h1 {
   color: var(--body-fg);
   font-size: clamp(30px, 3vw, 42px);
@@ -270,7 +292,6 @@ div.breadcrumbs a {
   margin: 0 0 8px;
 }
 
-.repage-page-intro p:last-child,
 .repage-login-intro p:last-child {
   color: var(--repage-muted);
   font-size: 16px;
@@ -792,11 +813,6 @@ textarea:focus {
     padding-right: 16px;
   }
 
-  .repage-page-intro {
-    margin-bottom: 20px;
-  }
-
-  .repage-page-intro h1,
   .repage-login-intro h1 {
     font-size: 28px;
   }

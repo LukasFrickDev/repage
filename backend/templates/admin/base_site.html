@@ -14,8 +14,10 @@
 
 {% block extrastyle %}
   {{ block.super }}
-  <link rel="stylesheet" href="{% static 'repage-admin/admin.css' %}?v=system-font-20260815">
   <link rel="icon" href="{% static 'repage-admin/brand/logo.svg' %}" type="image/svg+xml">
+  {% block repage_admin_styles %}
+    <link rel="stylesheet" href="{% static 'repage-admin/admin.css' %}?v=system-font-20260815">
+  {% endblock %}
 {% endblock %}
 
 {% block branding %}
