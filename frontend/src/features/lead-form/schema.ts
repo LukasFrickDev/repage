@@ -26,6 +26,7 @@ export const leadFormSchema = z.object({
     (value) => value,
     'É necessário declarar ciência da Política de Privacidade.',
   ),
+  company_website: z.string().max(160).default(''),
 });
 
 export type LeadFormValues = z.infer<typeof leadFormSchema>;
@@ -82,5 +83,6 @@ export function toLeadCreatePayload(values: LeadFormValues) {
     privacy_policy_acknowledged: true as const,
     privacy_policy_version: PRIVACY_POLICY_VERSION,
     source: 'website' as const,
+    company_website: values.company_website.trim(),
   };
 }

@@ -2,7 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { Link } from 'react-router-dom';
-import { createLead, LeadApiError } from '../../services/api/leads';
+import { createIdempotencyKey, createLead, LeadApiError } from '../../services/api/leads';
 import {
   leadFormSchema,
   type LeadFieldName,
@@ -31,6 +31,7 @@ const defaultValues: LeadFormValues = {
   business_name: '',
   message: '',
   privacy_policy_acknowledged: false as never,
+  company_website: '',
 };
 
 type LeadFormProps = {
@@ -153,6 +154,8 @@ export function LeadForm({ onInteractionStart }: LeadFormProps) {
   const [submitted, setSubmitted] = useState(false);
   const [succeeded, setSucceeded] = useState(false);
   const interactionReported = useRef(false);
+  const idempotencyKey = useRef<string | null>(null);
+  const formStartedAt = useRef(new Date().toISOString());
   const {
     control,
     register,
@@ -182,12 +185,24 @@ export function LeadForm({ onInteractionStart }: LeadFormProps) {
   const onSubmit = async (values: LeadFormValues) => {
     setGeneralError('');
     setSubmitted(true);
+    const attemptKey = idempotencyKey.current ?? createIdempotencyKey();
+    idempotencyKey.current = attemptKey;
     try {
-      await createLead(values);
+      await createLead(values, {
+        idempotencyKey: attemptKey,
+        formStartedAt: formStartedAt.current,
+      });
       setSucceeded(true);
+      idempotencyKey.current = null;
+      formStartedAt.current = new Date().toISOString();
       reset();
     } catch (error) {
       if (error instanceof LeadApiError) {
+        if (error.code === 'idempotency_conflict') {
+          idempotencyKey.current = null;
+          setGeneralError('Esta tentativa já foi usada com dados diferentes. Revise o formulário e envie novamente.');
+          return;
+        }
         if (error.code === 'privacy_policy_version_mismatch') {
           setGeneralError('A Política de Privacidade foi atualizada. Recarregue esta página e revise o formulário antes de tentar novamente.');
           return;
@@ -218,6 +233,13 @@ export function LeadForm({ onInteractionStart }: LeadFormProps) {
         onSubmit={handleSubmit(onSubmit, onInvalid)}
       >
         <S.Heading id="lead-form-title">Solicitar orçamento</S.Heading>
+        <S.Honeypot
+          aria-hidden="true"
+          autoComplete="off"
+          tabIndex={-1}
+          type="text"
+          {...register('company_website')}
+        />
         {isSubmitted && submitted && Object.keys(errors).length > 0 && (
           <S.ErrorSummary role="alert" aria-live="assertive">
             Revise os campos destacados antes de enviar.

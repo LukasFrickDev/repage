@@ -77,6 +77,64 @@ describe('LeadForm', () => {
     expect(screen.getByLabelText('Nome')).toHaveValue('Ana Souza');
   });
 
+  it('reuses the same key after a recoverable 429 and clears after success', async () => {
+    const user = userEvent.setup();
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce(new Response(JSON.stringify({
+        error: { code: 'rate_limited', message: 'Tente novamente mais tarde.' },
+        request_id: 'request-id-1',
+      }), { status: 429 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({
+        status: 'received', message: 'Recebemos sua solicitação.', request_id: 'request-id-2',
+      }), { status: 201 }));
+    vi.stubGlobal('fetch', fetchMock);
+    renderForm();
+    await fillRequiredFields(user);
+    await user.click(screen.getByRole('button', { name: 'Solicitar orçamento' }));
+    expect(await screen.findByRole('alert')).toHaveTextContent('Tente novamente mais tarde.');
+    expect(screen.getByLabelText('Nome')).toHaveValue('Ana Souza');
+
+    await user.click(screen.getByRole('button', { name: 'Solicitar orçamento' }));
+    expect(await screen.findByRole('status')).toHaveTextContent('Solicitação recebida.');
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    const firstOptions = fetchMock.mock.calls[0][1] as RequestInit;
+    const secondOptions = fetchMock.mock.calls[1][1] as RequestInit;
+    expect(firstOptions.headers).toEqual(secondOptions.headers);
+    expect(screen.getByLabelText('Nome')).toHaveValue('');
+  });
+
+  it('discards the key after a conflict before the next logical attempt', async () => {
+    const user = userEvent.setup();
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce(new Response(JSON.stringify({
+        error: { code: 'idempotency_conflict', message: 'Conflito.' },
+        request_id: 'request-id-1',
+      }), { status: 409 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({
+        status: 'received', message: 'Recebemos sua solicitação.', request_id: 'request-id-2',
+      }), { status: 201 }));
+    vi.stubGlobal('fetch', fetchMock);
+    renderForm();
+    await fillRequiredFields(user);
+    await user.click(screen.getByRole('button', { name: 'Solicitar orçamento' }));
+    expect(await screen.findByRole('alert')).toHaveTextContent('Esta tentativa já foi usada');
+
+    await user.click(screen.getByRole('button', { name: 'Solicitar orçamento' }));
+    expect(await screen.findByRole('status')).toHaveTextContent('Solicitação recebida.');
+    const firstOptions = fetchMock.mock.calls[0][1] as RequestInit;
+    const secondOptions = fetchMock.mock.calls[1][1] as RequestInit;
+    expect(firstOptions.headers).not.toEqual(secondOptions.headers);
+  });
+
+  it('keeps the honeypot hidden and outside keyboard navigation', () => {
+    renderForm();
+    const honeypot = document.querySelector('input[name="company_website"]');
+
+    expect(honeypot).toHaveAttribute('aria-hidden', 'true');
+    expect(honeypot).toHaveAttribute('autocomplete', 'off');
+    expect(honeypot).toHaveAttribute('tabindex', '-1');
+  });
+
   it('explains a policy version mismatch without clearing the form', async () => {
     const user = userEvent.setup();
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(JSON.stringify({

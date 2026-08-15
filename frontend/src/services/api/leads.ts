@@ -65,11 +65,31 @@ function isCreatedResponse(body: unknown): body is LeadCreatedResponse {
     && typeof body.request_id === 'string';
 }
 
-export async function createLead(values: LeadFormValues): Promise<LeadCreatedResponse> {
+export type LeadAttemptMetadata = {
+  idempotencyKey: string;
+  formStartedAt: string;
+};
+
+export function createIdempotencyKey(): string {
+  if (typeof globalThis.crypto?.randomUUID === 'function') return globalThis.crypto.randomUUID();
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (character) => {
+    const random = Math.random() * 16 | 0;
+    const value = character === 'x' ? random : (random & 0x3) | 0x8;
+    return value.toString(16);
+  });
+}
+
+export async function createLead(values: LeadFormValues, metadata: LeadAttemptMetadata): Promise<LeadCreatedResponse> {
   const response = await fetch(`${API_BASE_URL}/api/v1/leads/`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(toLeadCreatePayload(values)),
+    headers: {
+      'Content-Type': 'application/json',
+      'Idempotency-Key': metadata.idempotencyKey,
+    },
+    body: JSON.stringify({
+      ...toLeadCreatePayload(values),
+      form_started_at: metadata.formStartedAt,
+    }),
   });
   const body = await parseJson(response);
 
