@@ -1,0 +1,34 @@
+{% extends "admin/base.html" %}
+{% load i18n static %}
+
+{% block title %}Administração Repage{% endblock %}
+
+{% block dark-mode-vars %}
+  <link rel="stylesheet" href="{% static 'admin/css/dark_mode.css' %}">
+{% endblock %}
+
+{% block extrahead %}
+  {{ block.super }}
+  <script src="{% static 'repage-admin/theme.js' %}"></script>
+{% endblock %}
+
+{% block extrastyle %}
+  {{ block.super }}
+  <link rel="icon" href="{% static 'repage-admin/brand/logo.svg' %}" type="image/svg+xml">
+  {% block repage_admin_styles %}
+    <link rel="stylesheet" href="{% static 'repage-admin/admin.css' %}?v=system-font-20260815">
+  {% endblock %}
+{% endblock %}
+
+{% block branding %}
+  <div id="site-name" class="repage-brand">
+    <a href="{% url 'admin:index' %}" aria-label="Repage — início da administração">
+      <img src="{% static 'repage-admin/brand/logo.svg' %}" alt="Repage" class="repage-brand__logo">
+      <span class="repage-brand__context">Administração</span>
+    </a>
+  </div>
+{% endblock %}
+
+{% block nav-global %}
+  <div class="repage-admin-label" aria-label="Área administrativa Repage">Área interna</div>
+{% endblock %}
