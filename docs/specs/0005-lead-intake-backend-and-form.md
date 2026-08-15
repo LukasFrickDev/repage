@@ -268,6 +268,7 @@ Criar `Lead` com:
 - `business_name`;
 - `message`;
 - `source`;
+- `acquisition_source`;
 - `status`;
 - `privacy_policy_acknowledged`;
 - `privacy_policy_version`;
@@ -285,16 +286,21 @@ Criar `Lead` com:
 
 ### 9.2 Status
 
-Somente:
+Valores permitidos:
 
-- `new`;
-- `archived`.
+- `new` — Novo;
+- `in_progress` — Em andamento;
+- `delivered` — Entregue;
+- `maintenance` — Manutenção;
+- `archived` — Arquivado.
 
 Novo Lead começa como:
 
 `new`
 
 Não criar pipeline de CRM.
+Não existem transições rígidas, histórico de status, eventos ou auditoria de
+pipeline nesta entrega. O status representa somente o valor operacional atual.
 
 ### 9.3 Tipos de projeto
 
@@ -324,7 +330,8 @@ Referências de contrato:
 - `project_type`: obrigatório e limitado às escolhas;
 - `business_name`: opcional, máximo de 160 caracteres;
 - `message`: opcional, máximo de 4000 caracteres;
-- `source`: valor controlado;
+- `source`: valor técnico controlado (`website` ou `manual`);
+- `acquisition_source`: opcional, texto livre, máximo de 160 caracteres;
 - `privacy_policy_version`: tamanho limitado e controlado.
 
 O frontend deve possuir limites coerentes, mas o backend é a autoridade.
@@ -360,6 +367,17 @@ Aceitar número nacional válido de 10 ou 11 dígitos depois da normalização a
 
 Não validar operadora ou existência real do número.
 
+### Origem comercial
+
+`acquisition_source` é um texto livre opcional para registrar a origem
+comercial de Leads criados manualmente, como indicação, Instagram, LinkedIn,
+WhatsApp, prospecção ou evento. Aplicar somente `trim`, preservando a
+capitalização e a grafia informadas, e persistir vazio quando não preenchido.
+
+Leads recebidos pela API pública persistem `acquisition_source` como `""` e o
+visitante não controla esse campo. Ele não possui choices fechadas, tabela
+separada, histórico ou auditoria nesta V1.
+
 ### Texto
 
 - trim;
@@ -383,6 +401,9 @@ O frontend e a API pública enviam somente `website`. A API pública rejeita `ma
 O backend aceita somente essas duas origens, e `manual` é reservado à criação administrativa.
 
 Não implementar tracking de campanha, UTM, referer persistido ou perfil de navegação nesta entrega.
+`source` representa a entrada técnica no sistema e não deve ser confundido com
+`acquisition_source`, que registra livremente a origem comercial de Leads
+manuais. `source` permanece somente `website` ou `manual`.
 
 ## 12. Política de Privacidade
 
@@ -645,6 +666,7 @@ Exibir informações úteis como:
 
 - nome;
 - e-mail;
+- telefone;
 - tipo de projeto;
 - status;
 - data de criação.
@@ -665,14 +687,30 @@ Pelo menos:
 - e-mail;
 - WhatsApp;
 - negócio.
+- origem comercial (`acquisition_source`).
 
 ### Detalhe
 
-Dados enviados são registro histórico.
+No detalhe, a mensagem enviada permanece consultável integralmente e os dados
+históricos permanecem protegidos contra edição livre. Após a criação, são
+editáveis somente os campos operacionais:
 
-Evitar edição livre dos campos enviados.
+- `email`;
+- `whatsapp`;
+- `project_type`;
+- `status`.
+
+`name`, `business_name`, `message`, `source`, `acquisition_source`, os campos de política, `id` e os
+timestamps permanecem somente leitura. Uma correção administrativa substitui
+diretamente o valor vigente no mesmo Lead, sem histórico de alterações,
+auditoria customizada ou cópia paralela nesta V1.
 
 Status pode ser controlado de maneira explícita.
+
+### Status e arquivamento
+
+O operador pode controlar explicitamente o status atual entre os valores
+permitidos acima.
 
 ### Arquivamento
 
@@ -694,10 +732,13 @@ Na criação manual, o operador preenche somente os dados comerciais existentes:
 - `project_type`;
 - `business_name`;
 - `message`.
+- `acquisition_source`, opcional, como origem comercial livre.
 
 O backend define `source=manual`, `status=new`,
 `privacy_policy_acknowledged=false` e `privacy_policy_version` vazio.
-Esses campos técnicos não são controláveis pelo operador.
+`acquisition_source` é normalizado com `trim` e permanece somente leitura após
+a criação. `source` e os demais campos técnicos não são controláveis pelo
+operador.
 
 ### Exclusão
 
@@ -1188,6 +1229,8 @@ Testes de persistência devem usar PostgreSQL no fluxo final de validação.
 - filtros/busca/configuração essencial;
 - criação manual autenticada com origem `manual`;
 - Leads manuais sem ciência ou versão de política;
+- correção administrativa in-place de e-mail, telefone, tipo de projeto e status;
+- telefone presente na listagem e mensagem integral disponível no detalhe;
 - arquivamento.
 
 ### Core
@@ -1404,7 +1447,7 @@ Nenhum deles pode ser commitado indevidamente.
 - [ ] `apps/leads` existe.
 - [ ] `Lead` usa UUID.
 - [ ] Campos do Lead correspondem ao contrato.
-- [ ] Status possui somente `new` e `archived`.
+- [ ] Status possui somente `new`, `in_progress`, `delivered`, `maintenance` e `archived`.
 - [ ] Migration está versionada.
 - [ ] `POST /api/v1/leads/` existe.
 - [ ] Payload válido persiste exatamente um Lead por requisição nesta entrega.

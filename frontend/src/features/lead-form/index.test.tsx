@@ -15,8 +15,9 @@ function renderForm() {
 async function fillRequiredFields(user: ReturnType<typeof userEvent.setup>) {
   await user.type(screen.getByLabelText('Nome'), 'Ana Souza');
   await user.type(screen.getByLabelText('E-mail'), 'ana@example.com');
-  await user.type(screen.getByLabelText('WhatsApp'), '(11) 99999-9999');
-  await user.selectOptions(screen.getByLabelText('Tipo de projeto'), 'landing_page');
+  await user.type(screen.getByLabelText('Telefone'), '11999999999');
+  await user.click(screen.getByRole('combobox', { name: 'Tipo de projeto' }));
+  await user.click(screen.getByRole('option', { name: 'Landing page' }));
   await user.click(screen.getByLabelText(/Li e estou ciente/));
 }
 
@@ -76,10 +77,56 @@ describe('LeadForm', () => {
     expect(screen.getByLabelText('Nome')).toHaveValue('Ana Souza');
   });
 
+  it('explains a policy version mismatch without clearing the form', async () => {
+    const user = userEvent.setup();
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(JSON.stringify({
+      error: { code: 'privacy_policy_version_mismatch', message: 'Atualize a página.' },
+      request_id: 'request-id',
+    }), { status: 400 })));
+    renderForm();
+    await fillRequiredFields(user);
+    await user.click(screen.getByRole('button', { name: 'Solicitar orçamento' }));
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('A Política de Privacidade foi atualizada.');
+    expect(screen.getByLabelText('Nome')).toHaveValue('Ana Souza');
+  });
+
+  it('masks fixed and mobile phone values and removes letters', async () => {
+    const user = userEvent.setup();
+    renderForm();
+    const phone = screen.getByLabelText('Telefone');
+
+    await user.type(phone, '11abc34567890');
+    expect(phone).toHaveValue('(11) 3456-7890');
+    await user.clear(phone);
+    await user.paste('+55 11 95824-4081');
+    expect(phone).toHaveValue('(11) 95824-4081');
+  });
+
+  it('supports mouse and keyboard interaction in the project type combobox', async () => {
+    const user = userEvent.setup();
+    renderForm();
+    const combobox = screen.getByRole('combobox', { name: 'Tipo de projeto' });
+
+    await user.click(combobox);
+    expect(screen.getByRole('listbox', { name: 'Opções de tipo de projeto' })).toBeVisible();
+    await user.click(screen.getByRole('option', { name: 'Site institucional' }));
+    expect(combobox).toHaveTextContent('Site institucional');
+    await user.click(combobox);
+    await user.keyboard('{Escape}');
+    expect(combobox).toHaveAttribute('aria-expanded', 'false');
+    await user.click(combobox);
+    await user.keyboard('{ArrowDown}{ArrowDown}{Enter}');
+    expect(combobox).toHaveTextContent('Suporte ou evolução');
+  });
+
   it('keeps the privacy link accessible and unchecked initially', () => {
     renderForm();
 
     expect(screen.getByRole('checkbox', { name: /Li e estou ciente/ })).not.toBeChecked();
     expect(screen.getByRole('link', { name: 'Política de Privacidade' })).toHaveAttribute('href', '/privacidade');
+    const whatsappLink = screen.getByRole('link', { name: 'Falar pelo WhatsApp' });
+    expect(whatsappLink).toHaveAttribute('href', 'https://wa.me/5511958244081?text=Ol%C3%A1!%20Conheci%20a%20Repage%20pelo%20site%20e%20gostaria%20de%20conversar%20sobre%20um%20projeto.');
+    expect(whatsappLink).toHaveAttribute('target', '_blank');
   });
 });

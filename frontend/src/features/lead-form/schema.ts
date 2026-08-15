@@ -15,9 +15,9 @@ const projectTypeValues = projectTypeOptions.map(({ value }) => value) as [strin
 export const leadFormSchema = z.object({
   name: z.string().trim().min(1, 'Informe seu nome.').max(120, 'O nome deve ter no máximo 120 caracteres.'),
   email: z.string().trim().min(1, 'Informe seu e-mail.').email('Informe um e-mail válido.').max(254, 'O e-mail deve ter no máximo 254 caracteres.'),
-  whatsapp: z.string().trim().min(1, 'Informe seu WhatsApp.').max(32, 'O WhatsApp informado é muito longo.').refine(
+  whatsapp: z.string().trim().min(1, 'Informe seu telefone.').max(32, 'O telefone informado é muito longo.').refine(
     (value) => normalizeWhatsApp(value) !== null,
-    'Informe um WhatsApp brasileiro válido.',
+    'Informe um telefone brasileiro válido.',
   ),
   project_type: z.enum(projectTypeValues, { error: 'Selecione um tipo de projeto.' }),
   business_name: z.string().trim().max(160, 'O nome deve ter no máximo 160 caracteres.').default(''),
@@ -48,6 +48,24 @@ export function normalizeWhatsApp(value: string): string | null {
   if (nationalNumber.length === 11 && nationalNumber[2] !== '9') return null;
 
   return `+55${nationalNumber}`;
+}
+
+export function formatPhoneInput(value: string): string {
+  const hasCountryCode = value.trim().startsWith('+55');
+  const digits = value.replace(/\D/g, '');
+  const nationalDigits = (hasCountryCode && digits.startsWith('55') ? digits.slice(2) : digits).slice(0, 11);
+
+  if (nationalDigits.length === 0) return '';
+  if (nationalDigits.length <= 2) return `(${nationalDigits}`;
+
+  const areaCode = nationalDigits.slice(0, 2);
+  const localNumber = nationalDigits.slice(2);
+  const localLength = nationalDigits.length === 11 ? 5 : 4;
+  const formattedLocal = localNumber.length > localLength
+    ? `${localNumber.slice(0, localLength)}-${localNumber.slice(localLength)}`
+    : localNumber;
+
+  return `(${areaCode}) ${formattedLocal}`;
 }
 
 export function toLeadCreatePayload(values: LeadFormValues) {

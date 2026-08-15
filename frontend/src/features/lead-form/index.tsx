@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
+import { Controller, useForm } from 'react-hook-form';
 import { Link } from 'react-router-dom';
 import { createLead, LeadApiError } from '../../services/api/leads';
 import {
@@ -8,6 +8,7 @@ import {
   type LeadFieldName,
   type LeadFormInput,
   type LeadFormValues,
+  formatPhoneInput,
   projectTypeOptions,
 } from './schema';
 import * as S from './styles';
@@ -32,11 +33,128 @@ const defaultValues: LeadFormValues = {
   privacy_policy_acknowledged: false as never,
 };
 
-export function LeadForm() {
+type LeadFormProps = {
+  onInteractionStart?: () => void;
+};
+
+type ProjectTypeComboboxProps = {
+  'aria-describedby'?: string;
+  'aria-invalid': boolean;
+  name: string;
+  onBlur: () => void;
+  onChange: (value: string) => void;
+  value: string | undefined;
+};
+
+function ProjectTypeCombobox({
+  'aria-describedby': ariaDescribedBy,
+  'aria-invalid': ariaInvalid,
+  name,
+  onBlur,
+  onChange,
+  value,
+}: ProjectTypeComboboxProps) {
+  const [open, setOpen] = useState(false);
+  const [highlightedIndex, setHighlightedIndex] = useState(0);
+  const rootRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const selectedIndex = projectTypeOptions.findIndex((option) => option.value === value);
+  const selectedOption = selectedIndex >= 0 ? projectTypeOptions[selectedIndex] : undefined;
+
+  useEffect(() => {
+    const handlePointerDown = (event: PointerEvent) => {
+      if (rootRef.current && !rootRef.current.contains(event.target as Node)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener('pointerdown', handlePointerDown);
+    return () => document.removeEventListener('pointerdown', handlePointerDown);
+  }, []);
+
+  const openList = () => {
+    setHighlightedIndex(selectedIndex >= 0 ? selectedIndex : 0);
+    setOpen(true);
+  };
+
+  const chooseOption = (index: number) => {
+    onChange(projectTypeOptions[index].value);
+    onBlur();
+    setOpen(false);
+    buttonRef.current?.focus();
+  };
+
+  const handleKeyDown = (event: KeyboardEvent<HTMLButtonElement>) => {
+    if (event.key === 'ArrowDown') {
+      event.preventDefault();
+      if (!open) openList();
+      else setHighlightedIndex((index) => Math.min(index + 1, projectTypeOptions.length - 1));
+    } else if (event.key === 'ArrowUp') {
+      event.preventDefault();
+      if (!open) openList();
+      else setHighlightedIndex((index) => Math.max(index - 1, 0));
+    } else if ((event.key === 'Enter' || event.key === ' ') && open) {
+      event.preventDefault();
+      chooseOption(highlightedIndex);
+    } else if ((event.key === 'Enter' || event.key === ' ') && !open) {
+      event.preventDefault();
+      openList();
+    } else if (event.key === 'Escape' && open) {
+      event.preventDefault();
+      setOpen(false);
+    }
+  };
+
+  return (
+    <S.Combobox ref={rootRef}>
+      <S.ComboboxButton
+        ref={buttonRef}
+        id="lead-project-type"
+        type="button"
+        name={name}
+        role="combobox"
+        aria-controls="lead-project-type-list"
+        aria-activedescendant={open ? `lead-project-type-option-${projectTypeOptions[highlightedIndex].value}` : undefined}
+        aria-describedby={ariaDescribedBy}
+        aria-expanded={open}
+        aria-haspopup="listbox"
+        aria-invalid={ariaInvalid}
+        aria-label="Tipo de projeto"
+        onBlur={onBlur}
+        onClick={() => (open ? setOpen(false) : openList())}
+        onKeyDown={handleKeyDown}
+      >
+        {selectedOption?.label ?? 'Selecione uma opção'}
+      </S.ComboboxButton>
+      {open && (
+        <S.ComboboxList id="lead-project-type-list" role="listbox" aria-label="Opções de tipo de projeto">
+          {projectTypeOptions.map((option, index) => (
+            <S.ComboboxOption
+              key={option.value}
+              id={`lead-project-type-option-${option.value}`}
+              role="option"
+              aria-selected={option.value === value}
+              tabIndex={-1}
+              onMouseDown={(event) => event.preventDefault()}
+              onClick={() => chooseOption(index)}
+              onMouseEnter={() => setHighlightedIndex(index)}
+              data-highlighted={index === highlightedIndex ? 'true' : undefined}
+            >
+              {option.label}
+            </S.ComboboxOption>
+          ))}
+        </S.ComboboxList>
+      )}
+    </S.Combobox>
+  );
+}
+
+export function LeadForm({ onInteractionStart }: LeadFormProps) {
   const [generalError, setGeneralError] = useState('');
   const [submitted, setSubmitted] = useState(false);
   const [succeeded, setSucceeded] = useState(false);
+  const interactionReported = useRef(false);
   const {
+    control,
     register,
     handleSubmit,
     reset,
@@ -48,6 +166,7 @@ export function LeadForm() {
     resolver: zodResolver(leadFormSchema),
     shouldFocusError: false,
   });
+  const phoneRegistration = register('whatsapp');
 
   const focusFirstError = (fieldErrors: typeof errors) => {
     const firstField = fieldOrder.find((field) => fieldErrors[field]);
@@ -69,6 +188,10 @@ export function LeadForm() {
       reset();
     } catch (error) {
       if (error instanceof LeadApiError) {
+        if (error.code === 'privacy_policy_version_mismatch') {
+          setGeneralError('A Política de Privacidade foi atualizada. Recarregue esta página e revise o formulário antes de tentar novamente.');
+          return;
+        }
         Object.entries(error.fields ?? {}).forEach(([field, messages]) => {
           if (fieldOrder.includes(field as LeadFieldName)) {
             setError(field as LeadFieldName, { type: 'server', message: messages[0] });
@@ -83,7 +206,17 @@ export function LeadForm() {
 
   return (
     <>
-      <S.Form aria-labelledby="lead-form-title" noValidate onSubmit={handleSubmit(onSubmit, onInvalid)}>
+      <S.Form
+        aria-labelledby="lead-form-title"
+        noValidate
+        onFocusCapture={() => {
+          if (!interactionReported.current) {
+            interactionReported.current = true;
+            onInteractionStart?.();
+          }
+        }}
+        onSubmit={handleSubmit(onSubmit, onInvalid)}
+      >
         <S.Heading id="lead-form-title">Solicitar orçamento</S.Heading>
         {isSubmitted && submitted && Object.keys(errors).length > 0 && (
           <S.ErrorSummary role="alert" aria-live="assertive">
@@ -118,30 +251,39 @@ export function LeadForm() {
             {errors.email && <S.Error id="lead-email-error">{errors.email.message}</S.Error>}
           </S.Field>
           <S.Field>
-            <S.Label htmlFor="lead-whatsapp">WhatsApp</S.Label>
+            <S.Label htmlFor="lead-whatsapp">Telefone</S.Label>
             <S.Input
               id="lead-whatsapp"
               type="tel"
               autoComplete="tel"
-              inputMode="tel"
-              maxLength={32}
+              inputMode="numeric"
+              maxLength={15}
               aria-invalid={Boolean(errors.whatsapp)}
               aria-describedby={errors.whatsapp ? 'lead-whatsapp-error' : undefined}
-              {...register('whatsapp')}
+              {...phoneRegistration}
+              onChange={(event) => {
+                event.target.value = formatPhoneInput(event.target.value);
+                void phoneRegistration.onChange(event);
+              }}
             />
             {errors.whatsapp && <S.Error id="lead-whatsapp-error">{errors.whatsapp.message}</S.Error>}
           </S.Field>
           <S.Field>
             <S.Label htmlFor="lead-project-type">Tipo de projeto</S.Label>
-            <S.Select
-              id="lead-project-type"
-              aria-invalid={Boolean(errors.project_type)}
-              aria-describedby={errors.project_type ? 'lead-project-type-error' : undefined}
-              {...register('project_type')}
-            >
-              <option value="">Selecione uma opção</option>
-              {projectTypeOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
-            </S.Select>
+            <Controller
+              control={control}
+              name="project_type"
+              render={({ field }) => (
+                <ProjectTypeCombobox
+                  aria-describedby={errors.project_type ? 'lead-project-type-error' : undefined}
+                  aria-invalid={Boolean(errors.project_type)}
+                  name={field.name}
+                  onBlur={field.onBlur}
+                  onChange={field.onChange}
+                  value={field.value}
+                />
+              )}
+            />
             {errors.project_type && <S.Error id="lead-project-type-error">{errors.project_type.message}</S.Error>}
           </S.Field>
           <S.Field $wide>
@@ -187,6 +329,16 @@ export function LeadForm() {
           </S.Submit>
           {generalError && <S.Status role="alert" aria-live="assertive">{generalError}</S.Status>}
         </S.Actions>
+        <S.DirectContact>
+          <span>Prefere falar diretamente?</span>
+          <S.WhatsAppLink
+            href={`https://wa.me/5511958244081?text=${encodeURIComponent('Olá! Conheci a Repage pelo site e gostaria de conversar sobre um projeto.')}`}
+            target="_blank"
+            rel="noreferrer"
+          >
+            Falar pelo WhatsApp
+          </S.WhatsAppLink>
+        </S.DirectContact>
       </S.Form>
       {succeeded && (
         <S.Success role="status" aria-live="polite">

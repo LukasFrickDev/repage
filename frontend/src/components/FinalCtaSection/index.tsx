@@ -1,11 +1,12 @@
 import { useReducedMotion, useScroll, useSpring, useTransform } from 'framer-motion';
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { finalCtaSectionContent } from '../../content/repageContent';
 import { LeadForm } from '../../features/lead-form';
 import * as S from './styles';
 
 export function FinalCtaSection() {
   const prefersReducedMotion = Boolean(useReducedMotion());
+  const [formInteracted, setFormInteracted] = useState(false);
   const sectionRef = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({
     target: sectionRef,
@@ -31,14 +32,19 @@ export function FinalCtaSection() {
     >
       <S.Content>
         <S.Eyebrow
-          style={prefersReducedMotion ? undefined : { opacity: eyebrowOpacity, y: eyebrowY }}
+          style={prefersReducedMotion || formInteracted ? { opacity: 1, y: 0 } : { opacity: eyebrowOpacity, y: eyebrowY }}
         >
           {finalCtaSectionContent.eyebrow}
         </S.Eyebrow>
         <S.Title
           id="final-cta-title"
           aria-label={finalCtaSectionContent.title}
-          style={prefersReducedMotion ? undefined : {
+          style={prefersReducedMotion || formInteracted ? {
+            maskPosition: '0 0%',
+            opacity: 1,
+            scale: 1,
+            y: 0,
+          } : {
             maskPosition: titleMaskPosition,
             opacity: titleOpacity,
             scale: titleScale,
@@ -52,14 +58,14 @@ export function FinalCtaSection() {
           ))}
         </S.Title>
         <S.Description
-          style={prefersReducedMotion ? undefined : {
+          style={prefersReducedMotion || formInteracted ? { opacity: 1, y: 0 } : {
             opacity: descriptionOpacity,
             y: descriptionY,
           }}
         >
           {finalCtaSectionContent.description}
         </S.Description>
-        <LeadForm />
+        <LeadForm onInteractionStart={() => setFormInteracted(true)} />
       </S.Content>
     </S.Section>
   );

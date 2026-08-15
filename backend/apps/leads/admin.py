@@ -1,3 +1,5 @@
+import re
+
 from django import forms
 from django.contrib import admin
 from django.utils import timezone
@@ -12,15 +14,29 @@ from .serializers import (
 )
 
 
-COMMERCIAL_FIELDS = (
+MANUAL_FIELDS = (
     'name',
     'email',
     'whatsapp',
     'project_type',
     'business_name',
     'message',
+    'acquisition_source',
+    'status',
 )
-TECHNICAL_FIELDS = (
+READONLY_FIELDS = (
+    'id',
+    'name',
+    'business_name',
+    'message',
+    'source',
+    'acquisition_source',
+    'privacy_policy_acknowledged',
+    'privacy_policy_version',
+    'created_at',
+    'updated_at',
+)
+CREATION_READONLY_FIELDS = (
     'id',
     'source',
     'status',
@@ -33,10 +49,15 @@ TECHNICAL_FIELDS = (
 
 class LeadAdminForm(forms.ModelForm):
     whatsapp = forms.CharField(max_length=32)
+    acquisition_source = forms.CharField(
+        max_length=160,
+        required=False,
+        label='Origem do contato',
+    )
 
     class Meta:
         model = Lead
-        fields = COMMERCIAL_FIELDS
+        fields = MANUAL_FIELDS
 
     def clean_name(self):
         value = normalize_name(self.cleaned_data['name'])
@@ -59,24 +80,42 @@ class LeadAdminForm(forms.ModelForm):
     def clean_message(self):
         return normalize_message(self.cleaned_data['message'])
 
+    def clean_acquisition_source(self):
+        return self.cleaned_data['acquisition_source'].strip()
+
 
 @admin.action(description='Arquivar Leads selecionados')
 def archive_leads(modeladmin, request, queryset):
     queryset.update(status=Lead.Status.ARCHIVED, updated_at=timezone.now())
 
 
+def format_whatsapp(value):
+    digits = re.sub(r'\D', '', value or '')
+    if digits.startswith('55') and len(digits) in (12, 13):
+        digits = digits[2:]
+    if len(digits) == 10:
+        return f'({digits[:2]}) {digits[2:6]}-{digits[6:]}'
+    if len(digits) == 11:
+        return f'({digits[:2]}) {digits[2:7]}-{digits[7:]}'
+    return value
+
+
 @admin.register(Lead)
 class LeadAdmin(admin.ModelAdmin):
     form = LeadAdminForm
-    list_display = ('name', 'email', 'project_type', 'status', 'created_at')
+    list_display = ('name', 'email', 'whatsapp_display', 'project_type', 'status', 'created_at')
     list_filter = ('status', 'project_type', 'created_at')
-    search_fields = ('name', 'email', 'whatsapp', 'business_name')
+    search_fields = ('name', 'email', 'whatsapp', 'business_name', 'acquisition_source')
     actions = (archive_leads,)
 
     def get_readonly_fields(self, request, obj=None):
         if obj is None:
-            return TECHNICAL_FIELDS
-        return TECHNICAL_FIELDS + COMMERCIAL_FIELDS
+            return CREATION_READONLY_FIELDS
+        return READONLY_FIELDS
+
+    @admin.display(description='Telefone', ordering='whatsapp')
+    def whatsapp_display(self, obj):
+        return format_whatsapp(obj.whatsapp)
 
     def save_model(self, request, obj, form, change):
         if not change:

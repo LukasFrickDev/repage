@@ -11,7 +11,7 @@ from django.utils import timezone
 from django.urls import reverse
 from rest_framework.test import APIClient
 
-from apps.leads.admin import LeadAdmin
+from apps.leads.admin import LeadAdmin, LeadAdminForm
 from apps.leads.models import Lead
 from apps.leads.serializers import LeadSerializer
 
@@ -50,6 +50,7 @@ def test_lead_defaults_choices_and_representation():
     assert lead.privacy_policy_acknowledged is False
     assert lead.business_name == ''
     assert lead.message == ''
+    assert lead.acquisition_source == ''
     assert set(Lead.ProjectType.values) == {
         'landing_page',
         'institutional_site',
@@ -57,7 +58,20 @@ def test_lead_defaults_choices_and_representation():
         'support_or_evolution',
         'not_sure',
     }
-    assert set(Lead.Status.values) == {'new', 'archived'}
+    assert set(Lead.Status.values) == {
+        'new',
+        'in_progress',
+        'delivered',
+        'maintenance',
+        'archived',
+    }
+    assert dict(Lead.Status.choices) == {
+        'new': 'Novo',
+        'in_progress': 'Em andamento',
+        'delivered': 'Entregue',
+        'maintenance': 'Manutenção',
+        'archived': 'Arquivado',
+    }
     assert set(Lead.Source.values) == {'website', 'manual'}
     assert str(lead) == 'Ana Souza — ana@example.com'
 
@@ -130,6 +144,13 @@ def test_serializer_rejects_unknown_field():
     assert serializer.errors['unexpected'] == ['Este campo não é permitido.']
 
 
+def test_serializer_rejects_public_acquisition_source():
+    serializer = LeadSerializer(data=payload(acquisition_source='Indicação'))
+
+    assert not serializer.is_valid()
+    assert serializer.errors['acquisition_source'] == ['Este campo não é permitido.']
+
+
 def test_serializer_rejects_unacknowledged_or_unknown_policy():
     unacknowledged = LeadSerializer(data=payload(privacy_policy_acknowledged=False))
     outdated = LeadSerializer(data=payload(privacy_policy_version='pre-launch-old'))
@@ -153,6 +174,69 @@ def test_lead_persists_with_uuid_and_new_status():
 
 
 @pytest.mark.django_db
+@pytest.mark.parametrize(
+    'status',
+    [
+        Lead.Status.NEW,
+        Lead.Status.IN_PROGRESS,
+        Lead.Status.DELIVERED,
+        Lead.Status.MAINTENANCE,
+        Lead.Status.ARCHIVED,
+    ],
+)
+def test_lead_accepts_all_status_choices(status):
+    lead = Lead.objects.create(
+        name='Status Fictício',
+        email='status@example.test',
+        whatsapp='+5511999999999',
+        project_type=Lead.ProjectType.LANDING_PAGE,
+        source=Lead.Source.MANUAL,
+        status=status,
+    )
+
+    assert Lead.objects.get(pk=lead.pk).status == status
+
+
+def test_admin_status_form_rejects_invalid_choice():
+    form = LeadAdminForm(
+        data={
+            'name': 'Status Fictício',
+            'email': 'status@example.test',
+            'whatsapp': '+55 11 99999-9999',
+            'project_type': Lead.ProjectType.LANDING_PAGE,
+            'business_name': '',
+            'message': '',
+            'status': 'not_a_status',
+        }
+    )
+
+    assert not form.is_valid()
+    assert 'status' in form.errors
+
+
+def test_admin_form_rejects_excessive_acquisition_source():
+    form = LeadAdminForm(
+        data={
+            'name': 'Origem Fictícia',
+            'email': 'origem@example.test',
+            'whatsapp': '+55 11 99999-9999',
+            'project_type': Lead.ProjectType.LANDING_PAGE,
+            'business_name': '',
+            'message': '',
+            'acquisition_source': 'x' * 161,
+            'status': Lead.Status.NEW,
+        }
+    )
+
+    assert not form.is_valid()
+    assert 'acquisition_source' in form.errors
+
+
+def test_admin_form_labels_acquisition_source_in_portuguese():
+    assert LeadAdminForm().fields['acquisition_source'].label == 'Origem do contato'
+
+
+@pytest.mark.django_db
 def test_api_creates_lead_and_returns_safe_response():
     response = APIClient().post('/api/v1/leads/', payload(), format='json')
 
@@ -162,6 +246,9 @@ def test_api_creates_lead_and_returns_safe_response():
     assert response.data['request_id']
     assert 'email' not in response.data
     assert 'whatsapp' not in response.data
+    lead = Lead.objects.get()
+    assert lead.source == Lead.Source.WEBSITE
+    assert lead.acquisition_source == ''
     assert Lead.objects.count() == 1
 
 
@@ -211,8 +298,22 @@ def test_admin_registers_lead_with_search_filters_and_archive_action():
     model_admin = admin.site._registry[Lead]
 
     assert isinstance(model_admin, LeadAdmin)
+    assert model_admin.list_display == (
+        'name',
+        'email',
+        'whatsapp_display',
+        'project_type',
+        'status',
+        'created_at',
+    )
     assert model_admin.list_filter == ('status', 'project_type', 'created_at')
-    assert model_admin.search_fields == ('name', 'email', 'whatsapp', 'business_name')
+    assert model_admin.search_fields == (
+        'name',
+        'email',
+        'whatsapp',
+        'business_name',
+        'acquisition_source',
+    )
     assert model_admin.has_delete_permission(None) is False
     serializer = LeadSerializer(data=payload())
     assert serializer.is_valid(), serializer.errors
@@ -226,14 +327,84 @@ def test_admin_registers_lead_with_search_filters_and_archive_action():
     lead.refresh_from_db()
     assert lead.status == Lead.Status.ARCHIVED
     assert lead.updated_at > original_updated_at
-    assert set(model_admin.get_readonly_fields(None, lead)) >= {
+    assert set(model_admin.get_readonly_fields(None, lead)) == {
+        'id',
         'name',
-        'email',
-        'whatsapp',
-        'project_type',
         'business_name',
         'message',
+        'source',
+        'acquisition_source',
+        'privacy_policy_acknowledged',
+        'privacy_policy_version',
+        'created_at',
+        'updated_at',
     }
+    assert {'email', 'whatsapp', 'project_type', 'status'}.isdisjoint(
+        model_admin.get_readonly_fields(None, lead)
+    )
+    assert model_admin.form is LeadAdminForm
+    assert model_admin.whatsapp_display(lead) == '(11) 99999-9999'
+
+
+@pytest.mark.django_db
+def test_admin_edits_operational_fields_in_place_with_shared_normalization():
+    user = get_user_model().objects.create_superuser(
+        username='lead-change-admin',
+        email='change-admin@example.test',
+        password='Fictitious-Admin-Password-123!',
+    )
+    lead = Lead.objects.create(
+        name='Lead Histórico',
+        email='historico@example.com',
+        whatsapp='+5511999999999',
+        project_type=Lead.ProjectType.LANDING_PAGE,
+        business_name='Negócio histórico',
+        message='Mensagem integral fictícia',
+        source=Lead.Source.WEBSITE,
+        privacy_policy_acknowledged=True,
+        privacy_policy_version=settings.PRIVACY_POLICY_VERSION,
+    )
+    original_id = lead.id
+
+    client = Client()
+    client.force_login(user)
+
+    statuses = [
+        Lead.Status.IN_PROGRESS,
+        Lead.Status.DELIVERED,
+        Lead.Status.MAINTENANCE,
+        Lead.Status.ARCHIVED,
+    ]
+    for status in statuses:
+        Lead.objects.filter(pk=lead.pk).update(updated_at=timezone.now() - timedelta(days=1))
+        lead.refresh_from_db()
+        original_updated_at = lead.updated_at
+        response = client.post(
+            reverse('admin:leads_lead_change', args=[lead.pk]),
+            {
+                'email': '  EDITADO@EXEMPLO.COM ',
+                'whatsapp': '+55 11 95824-4081',
+                'project_type': Lead.ProjectType.CUSTOM_SOLUTION,
+                'status': status,
+                '_save': 'Salvar e continuar editando',
+            },
+        )
+
+        assert response.status_code == 302
+        lead.refresh_from_db()
+        assert lead.status == status
+        assert lead.updated_at > original_updated_at
+
+    assert lead.id == original_id
+    assert Lead.objects.count() == 1
+    assert lead.email == 'editado@exemplo.com'
+    assert lead.whatsapp == '+5511958244081'
+    assert lead.project_type == Lead.ProjectType.CUSTOM_SOLUTION
+    assert lead.status == Lead.Status.ARCHIVED
+    assert lead.name == 'Lead Histórico'
+    assert lead.business_name == 'Negócio histórico'
+    assert lead.message == 'Mensagem integral fictícia'
+    assert [model.__name__ for model in Lead._meta.app_config.get_models()] == ['Lead']
 
 
 @pytest.mark.django_db
@@ -244,8 +415,11 @@ def test_admin_creates_manual_lead_with_internal_values_and_shared_normalization
         password='Fictitious-Admin-Password-123!',
         is_staff=True,
     )
-    permission = Permission.objects.get(codename='add_lead', content_type__app_label='leads')
-    user.user_permissions.add(permission)
+    permissions = Permission.objects.filter(
+        codename__in=('add_lead', 'view_lead'),
+        content_type__app_label='leads',
+    )
+    user.user_permissions.add(*permissions)
     client = Client()
     client.force_login(user)
 
@@ -258,6 +432,7 @@ def test_admin_creates_manual_lead_with_internal_values_and_shared_normalization
             'project_type': 'landing_page',
             'business_name': '  Negócio manual  ',
             'message': '  Registro interno  ',
+            'acquisition_source': '  Indicação da Carol  ',
         },
     )
 
@@ -269,6 +444,37 @@ def test_admin_creates_manual_lead_with_internal_values_and_shared_normalization
     assert lead.privacy_policy_version == ''
     assert lead.whatsapp == '+5511999999999'
     assert lead.business_name == 'Negócio manual'
+    assert lead.acquisition_source == 'Indicação da Carol'
+
+    search_response = client.get(
+        reverse('admin:leads_lead_changelist'),
+        {'q': 'Indicação da Carol'},
+    )
+    assert search_response.status_code == 200
+    assert 'Manual Fictício' in search_response.content.decode()
+
+    response_without_acquisition = client.post(
+        reverse('admin:leads_lead_add'),
+        {
+            'name': '  Manual Sem Origem  ',
+            'email': 'manual-sem-origem@example.test',
+            'whatsapp': '11999999999',
+            'project_type': 'landing_page',
+            'business_name': '',
+            'message': '',
+        },
+    )
+    assert response_without_acquisition.status_code == 302
+    lead_without_acquisition = Lead.objects.get(email='manual-sem-origem@example.test')
+    assert lead_without_acquisition.acquisition_source == ''
+    assert lead_without_acquisition.source == Lead.Source.MANUAL
+
+    detail_response = client.get(
+        reverse('admin:leads_lead_change', args=[lead.pk]),
+    )
+    assert detail_response.status_code == 200
+    assert 'Indicação da Carol' in detail_response.content.decode()
+    assert 'name="acquisition_source"' not in detail_response.content.decode()
 
 
 @pytest.mark.django_db

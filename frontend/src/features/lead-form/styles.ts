@@ -57,12 +57,12 @@ const controlStyles = `
   color: ${colors.white};
   font: 500 1rem/1.4 ${fonts.primary};
   outline: none;
-  transition: border-color 160ms ease, background-color 160ms ease, box-shadow 160ms ease;
+  transition: border-color 160ms ease, background-color 160ms ease;
 
-  &:focus-visible {
-    border-color: ${colors.blue};
-    background: rgba(245, 242, 236, 0.1);
-    box-shadow: 0 0 0 3px rgba(145, 168, 255, 0.25);
+  &&:focus {
+    outline: none;
+    border-color: ${colors.blue} !important;
+    background: rgba(245, 242, 236, 0.1) !important;
   }
 
   &[aria-invalid='true'] {
@@ -87,6 +87,66 @@ export const Select = styled.select`
 
   option {
     color: ${colors.ink};
+  }
+`;
+
+export const Combobox = styled.div`
+  position: relative;
+`;
+
+export const ComboboxButton = styled.button`
+  ${controlStyles}
+  position: relative;
+  min-height: 3.1rem;
+  padding: 0.75rem 2.75rem 0.75rem 0.85rem;
+  text-align: left;
+  cursor: pointer;
+
+  &::after {
+    position: absolute;
+    top: 50%;
+    right: 1rem;
+    width: 0.55rem;
+    height: 0.55rem;
+    border-right: 2px solid currentColor;
+    border-bottom: 2px solid currentColor;
+    content: '';
+    transform: translateY(-65%) rotate(45deg);
+  }
+
+  &[aria-expanded='true']::after {
+    transform: translateY(-25%) rotate(225deg);
+  }
+`;
+
+export const ComboboxList = styled.div`
+  position: absolute;
+  z-index: 10;
+  top: calc(100% + 0.35rem);
+  right: 0;
+  left: 0;
+  max-height: min(16rem, 35vh);
+  overflow-y: auto;
+  padding: 0.35rem;
+  border: 1px solid rgba(145, 168, 255, 0.55);
+  border-radius: ${layout.radii.control};
+  background: #172136;
+  box-shadow: 0 0.8rem 1.75rem rgba(3, 8, 19, 0.35);
+`;
+
+export const ComboboxOption = styled.div`
+  padding: 0.75rem 0.7rem;
+  border-radius: calc(${layout.radii.control} - 0.15rem);
+  color: ${colors.white};
+  cursor: pointer;
+  font: 500 1rem/1.4 ${fonts.primary};
+
+  &:hover,
+  &:focus-visible,
+  &[data-highlighted='true'],
+  &[aria-selected='true'] {
+    outline: none;
+    background: rgba(145, 168, 255, 0.18);
   }
 `;
 
@@ -158,6 +218,37 @@ export const Actions = styled.div`
   @media (max-width: ${breakpoints.mobileMax}) {
     align-items: stretch;
     flex-direction: column;
+  }
+`;
+
+export const DirectContact = styled.div`
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 0.4rem;
+  margin-top: 1.25rem;
+  color: rgba(245, 242, 236, 0.68);
+  font-family: ${fonts.primary};
+  font-size: 0.92rem;
+  line-height: 1.45;
+  text-align: center;
+
+  @media (max-width: ${breakpoints.mobileMax}) {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.15rem;
+  }
+`;
+
+export const WhatsAppLink = styled.a`
+  color: ${colors.blue};
+  font-weight: 650;
+  text-decoration-thickness: 0.08em;
+  text-underline-offset: 0.18em;
+
+  &:focus-visible {
+    outline: 2px solid ${colors.blue};
+    outline-offset: 3px;
   }
 `;
 

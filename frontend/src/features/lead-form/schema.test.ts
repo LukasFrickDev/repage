@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   leadFormSchema,
+  formatPhoneInput,
   normalizeWhatsApp,
   projectTypeOptions,
   toLeadCreatePayload,
@@ -51,6 +52,15 @@ describe('lead form schema', () => {
   it('rejects invalid WhatsApp values', () => {
     expect(normalizeWhatsApp('123')).toBeNull();
     expect(leadFormSchema.safeParse({ ...validValues, whatsapp: '123' }).success).toBe(false);
+  });
+
+  it.each([
+    ['1134567890', '(11) 3456-7890'],
+    ['11958244081', '(11) 95824-4081'],
+    ['+55 11 95824-4081', '(11) 95824-4081'],
+    ['11abc95824-4081', '(11) 95824-4081'],
+  ])('formats phone input %s as %s', (value, expected) => {
+    expect(formatPhoneInput(value)).toBe(expected);
   });
 
   it('builds a public payload with website as the fixed source', () => {

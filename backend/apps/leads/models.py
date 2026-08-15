@@ -13,6 +13,9 @@ class Lead(models.Model):
 
     class Status(models.TextChoices):
         NEW = 'new', 'Novo'
+        IN_PROGRESS = 'in_progress', 'Em andamento'
+        DELIVERED = 'delivered', 'Entregue'
+        MAINTENANCE = 'maintenance', 'Manutenção'
         ARCHIVED = 'archived', 'Arquivado'
 
     class Source(models.TextChoices):
@@ -27,6 +30,7 @@ class Lead(models.Model):
     business_name = models.CharField(max_length=160, blank=True, default='')
     message = models.TextField(max_length=4000, blank=True, default='')
     source = models.CharField(max_length=32, choices=Source.choices)
+    acquisition_source = models.CharField(max_length=160, blank=True, default='')
     status = models.CharField(max_length=16, choices=Status.choices, default=Status.NEW)
     privacy_policy_acknowledged = models.BooleanField(default=False)
     privacy_policy_version = models.CharField(max_length=64, blank=True, default='')

@@ -347,6 +347,7 @@ Campos semânticos aprovados:
 - `business_name`;
 - `message`;
 - `source`;
+- `acquisition_source`;
 - `status`;
 - `privacy_policy_acknowledged`;
 - `privacy_policy_version`;
@@ -361,13 +362,23 @@ Tipos de projeto:
 - ainda não sabe.
 Status da V1:
 - `new`;
+- `in_progress`;
+- `delivered`;
+- `maintenance`;
 - `archived`.
-Não antecipar pipeline de CRM. `archived` não significa exclusão.
+O status representa somente o valor operacional atual. Não há transições
+rígidas, histórico, eventos ou pipeline de CRM nesta V1. `archived` não
+significa exclusão.
 
 `Lead.source` possui somente `website` e `manual`: a API pública cria apenas Leads
 com `website`, enquanto `manual` é reservado à criação administrativa autenticada.
 Ciência e versão da Política de Privacidade pertencem ao fluxo público e não são
 falsificadas em Leads manuais.
+`source` representa a entrada técnica no sistema. `acquisition_source` é um
+texto livre opcional, limitado a 160 caracteres, para registrar a origem
+comercial de Leads manuais; recebe apenas trim, não possui enum ou tabela
+separada, e fica somente leitura após a criação. Leads públicos mantêm esse
+campo vazio e a API não o aceita.
 ## 25. Modelo EmailDelivery
 Relaciona-se ao Lead e representa:
 - `internal_notification`;
@@ -533,7 +544,11 @@ Proteção:
 - proteção de login;
 - logs de ações;
 - MFA ou restrição adicional quando viável.
-Dados do Lead são registro histórico; evitar edição livre.
+No Django Admin, `email`, `whatsapp`, `project_type` e `status` podem ser
+corrigidos in-place no mesmo Lead, com normalização compartilhada e atualização
+normal de `updated_at`. Os demais dados originais permanecem somente leitura,
+incluindo a mensagem, que continua disponível no detalhe. A V1 não mantém
+histórico de alterações administrativas, audit log customizado ou cópia paralela.
 Leads manuais usam `source=manual`, status inicial `new` e não registram ciência ou versão de Política de Privacidade.
 ## 39. Privacidade e consentimento
 Categorias:
