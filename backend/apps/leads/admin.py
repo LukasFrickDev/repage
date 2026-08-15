@@ -2,10 +2,17 @@ import re
 
 from django import forms
 from django.contrib import admin
+from django.contrib import messages
+from django.core.exceptions import PermissionDenied
+from django.http import HttpResponseRedirect
+from django.shortcuts import get_object_or_404
+from django.template.response import TemplateResponse
+from django.urls import path, reverse
 from django.utils.html import format_html, format_html_join
 from django.utils import timezone
 
-from .models import Lead
+from .email_service import process_manual_delivery
+from .models import EmailDelivery, Lead
 from .serializers import (
     normalize_business_name,
     normalize_email,
@@ -62,6 +69,43 @@ STATUS_CLASSES = {
     Lead.Status.MAINTENANCE: 'maintenance',
     Lead.Status.ARCHIVED: 'archived',
 }
+DELIVERY_READONLY_FIELDS = (
+    'lead',
+    'kind',
+    'status',
+    'attempts',
+    'next_attempt_at',
+    'last_attempt_at',
+    'last_error_code',
+    'sent_at',
+    'created_at',
+    'updated_at',
+)
+
+
+class EmailDeliveryInline(admin.TabularInline):
+    model = EmailDelivery
+    fields = (
+        'kind',
+        'status',
+        'attempts',
+        'next_attempt_at',
+        'last_attempt_at',
+        'last_error_code',
+        'sent_at',
+    )
+    readonly_fields = fields
+    extra = 0
+    max_num = 0
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
 
 
 class LeadAdminForm(forms.ModelForm):
@@ -131,6 +175,7 @@ class LeadAdmin(admin.ModelAdmin):
     list_filter = ('status', 'project_type', 'source', 'created_at')
     search_fields = ('name', 'email', 'whatsapp', 'business_name', 'acquisition_source')
     actions = (archive_leads,)
+    inlines = (EmailDeliveryInline,)
 
     def get_fieldsets(self, request, obj=None):
         if obj is None:
@@ -234,3 +279,89 @@ class LeadAdmin(admin.ModelAdmin):
 
     def has_delete_permission(self, request, obj=None):
         return False
+
+
+@admin.register(EmailDelivery)
+class EmailDeliveryAdmin(admin.ModelAdmin):
+    list_display = (
+        'lead_id',
+        'kind',
+        'status',
+        'attempts',
+        'next_attempt_at',
+        'last_attempt_at',
+        'last_error_code',
+        'sent_at',
+        'created_at',
+        'updated_at',
+        'resend_link',
+    )
+    list_filter = ('kind', 'status')
+    search_fields = ('lead__id',)
+    readonly_fields = DELIVERY_READONLY_FIELDS
+    list_select_related = ('lead',)
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    def has_resend_permission(self, request):
+        return request.user.has_perm('leads.change_emaildelivery')
+
+    def get_urls(self):
+        custom_urls = [
+            path(
+                '<path:object_id>/resend/',
+                self.admin_site.admin_view(self.resend_view),
+                name='leads_emaildelivery_resend',
+            ),
+        ]
+        return custom_urls + super().get_urls()
+
+    @admin.display(description='Reenvio')
+    def resend_link(self, obj):
+        if obj.status != EmailDelivery.Status.FAILED:
+            return '—'
+        url = reverse('admin:leads_emaildelivery_resend', args=[obj.pk])
+        return format_html('<a href="{}">Reenviar</a>', url)
+
+    def resend_view(self, request, object_id):
+        if not self.has_resend_permission(request):
+            raise PermissionDenied
+        delivery = get_object_or_404(EmailDelivery.objects.select_related('lead'), pk=object_id)
+        change_url = reverse('admin:leads_emaildelivery_change', args=[delivery.pk])
+        if delivery.status != EmailDelivery.Status.FAILED:
+            self.message_user(
+                request,
+                'Somente deliveries com falha podem ser reenviadas.',
+                level=messages.WARNING,
+            )
+            return HttpResponseRedirect(change_url)
+        if request.method == 'POST':
+            result = process_manual_delivery(delivery.pk)
+            if result is None:
+                self.message_user(
+                    request,
+                    'A delivery deixou de estar disponível para reenvio.',
+                    level=messages.WARNING,
+                )
+            elif result.status == EmailDelivery.Status.SENT:
+                self.log_change(request, result, 'Tentativa manual de envio concluída com sucesso.')
+                self.message_user(request, 'Delivery reenviada com sucesso.', level=messages.SUCCESS)
+            else:
+                self.log_change(request, result, 'Tentativa manual de envio falhou.')
+                self.message_user(request, 'O reenvio falhou; a delivery permanece com falha.', level=messages.ERROR)
+            return HttpResponseRedirect(change_url)
+        context = {
+            **self.admin_site.each_context(request),
+            'title': 'Confirmar reenvio de delivery',
+            'delivery': delivery,
+            'opts': self.model._meta,
+            'change_url': change_url,
+        }
+        return TemplateResponse(request, 'admin/leads/emaildelivery_resend_confirmation.html', context)

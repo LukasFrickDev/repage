@@ -5,6 +5,7 @@ from unittest.mock import patch
 
 import pytest
 from django.contrib import admin
+from django.contrib.admin.models import LogEntry
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Permission
 from django.conf import settings
@@ -18,7 +19,7 @@ from django.utils import timezone
 from django.urls import reverse
 from rest_framework.test import APIClient
 
-from apps.leads.admin import LeadAdmin, LeadAdminForm
+from apps.leads.admin import EmailDeliveryAdmin, EmailDeliveryInline, LeadAdmin, LeadAdminForm
 from apps.leads.email_service import build_message, claim_delivery, process_delivery
 from apps.leads.models import EmailDelivery, IdempotencyRecord, Lead
 from apps.leads.serializers import LeadSerializer
@@ -335,6 +336,11 @@ def test_admin_form_labels_acquisition_source_in_portuguese():
 
 
 @pytest.mark.django_db
+@override_settings(
+    EMAIL_BACKEND='django.core.mail.backends.locmem.EmailBackend',
+    EMAIL_FROM_ADDRESS='from@example.com',
+    EMAIL_INTERNAL_RECIPIENT='internal@example.com',
+)
 def test_api_creates_lead_and_returns_safe_response():
     response = APIClient().post('/api/v1/leads/', payload(), format='json', **api_headers())
 
@@ -349,6 +355,7 @@ def test_api_creates_lead_and_returns_safe_response():
     assert lead.acquisition_source == ''
     assert Lead.objects.count() == 1
     assert EmailDelivery.objects.filter(lead=lead).count() == 2
+    assert set(EmailDelivery.objects.values_list('status', flat=True)) == {EmailDelivery.Status.SENT}
 
 
 def test_api_requires_a_valid_idempotency_key():
@@ -854,6 +861,10 @@ def test_admin_edits_operational_fields_in_place_with_shared_normalization():
                 'whatsapp': '+55 11 95824-4081',
                 'project_type': Lead.ProjectType.CUSTOM_SOLUTION,
                 'status': status,
+                'email_deliveries-TOTAL_FORMS': '0',
+                'email_deliveries-INITIAL_FORMS': '0',
+                'email_deliveries-MIN_NUM_FORMS': '0',
+                'email_deliveries-MAX_NUM_FORMS': '0',
                 '_save': 'Salvar e continuar editando',
             },
         )
@@ -874,9 +885,169 @@ def test_admin_edits_operational_fields_in_place_with_shared_normalization():
     assert lead.message == 'Mensagem integral fictícia'
 
 
-def test_phase_one_models_are_not_registered_in_admin():
-    assert EmailDelivery not in admin.site._registry
+def test_email_delivery_is_registered_but_idempotency_record_is_not():
+    assert isinstance(admin.site._registry[EmailDelivery], EmailDeliveryAdmin)
     assert IdempotencyRecord not in admin.site._registry
+
+
+def test_email_delivery_admin_is_readonly_and_lead_inline_is_readonly():
+    model_admin = admin.site._registry[EmailDelivery]
+    inline = LeadAdmin.inlines[0]
+
+    assert model_admin.list_filter == ('kind', 'status')
+    assert model_admin.readonly_fields == (
+        'lead', 'kind', 'status', 'attempts', 'next_attempt_at',
+        'last_attempt_at', 'last_error_code', 'sent_at', 'created_at', 'updated_at',
+    )
+    assert model_admin.has_add_permission(None) is False
+    assert model_admin.has_change_permission(None) is False
+    assert model_admin.has_delete_permission(None) is False
+    assert inline is EmailDeliveryInline
+    assert inline.extra == 0
+    assert inline.max_num == 0
+    inline_instance = inline(Lead, admin.site)
+    assert inline_instance.has_add_permission(None) is False
+    assert inline_instance.has_change_permission(None) is False
+    assert inline_instance.has_delete_permission(None) is False
+
+
+def admin_resend_user():
+    return get_user_model().objects.create_superuser(
+        username='delivery-admin',
+        email='delivery-admin@example.test',
+        password='Fictitious-Admin-Password-123!',
+    )
+
+
+@pytest.mark.django_db
+@override_settings(EMAIL_FROM_ADDRESS='from@example.com', EMAIL_INTERNAL_RECIPIENT='internal@example.com')
+def test_admin_resend_requires_confirmation_and_reuses_failed_delivery():
+    lead = email_lead()
+    delivery = EmailDelivery.objects.create(
+        lead=lead,
+        kind=EmailDelivery.Kind.VISITOR_CONFIRMATION,
+        status=EmailDelivery.Status.FAILED,
+        attempts=5,
+        next_attempt_at=None,
+        last_error_code='timeout',
+    )
+    client = Client()
+    client.force_login(admin_resend_user())
+    resend_url = reverse('admin:leads_emaildelivery_resend', args=[delivery.pk])
+
+    confirmation = client.get(resend_url)
+    assert confirmation.status_code == 200
+    assert 'Confirmar reenvio' in confirmation.content.decode()
+    delivery.refresh_from_db()
+    assert delivery.attempts == 5
+
+    response = client.post(resend_url)
+    assert response.status_code == 302
+    delivery.refresh_from_db()
+    assert delivery.status == EmailDelivery.Status.SENT
+    assert delivery.attempts == 6
+    assert delivery.next_attempt_at is None
+    assert IdempotencyRecord.objects.count() == 0
+    assert LogEntry.objects.filter(object_id=str(delivery.pk)).exists()
+
+
+@pytest.mark.django_db
+@override_settings(EMAIL_FROM_ADDRESS='from@example.com', EMAIL_INTERNAL_RECIPIENT='internal@example.com')
+def test_admin_resend_terminal_failure_stays_failed_without_automatic_retry():
+    lead = email_lead()
+    delivery = EmailDelivery.objects.create(
+        lead=lead,
+        kind=EmailDelivery.Kind.INTERNAL_NOTIFICATION,
+        status=EmailDelivery.Status.FAILED,
+        attempts=5,
+        next_attempt_at=None,
+        last_error_code='timeout',
+    )
+    client = Client()
+    client.force_login(admin_resend_user())
+    resend_url = reverse('admin:leads_emaildelivery_resend', args=[delivery.pk])
+
+    with patch('django.core.mail.EmailMessage.send', side_effect=TimeoutError('secret')):
+        response = client.post(resend_url)
+
+    assert response.status_code == 302
+    delivery.refresh_from_db()
+    assert delivery.status == EmailDelivery.Status.FAILED
+    assert delivery.attempts == 6
+    assert delivery.last_error_code == 'timeout'
+    assert delivery.next_attempt_at is None
+
+
+@pytest.mark.django_db
+def test_admin_resend_rejects_pending_and_sent_deliveries():
+    lead = email_lead()
+    pending = EmailDelivery.objects.create(
+        lead=lead,
+        kind=EmailDelivery.Kind.INTERNAL_NOTIFICATION,
+    )
+    sent = EmailDelivery.objects.create(
+        lead=lead,
+        kind=EmailDelivery.Kind.VISITOR_CONFIRMATION,
+        status=EmailDelivery.Status.SENT,
+        sent_at=timezone.now(),
+        next_attempt_at=None,
+    )
+    client = Client()
+    client.force_login(admin_resend_user())
+
+    for delivery in (pending, sent):
+        response = client.get(
+            reverse('admin:leads_emaildelivery_resend', args=[delivery.pk]),
+        )
+        assert response.status_code == 302
+        delivery.refresh_from_db()
+        assert delivery.attempts == 0
+
+
+@pytest.mark.django_db
+def test_admin_resend_requires_change_permission_and_csrf():
+    lead = email_lead()
+    delivery = EmailDelivery.objects.create(
+        lead=lead,
+        kind=EmailDelivery.Kind.INTERNAL_NOTIFICATION,
+        status=EmailDelivery.Status.FAILED,
+        next_attempt_at=None,
+    )
+    user = get_user_model().objects.create_user(
+        username='delivery-viewer',
+        password='Fictitious-Viewer-Password-123!',
+        is_staff=True,
+    )
+    user.user_permissions.add(
+        Permission.objects.get(codename='view_emaildelivery', content_type__app_label='leads'),
+    )
+    client = Client(enforce_csrf_checks=True)
+    client.force_login(user)
+    resend_url = reverse('admin:leads_emaildelivery_resend', args=[delivery.pk])
+    assert client.get(resend_url).status_code == 403
+
+    client.force_login(admin_resend_user())
+    assert client.get(resend_url).status_code == 200
+    assert client.post(resend_url).status_code == 403
+
+
+@pytest.mark.django_db
+def test_email_delivery_admin_list_requires_authentication_and_supports_filters():
+    lead = email_lead()
+    EmailDelivery.objects.create(
+        lead=lead,
+        kind=EmailDelivery.Kind.INTERNAL_NOTIFICATION,
+        status=EmailDelivery.Status.FAILED,
+    )
+    client = Client()
+    changelist = reverse('admin:leads_emaildelivery_changelist')
+
+    assert client.get(changelist).status_code == 302
+    client.force_login(admin_resend_user())
+    response = client.get(changelist, {'status': EmailDelivery.Status.FAILED})
+
+    assert response.status_code == 200
+    assert 'Reenviar' in response.content.decode()
 
 
 @pytest.mark.django_db
