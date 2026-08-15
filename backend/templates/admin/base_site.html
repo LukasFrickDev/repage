@@ -1,0 +1,23 @@
+{% extends "admin/base.html" %}
+{% load i18n static %}
+
+{% block title %}{% if subtitle %}{{ subtitle }} | {% endif %}{{ title }} | {{ site_title|default:_('Repage Admin') }}{% endblock %}
+
+{% block extrastyle %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'repage-admin/admin.css' %}">
+  <link rel="icon" href="{% static 'repage-admin/brand/favicon.svg' %}" type="image/svg+xml">
+{% endblock %}
+
+{% block branding %}
+  <div id="site-name" class="repage-brand">
+    <a href="{% url 'admin:index' %}" aria-label="Repage — início da administração">
+      <img src="{% static 'repage-admin/brand/logo.svg' %}" alt="Repage" class="repage-brand__logo">
+      <span class="repage-brand__context">Administração</span>
+    </a>
+  </div>
+{% endblock %}
+
+{% block nav-global %}
+  <div class="repage-admin-label" aria-label="Área administrativa Repage">Área interna</div>
+{% endblock %}

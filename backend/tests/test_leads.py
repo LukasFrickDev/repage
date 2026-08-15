@@ -2,7 +2,6 @@ import uuid
 from datetime import timedelta
 
 import pytest
-from django.contrib import admin
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Permission
 from django.conf import settings
@@ -12,6 +11,7 @@ from django.urls import reverse
 from rest_framework.test import APIClient
 
 from apps.leads.admin import LeadAdmin, LeadAdminForm
+from apps.core.admin import repage_admin_site
 from apps.leads.models import Lead
 from apps.leads.serializers import LeadSerializer
 
@@ -295,7 +295,7 @@ def test_api_does_not_expose_public_read_endpoints():
 
 @pytest.mark.django_db
 def test_admin_registers_lead_with_search_filters_and_archive_action():
-    model_admin = admin.site._registry[Lead]
+    model_admin = repage_admin_site._registry[Lead]
 
     assert isinstance(model_admin, LeadAdmin)
     assert model_admin.list_display == (
