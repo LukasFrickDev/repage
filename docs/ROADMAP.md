@@ -22,7 +22,8 @@ A V1 deve servir como referência comercial da marca, apoiar prospecção e cond
 * A entrega 4 está concluída: `/portfolio` e os seis cases usam conteúdo e mídia reais, galerias, viewer, vídeos integrados, publicação validada e navegação compartilhada.
 * A entrega 5 está concluída: backend Django/DRF, PostgreSQL, API pública de Leads, Django Admin, formulário persistido e migrations versionadas foram validados.
 * A entrega 6 está concluída: o Django Admin existente recebeu a experiência administrativa Repage, com Leads como superfície operacional principal.
-* E-mails, idempotência e proteção continuam pendentes para a Entrega 7.
+* A entrega 7 está concluída: e-mails, idempotência, proteção, retries e recuperação administrativa foram implementados, validados e documentados.
+* A próxima entrega é a 8 — Consentimento, Analytics e páginas legais; sua implementação não faz parte deste fechamento.
 * Consentimento, Analytics, SEO, prerender, CI/CD, deploy e lançamento continuam pendentes nas entregas seguintes.
 
 ## Princípios de execução
@@ -149,6 +150,8 @@ A V1 deve servir como referência comercial da marca, apoiar prospecção e cond
 
 ## Entrega 7 — E-mails, idempotência e proteção
 
+**Status:** concluída.
+
 **Objetivo:** tornar o fluxo confiável diante de falhas, repetição e abuso básico.
 **Resultado esperado:** Lead permanece salvo apesar do e-mail, retries não duplicam contatos e abusos são limitados sem CAPTCHA visível inicial.
 **Escopo principal:**
@@ -160,7 +163,7 @@ A V1 deve servir como referência comercial da marca, apoiar prospecção e cond
   **Dependências:** Entrega 5, SMTP ou ambiente seguro, textos aprovados, endereços profissionais e mecanismo de retentativa.
   **Validações:** persistência antes do SMTP, idempotência, conflito, novo contato legítimo, proteção, retentativa, reenvio e logs.
   **Critério de conclusão:** falhas, repetições e abusos possuem comportamento previsível, testado e recuperável.
-  **Spec:** obrigatória ao iniciar.
+  **Spec:** [`0007-email-idempotency-and-protection.md`](specs/0007-email-idempotency-and-protection.md) — `implemented`.
 
 ## Entrega 8 — Consentimento, Analytics e páginas legais
 

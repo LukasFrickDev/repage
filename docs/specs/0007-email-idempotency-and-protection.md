@@ -1,6 +1,6 @@
 # 0007 — E-mails, idempotência e proteção
 
-- **Status:** approved
+- **Status:** implemented
 - **Responsável:** Lukas Frick
 - **Data:** 15 de agosto de 2026
 - **Branch-base:** `main`
@@ -933,56 +933,56 @@ Não afirmar que esses itens foram validados durante 0007.
 
 ## 54. Critérios de aceite
 
-- [ ] `main` pós-0006 usada como baseline.
-- [ ] Lead/domain 0005 preservado.
-- [ ] Admin 0006 preservado.
-- [ ] `EmailDelivery` implementado.
-- [ ] `IdempotencyRecord` implementado.
-- [ ] Migrations versionadas.
-- [ ] Duas deliveries para Lead público.
-- [ ] Nenhuma delivery para Lead manual.
-- [ ] Idempotency-Key obrigatório.
-- [ ] Frontend gera UUID por tentativa.
-- [ ] Mesma chave/payload não duplica Lead.
-- [ ] Replay não reenvia e-mail.
-- [ ] Mesma chave/payload diferente retorna 409.
-- [ ] Constraint protege concorrência da chave.
-- [ ] Fingerprint não armazena PII em claro.
-- [ ] Duplicate window funciona.
-- [ ] Novo contato legítimo continua possível.
-- [ ] Honeypot acessível/seguro.
-- [ ] Min time configurável.
-- [ ] Throttling IP burst/daily funciona.
-- [ ] Throttling e-mail/telefone funciona.
-- [ ] `429` recuperável.
-- [ ] DatabaseCache compartilhado usado para produção.
-- [ ] IP/contatos não aparecem em cache keys em claro.
-- [ ] Readiness verifica cache.
-- [ ] SMTP não derruba readiness.
-- [ ] Lead + deliveries + idempotency são atômicos.
-- [ ] SMTP ocorre depois do commit.
-- [ ] Internal notification implementada.
-- [ ] Visitor confirmation implementada.
-- [ ] Emails são text/plain.
-- [ ] Falha SMTP preserva Lead e retorna 201.
-- [ ] Erros/logs sanitizados.
-- [ ] Retry imediato/15m/1h/6h/24h implementado.
-- [ ] Máximo automático 5.
-- [ ] Management command funciona.
-- [ ] Claim/lease evita processamento paralelo normal.
-- [ ] Cron de produção não foi inventado.
-- [ ] EmailDelivery aparece no Admin.
-- [ ] Lead mostra deliveries readonly.
-- [ ] Reenvio manual explícito/protegido.
-- [ ] IdempotencyRecord não polui Admin.
-- [ ] Nenhum provedor hardcoded.
-- [ ] Nenhum Redis/Celery/fila/CAPTCHA.
-- [ ] Entrega 8 não antecipada.
-- [ ] Testes backend/frontend/E2E aprovados.
-- [ ] Smoke real PostgreSQL/cache aprovado.
-- [ ] `git diff --check` aprovado.
-- [ ] Documentação reconciliada.
-- [ ] Spec só vira `implemented` após todos os obrigatórios.
+- [x] `main` pós-0006 usada como baseline.
+- [x] Lead/domain 0005 preservado.
+- [x] Admin 0006 preservado.
+- [x] `EmailDelivery` implementado.
+- [x] `IdempotencyRecord` implementado.
+- [x] Migrations versionadas.
+- [x] Duas deliveries para Lead público.
+- [x] Nenhuma delivery para Lead manual.
+- [x] Idempotency-Key obrigatório.
+- [x] Frontend gera UUID por tentativa.
+- [x] Mesma chave/payload não duplica Lead.
+- [x] Replay não reenvia e-mail.
+- [x] Mesma chave/payload diferente retorna 409.
+- [x] Constraint protege concorrência da chave.
+- [x] Fingerprint não armazena PII em claro.
+- [x] Duplicate window funciona.
+- [x] Novo contato legítimo continua possível.
+- [x] Honeypot acessível/seguro.
+- [x] Min time configurável.
+- [x] Throttling IP burst/daily funciona.
+- [x] Throttling e-mail/telefone funciona.
+- [x] `429` recuperável.
+- [x] DatabaseCache compartilhado usado para produção.
+- [x] IP/contatos não aparecem em cache keys em claro.
+- [x] Readiness verifica cache.
+- [x] SMTP não derruba readiness.
+- [x] Lead + deliveries + idempotency são atômicos.
+- [x] SMTP ocorre depois do commit.
+- [x] Internal notification implementada.
+- [x] Visitor confirmation implementada.
+- [x] Emails são text/plain.
+- [x] Falha SMTP preserva Lead e retorna 201.
+- [x] Erros/logs sanitizados.
+- [x] Retry imediato/15m/1h/6h/24h implementado.
+- [x] Máximo automático 5.
+- [x] Management command funciona.
+- [x] Claim/lease evita processamento paralelo normal.
+- [x] Cron de produção não foi inventado.
+- [x] EmailDelivery aparece no Admin.
+- [x] Lead mostra deliveries readonly.
+- [x] Reenvio manual explícito/protegido.
+- [x] IdempotencyRecord não polui Admin.
+- [x] Nenhum provedor hardcoded.
+- [x] Nenhum Redis/Celery/fila/CAPTCHA.
+- [x] Entrega 8 não antecipada.
+- [x] Testes backend/frontend/E2E aprovados.
+- [x] Smoke real PostgreSQL/cache aprovado.
+- [x] `git diff --check` aprovado.
+- [x] Documentação reconciliada.
+- [x] Spec só vira `implemented` após todos os obrigatórios.
 
 ## 55. Documentação no fechamento
 

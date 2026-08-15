@@ -102,9 +102,27 @@ test.describe('lead form integration states', () => {
     await fillRequiredFields(page);
 
     const honeypot = page.locator('input[name="company_website"]');
-    await expect(honeypot).toBeHidden();
+    await expect(honeypot).toHaveCount(1);
     await expect(honeypot).toHaveAttribute('tabindex', '-1');
     await expect(honeypot).toHaveAttribute('aria-hidden', 'true');
+    await expect(honeypot).toHaveAttribute('autocomplete', 'off');
+    const honeypotStyles = await honeypot.evaluate((element) => {
+      const styles = getComputedStyle(element);
+      return {
+        position: styles.position,
+        width: styles.width,
+        height: styles.height,
+        overflow: styles.overflow,
+        clip: styles.clip,
+        tabIndex: (element as HTMLInputElement).tabIndex,
+      };
+    });
+    expect(honeypotStyles.position).toBe('absolute');
+    expect(honeypotStyles.width).toBe('1px');
+    expect(honeypotStyles.height).toBe('1px');
+    expect(['hidden', 'clip']).toContain(honeypotStyles.overflow);
+    expect(honeypotStyles.clip).toBe('rect(0px, 0px, 0px, 0px)');
+    expect(honeypotStyles.tabIndex).toBe(-1);
 
     await page.getByRole('button', { name: 'Solicitar orçamento' }).click();
     await expect(page.getByRole('alert')).toContainText('Tente novamente mais tarde.');

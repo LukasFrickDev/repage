@@ -395,6 +395,9 @@ Registra:
 - último erro sanitizado;
 - timestamps;
 - data de envio.
+É criado somente para Leads públicos. A criação manual de Lead não cria
+delivery nem dispara e-mail. `next_attempt_at` pode ser nulo em deliveries
+enviadas ou em falha terminal.
 ## 26. Modelo IdempotencyRecord
 Registra:
 - chave;
@@ -404,6 +407,8 @@ Registra:
 - criação;
 - expiração.
 Retenção inicial curta, configurável, com referência aproximada de 24 horas.
+O payload persistido é a resposta pública sem `request_id` e sem PII; replay
+reutiliza o registro, mas recebe o `request_id` da requisição atual.
 ## 27. API pública
 Base:
 ```text
@@ -496,8 +501,8 @@ Não usar CAPTCHA visível no início.
 Cloudflare Turnstile é opção futura apenas diante de abuso real, com avaliação de privacidade, acessibilidade, consentimento e disponibilidade.
 ## 35. E-mail
 Notificação interna:
-- remetente `notificacoes@repage.com.br`;
-- destinatário `contato@repage.com.br`;
+- remetente configurado em `EMAIL_FROM_ADDRESS`;
+- destinatário configurado em `EMAIL_INTERNAL_RECIPIENT`;
 - `Reply-To` com o e-mail validado.
 Confirmação ao visitante:
 - confirma recebimento;
@@ -523,6 +528,9 @@ Política inicial de referência:
 5. aproximadamente 24 horas.
 Sem Celery e Redis. Execução por cron ou mecanismo simples validado.
 Reenvio manual no Admin deve ser explícito, protegido, auditável e evitar duplicidade acidental.
+O retry é executável pelo management command `process_email_retries`; a
+configuração de scheduler/cron real permanece pendente da Entrega 10. O Admin
+reutiliza a mesma delivery e permite reenvio manual somente para falhas.
 ## 38. Django Admin
 Admin provisório da V1.
 Recursos:
@@ -663,6 +671,10 @@ Categorias:
 - Analytics público;
 - deploy.
 Manter `.env.example` sem valores sensíveis. Não reutilizar segredos entre ambientes.
+Os endereços operacionais são sempre lidos de `EMAIL_FROM_ADDRESS` e
+`EMAIL_INTERNAL_RECIPIENT`; development/test usa locmem e production usa o
+backend SMTP nativo configurado por ambiente. Nenhum endereço deve ser
+espalhado por services, views, templates ou testes de produção.
 ## 47. Desenvolvimento local
 Docker Compose somente para PostgreSQL, com imagem compatível, porta, volume, health e credenciais locais.
 Arquivo `.http` versionado é recomendado para inspeção manual. Postman é opcional.
