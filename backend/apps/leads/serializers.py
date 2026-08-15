@@ -42,6 +42,8 @@ def normalize_message(value):
 
 
 class LeadSerializer(serializers.ModelSerializer):
+    company_website = serializers.CharField(required=False, allow_blank=True, write_only=True)
+    form_started_at = serializers.CharField(required=False, allow_blank=True, write_only=True)
     name = serializers.CharField(
         max_length=120,
         error_messages={
@@ -117,6 +119,8 @@ class LeadSerializer(serializers.ModelSerializer):
             'privacy_policy_acknowledged',
             'privacy_policy_version',
             'source',
+            'company_website',
+            'form_started_at',
         )
 
     def to_internal_value(self, data):
@@ -165,3 +169,8 @@ class LeadSerializer(serializers.ModelSerializer):
                 )
             })
         return attrs
+
+    def create(self, validated_data):
+        validated_data.pop('company_website', None)
+        validated_data.pop('form_started_at', None)
+        return super().create(validated_data)

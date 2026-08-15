@@ -9,6 +9,9 @@ from django.db import OperationalError
 from django.conf import settings
 from django.test import Client
 
+from apps.leads.protection import ProtectionUnavailable
+from config import settings as project_settings
+
 
 BACKEND_DIR = Path(__file__).resolve().parents[1]
 
@@ -27,7 +30,7 @@ def test_health_returns_simple_success_and_request_id(client):
 
 
 def test_readiness_reports_postgres_as_ready(client):
-    with patch('apps.core.views.connection.ensure_connection'):
+    with patch('apps.core.views.connection.ensure_connection'), patch('apps.core.views.check_cache'):
         response = client.get('/health/ready/')
 
     assert response.status_code == 200
@@ -42,6 +45,17 @@ def test_readiness_hides_database_failure(client):
     assert response.status_code == 503
     assert response.json() == {'status': 'unavailable'}
     assert 'secret sql details' not in response.content.decode()
+
+
+def test_readiness_hides_cache_failure(client):
+    with patch('apps.core.views.connection.ensure_connection'), patch(
+        'apps.core.views.check_cache', side_effect=ProtectionUnavailable('secret cache details')
+    ):
+        response = client.get('/health/ready/')
+
+    assert response.status_code == 503
+    assert response.json() == {'status': 'unavailable'}
+    assert 'secret cache details' not in response.content.decode()
 
 
 def load_settings_with_environment(**overrides):
@@ -62,6 +76,15 @@ def load_settings_with_environment(**overrides):
         'EMAIL_INTERNAL_RECIPIENT',
         'IDEMPOTENCY_TTL_SECONDS',
         'LEAD_DUPLICATE_WINDOW_SECONDS',
+        'LEAD_MIN_SUBMISSION_SECONDS',
+        'LEAD_RATE_LIMIT_IP_SHORT_COUNT',
+        'LEAD_RATE_LIMIT_IP_SHORT_WINDOW_SECONDS',
+        'LEAD_RATE_LIMIT_IP_DAILY_COUNT',
+        'LEAD_RATE_LIMIT_IP_DAILY_WINDOW_SECONDS',
+        'LEAD_RATE_LIMIT_EMAIL_COUNT',
+        'LEAD_RATE_LIMIT_EMAIL_WINDOW_SECONDS',
+        'LEAD_RATE_LIMIT_PHONE_COUNT',
+        'LEAD_RATE_LIMIT_PHONE_WINDOW_SECONDS',
         'EMAIL_BACKEND',
     ):
         environment.pop(name, None)
@@ -85,10 +108,11 @@ def test_development_keeps_local_configuration_defaults():
 def test_phase_one_cache_and_protection_settings():
     assert settings.IDEMPOTENCY_TTL_SECONDS == 86400
     assert settings.LEAD_DUPLICATE_WINDOW_SECONDS == 300
-    assert settings.CACHES['lead_protection'] == {
+    assert project_settings.CACHES['lead_protection'] == {
         'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
         'LOCATION': 'repage_lead_protection_cache',
     }
+    assert settings.CACHES['lead_protection']['BACKEND'] == 'django.core.cache.backends.locmem.LocMemCache'
     assert settings.EMAIL_BACKEND == 'django.core.mail.backends.locmem.EmailBackend'
 
 
