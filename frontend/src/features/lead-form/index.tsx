@@ -12,6 +12,7 @@ import {
   projectTypeOptions,
 } from './schema';
 import * as S from './styles';
+import { ANALYTICS_EVENT_NAMES, trackEvent } from '../../services/analytics';
 
 const fieldOrder: LeadFieldName[] = [
   'name',
@@ -179,6 +180,7 @@ export function LeadForm({ onInteractionStart }: LeadFormProps) {
   const onInvalid = (fieldErrors: typeof errors) => {
     setSubmitted(true);
     setGeneralError('Revise os campos destacados antes de enviar.');
+    trackEvent(ANALYTICS_EVENT_NAMES.leadFormError, { category: 'validation' });
     focusFirstError(fieldErrors);
   };
 
@@ -192,12 +194,25 @@ export function LeadForm({ onInteractionStart }: LeadFormProps) {
         idempotencyKey: attemptKey,
         formStartedAt: formStartedAt.current,
       });
+      trackEvent(ANALYTICS_EVENT_NAMES.leadFormSuccess);
       setSucceeded(true);
       idempotencyKey.current = null;
       formStartedAt.current = new Date().toISOString();
       reset();
     } catch (error) {
       if (error instanceof LeadApiError) {
+        const category = error.code === 'idempotency_conflict'
+          ? 'idempotency_conflict'
+          : error.status === 429
+            ? 'rate_limited'
+            : error.status === 503
+              ? 'service_unavailable'
+              : error.fields || error.code === 'validation_error'
+                ? 'validation'
+                : error.status >= 500
+                  ? 'server'
+                  : 'server';
+        trackEvent(ANALYTICS_EVENT_NAMES.leadFormError, { category });
         if (error.code === 'idempotency_conflict') {
           idempotencyKey.current = null;
           setGeneralError('Esta tentativa já foi usada com dados diferentes. Revise o formulário e envie novamente.');
@@ -214,6 +229,7 @@ export function LeadForm({ onInteractionStart }: LeadFormProps) {
         });
         setGeneralError(error.fields ? 'Revise os campos informados.' : error.message);
       } else {
+        trackEvent(ANALYTICS_EVENT_NAMES.leadFormError, { category: 'network' });
         setGeneralError('Não foi possível confirmar o envio. Verifique sua conexão e tente novamente quando desejar.');
       }
     }
@@ -357,6 +373,7 @@ export function LeadForm({ onInteractionStart }: LeadFormProps) {
             href={`https://wa.me/5511958244081?text=${encodeURIComponent('Olá! Conheci a Repage pelo site e gostaria de conversar sobre um projeto.')}`}
             target="_blank"
             rel="noreferrer"
+            onClick={() => trackEvent(ANALYTICS_EVENT_NAMES.whatsappClick)}
           >
             Falar pelo WhatsApp
           </S.WhatsAppLink>

@@ -2,6 +2,9 @@ import { ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useRef } from 'react';
 import { routeMetadata, useRouteMetadata } from '../../app/routeMetadata';
+import { useEffect } from 'react';
+import { ANALYTICS_EVENT_NAMES, trackEvent } from '../../services/analytics';
+import { useConsent } from '../../features/consent/useConsent';
 import { listPublicProjects } from '../../data/projects/publication';
 import { findReadinessBySlug } from '../../data/projects/projectReadiness';
 import { ProjectBrowserFrame } from '../../components/ProjectBrowserFrame';
@@ -15,6 +18,11 @@ import * as S from './styles';
 
 export function PortfolioPage() {
   useRouteMetadata(routeMetadata.portfolio);
+  const { preference } = useConsent();
+
+  useEffect(() => {
+    if (preference.analytics) trackEvent(ANALYTICS_EVENT_NAMES.portfolioView);
+  }, [preference.analytics]);
 
   const projects = listPublicProjects();
   const introRef = useRef<HTMLDivElement>(null);
@@ -60,7 +68,11 @@ export function PortfolioPage() {
         </S.ProjectList>
         <S.CollectionFooter>
           <S.FooterNote>Estratégia, direção visual e desenvolvimento conduzidos de perto.</S.FooterNote>
-          <PrimaryCta as={Link} to="/#contato">
+          <PrimaryCta
+            as={Link}
+            to="/#contato"
+            onClick={() => trackEvent(ANALYTICS_EVENT_NAMES.quoteCtaClick, { context: 'portfolio' })}
+          >
             Solicitar orçamento
             <ArrowRight size={18} aria-hidden="true" />
           </PrimaryCta>

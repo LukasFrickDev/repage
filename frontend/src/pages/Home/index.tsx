@@ -11,6 +11,7 @@ import { ServicesSection } from '../../components/ServicesSection';
 import { SignatureSection } from '../../components/SignatureSection';
 import { ValuePropositionSection } from '../../components/ValuePropositionSection';
 import { heroContent } from '../../content/repageContent';
+import { ANALYTICS_EVENT_NAMES, trackEvent } from '../../services/analytics';
 import * as S from './styles';
 
 const Home = () => {
@@ -57,7 +58,11 @@ const Home = () => {
             >
               <S.Description>{heroContent.description}</S.Description>
               <S.Actions>
-                <PrimaryCta as={Link} to={heroContent.primaryCta.href}>
+                <PrimaryCta
+                  as={Link}
+                  to={heroContent.primaryCta.href}
+                  onClick={() => trackEvent(ANALYTICS_EVENT_NAMES.quoteCtaClick, { context: 'hero' })}
+                >
                   <span>{heroContent.primaryCta.label}</span>
                   <ArrowRight size={18} aria-hidden="true" />
                 </PrimaryCta>

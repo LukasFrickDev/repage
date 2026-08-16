@@ -13,6 +13,8 @@ import { findPublicProjectNeighbors, findPublicProjectBySlug } from '../../data/
 import { findReadinessBySlug } from '../../data/projects/projectReadiness';
 import { resolveCaseGallery } from '../../data/projects/caseGallery';
 import type { ProjectMediaAsset } from '../../data/projects/projectReadiness';
+import { ANALYTICS_EVENT_NAMES, trackEvent } from '../../services/analytics';
+import { useConsent } from '../../features/consent/useConsent';
 import * as S from './styles';
 
 export function CasePage() {
@@ -50,6 +52,12 @@ type CaseExperienceProps = {
 };
 
 function CaseExperience({ project, neighbors }: CaseExperienceProps) {
+  const { preference } = useConsent();
+
+  useEffect(() => {
+    if (preference.analytics) trackEvent(ANALYTICS_EVENT_NAMES.caseView, { project_slug: project.slug });
+  }, [preference.analytics, project.slug]);
+
   return (
     <S.Page>
       <CaseIntro project={project} />
@@ -235,6 +243,7 @@ function CaseIntro({ project }: CaseIntroProps) {
               href={project.publicUrl}
               target="_blank"
               rel="noreferrer"
+              onClick={() => trackEvent(ANALYTICS_EVENT_NAMES.externalProjectClick, { project_slug: project.slug })}
             >
               Ver projeto publicado <ExternalLink size={16} aria-hidden="true" />
             </S.ExternalLink>
@@ -264,7 +273,11 @@ function CaseClosing({ neighbors }: { neighbors: ReturnType<typeof findPublicPro
     <S.Closing>
       <S.ClosingEyebrow>Tem um projeto em mente?</S.ClosingEyebrow>
       <S.ClosingTitle>Vamos conversar sobre o que sua próxima página precisa resolver.</S.ClosingTitle>
-      <PrimaryCta as={Link} to="/#contato">Solicitar orçamento <ArrowRight size={18} aria-hidden="true" /></PrimaryCta>
+      <PrimaryCta
+        as={Link}
+        to="/#contato"
+        onClick={() => trackEvent(ANALYTICS_EVENT_NAMES.quoteCtaClick, { context: 'case' })}
+      >Solicitar orçamento <ArrowRight size={18} aria-hidden="true" /></PrimaryCta>
       <S.NeighborNav aria-label="Navegação entre cases">
         <S.ReturnLink to="/portfolio">Voltar ao portfólio</S.ReturnLink>
         {neighbors.previous ? <S.NeighborLink to={`/portfolio/${neighbors.previous.slug}`}><ArrowLeft size={16} aria-hidden="true" /> {neighbors.previous.title}</S.NeighborLink> : null}

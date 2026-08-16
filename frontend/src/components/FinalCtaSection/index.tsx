@@ -3,6 +3,7 @@ import { useRef, useState } from 'react';
 import { finalCtaSectionContent } from '../../content/repageContent';
 import { LeadForm } from '../../features/lead-form';
 import * as S from './styles';
+import { ANALYTICS_EVENT_NAMES, trackEvent } from '../../services/analytics';
 
 export function FinalCtaSection() {
   const prefersReducedMotion = Boolean(useReducedMotion());
@@ -65,7 +66,7 @@ export function FinalCtaSection() {
         >
           {finalCtaSectionContent.description}
         </S.Description>
-        <LeadForm onInteractionStart={() => setFormInteracted(true)} />
+        <LeadForm onInteractionStart={() => { setFormInteracted(true); trackEvent(ANALYTICS_EVENT_NAMES.leadFormStart); }} />
       </S.Content>
     </S.Section>
   );

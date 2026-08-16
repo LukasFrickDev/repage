@@ -7,6 +7,7 @@ import {
 import { ConsentBanner } from './ConsentBanner';
 import { ConsentPreferencesDialog } from './ConsentPreferencesDialog';
 import { ConsentContext, type ConsentContextValue } from './context';
+import { ANALYTICS_EVENT_NAMES, AnalyticsBridge, setAnalyticsConsent, trackEvent } from '../../services/analytics';
 import { readConsentPreference, writeConsentPreference } from './storage';
 import {
   defaultConsentPreference,
@@ -32,6 +33,13 @@ export function ConsentProvider({ children }: PropsWithChildren) {
     };
 
     writeConsentPreference(nextPreference);
+    setAnalyticsConsent(nextPreference.analytics);
+    if (nextPreference.analytics) {
+      trackEvent(ANALYTICS_EVENT_NAMES.consentUpdate, {
+        analytics: true,
+        advertising: nextPreference.advertising,
+      });
+    }
     setPreference(nextPreference);
     setHasValidChoice(true);
     setPreferencesOpen(false);
@@ -50,6 +58,7 @@ export function ConsentProvider({ children }: PropsWithChildren) {
   return (
     <ConsentContext.Provider value={value}>
       {children}
+      <AnalyticsBridge />
       {!hasValidChoice && <ConsentBanner />}
       {preferencesOpen && <ConsentPreferencesDialog />}
     </ConsentContext.Provider>
