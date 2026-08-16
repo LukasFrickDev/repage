@@ -28,13 +28,13 @@ export const routeMetadata = {
     indexing: 'index',
   },
   privacy: {
-    title: 'Política de Privacidade em preparação | Repage',
-    description: 'Página estrutural da Política de Privacidade da Repage, ainda em preparação.',
+    title: 'Política de Privacidade | Repage',
+    description: 'Como a Repage trata dados pessoais relacionados ao site e às solicitações de orçamento.',
     indexing: 'noindex',
   },
   cookies: {
-    title: 'Política de Cookies em preparação | Repage',
-    description: 'Página estrutural da Política de Cookies da Repage, ainda em preparação.',
+    title: 'Política de Cookies | Repage',
+    description: 'Como a Repage usa tecnologias necessárias, analíticas e publicitárias no site.',
     indexing: 'noindex',
   },
   notFound: {

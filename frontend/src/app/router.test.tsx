@@ -40,8 +40,8 @@ describe('public routes', () => {
     ['/', 'Uma nova página para o seu negócio começa aqui.'],
     ['/portfolio', 'Projetos reais para contextos diferentes.'],
     ['/portfolio/axium', 'Axium'],
-    ['/privacidade', 'Política de Privacidade em preparação.'],
-    ['/cookies', 'Política de Cookies em preparação.'],
+    ['/privacidade', 'Política de Privacidade'],
+    ['/cookies', 'Política de Cookies'],
     ['/rota-inexistente', 'Página não encontrada.'],
   ])('renders %s with a main heading', (route, heading) => {
     renderAt(route);
