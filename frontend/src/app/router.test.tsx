@@ -441,7 +441,7 @@ describe('public routes', () => {
       'content',
       'Estratégia, design e desenvolvimento para transformar ideias e serviços em experiências digitais profissionais.',
     );
-    expect(document.querySelector('meta[name="robots"]')).toHaveAttribute('content', 'index, follow');
+    expect(document.querySelector('meta[name="robots"]')).toHaveAttribute('content', 'noindex, nofollow');
 
     await user.click(screen.getByRole('link', { name: 'Ver projetos' }));
 
@@ -450,7 +450,7 @@ describe('public routes', () => {
       'content',
       'Uma seleção de sites institucionais, e-commerce, landing pages e aplicações web que reúne estrutura, design e desenvolvimento.',
     );
-    expect(document.querySelector('meta[name="robots"]')).toHaveAttribute('content', 'index, follow');
+    expect(document.querySelector('meta[name="robots"]')).toHaveAttribute('content', 'noindex, nofollow');
   });
 
   it.each([
@@ -466,7 +466,7 @@ describe('public routes', () => {
     expect(document.querySelector('meta[name="description"]')).toHaveAttribute('content', metadata.description);
     expect(document.querySelector('meta[name="robots"]')).toHaveAttribute(
       'content',
-      metadata.indexing === 'index' ? 'index, follow' : 'noindex, nofollow',
+      'noindex, nofollow',
     );
   });
 });

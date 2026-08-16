@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import { getCaseMetadata, routeMetadata, useRouteMetadata } from '../../app/routeMetadata';
+import { siteConfig } from '../../config/site';
 import { PrimaryCta } from '../../components/PrimaryCta';
 import { EditorialInkBackdrop } from '../../components/EditorialInkBackdrop';
 import { ProjectBrowserFrame } from '../../components/ProjectBrowserFrame';
@@ -20,7 +21,16 @@ import * as S from './styles';
 export function CasePage() {
   const { slug = '' } = useParams();
   const project = findPublicProjectBySlug(slug);
-  useRouteMetadata(project ? getCaseMetadata(project.routeMetadata) : routeMetadata.notFound);
+  const readiness = project ? findReadinessBySlug(project.slug) : undefined;
+  const cover = project && readiness?.assets.find((asset) => asset.path === project.media.cover);
+  useRouteMetadata(project
+    ? getCaseMetadata(project.routeMetadata, {
+      path: `/portfolio/${project.slug}`,
+      ...(cover?.kind === 'screenshot' ? {
+        socialImage: { url: `${siteConfig.canonicalOrigin}${cover.path}`, width: cover.width, height: cover.height, alt: cover.alt },
+      } : {}),
+    })
+    : routeMetadata.notFound);
 
   if (!project) {
     return (
@@ -35,8 +45,6 @@ export function CasePage() {
     );
   }
 
-  const readiness = findReadinessBySlug(project.slug);
-  const cover = readiness?.assets.find((asset) => asset.path === project.media.cover);
   const neighbors = findPublicProjectNeighbors(project.slug);
 
   if (!cover || cover.kind !== 'screenshot' || !cover.roles.includes('cover')) {

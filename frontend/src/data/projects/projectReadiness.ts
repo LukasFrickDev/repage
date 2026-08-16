@@ -135,6 +135,7 @@ function video(input: VideoInput): ProjectMediaAsset {
 
 function getAspectRatio(viewport: CaptureViewport): string {
   if (viewport.width === socialViewport.width) return socialAspectRatio;
+  if (viewport.width === 1689 && viewport.height === 725) return '1689:725';
   return viewport.width === desktopViewport.width ? desktopAspectRatio : mobileAspectRatio;
 }
 
