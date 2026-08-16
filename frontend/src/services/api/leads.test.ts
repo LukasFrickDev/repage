@@ -9,6 +9,11 @@ const values = {
   business_name: '',
   message: '',
   privacy_policy_acknowledged: true,
+  company_website: '',
+};
+const metadata = {
+  idempotencyKey: '00000000-0000-4000-8000-000000000001',
+  formStartedAt: '2026-08-15T12:00:00.000Z',
 };
 
 describe('lead API client', () => {
@@ -16,7 +21,7 @@ describe('lead API client', () => {
     vi.restoreAllMocks();
   });
 
-  it('posts the typed public payload without retry or Idempotency-Key', async () => {
+  it('posts the typed public payload with Idempotency-Key and technical fields', async () => {
     const fetchMock = vi.fn().mockResolvedValue(new Response(JSON.stringify({
       status: 'received',
       message: 'Recebemos sua solicitação.',
@@ -24,13 +29,16 @@ describe('lead API client', () => {
     }), { status: 201, headers: { 'Content-Type': 'application/json' } }));
     vi.stubGlobal('fetch', fetchMock);
 
-    await createLead(values);
+    await createLead(values, metadata);
 
     expect(fetchMock).toHaveBeenCalledTimes(1);
     const [, options] = fetchMock.mock.calls[0] as [string, RequestInit];
-    expect(options.headers).toEqual({ 'Content-Type': 'application/json' });
+    expect(options.headers).toEqual({
+      'Content-Type': 'application/json',
+      'Idempotency-Key': metadata.idempotencyKey,
+    });
     expect(options.body).toContain('"source":"website"');
-    expect(options.body).not.toContain('Idempotency-Key');
+    expect(options.body).toContain('"form_started_at":"2026-08-15T12:00:00.000Z"');
   });
 
   it('maps safe API field errors', async () => {
@@ -39,7 +47,7 @@ describe('lead API client', () => {
       request_id: 'request-id',
     }), { status: 400, headers: { 'Content-Type': 'application/json' } })));
 
-    await expect(createLead(values)).rejects.toMatchObject({
+    await expect(createLead(values, metadata)).rejects.toMatchObject({
       status: 400,
       code: 'validation_error',
       fields: { email: ['Informe um e-mail válido.'] },
@@ -50,7 +58,7 @@ describe('lead API client', () => {
     const fetchMock = vi.fn().mockRejectedValue(new TypeError('network unavailable'));
     vi.stubGlobal('fetch', fetchMock);
 
-    await expect(createLead(values)).rejects.toThrow('network unavailable');
+    await expect(createLead(values, metadata)).rejects.toThrow('network unavailable');
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 });

@@ -1,19 +1,29 @@
 import uuid
+from concurrent.futures import ThreadPoolExecutor
 from datetime import timedelta
+from unittest.mock import patch
 
 import pytest
 from django.contrib import admin
+from django.contrib.admin.models import LogEntry
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Permission
 from django.conf import settings
+from django.core.cache import caches
+from django.core import mail
+from django.db import IntegrityError, connections
+from django.core.management import call_command
 from django.test import Client
+from django.test import override_settings
 from django.utils import timezone
 from django.urls import reverse
 from rest_framework.test import APIClient
 
-from apps.leads.admin import LeadAdmin, LeadAdminForm
-from apps.leads.models import Lead
+from apps.leads.admin import EmailDeliveryAdmin, EmailDeliveryInline, LeadAdmin, LeadAdminForm
+from apps.leads.email_service import build_message, claim_delivery, process_delivery
+from apps.leads.models import EmailDelivery, IdempotencyRecord, Lead
 from apps.leads.serializers import LeadSerializer
+from apps.leads.security import canonicalize, protected_cache_key, protected_fingerprint
 
 
 def payload(**overrides):
@@ -27,9 +37,18 @@ def payload(**overrides):
         'privacy_policy_acknowledged': True,
         'privacy_policy_version': settings.PRIVACY_POLICY_VERSION,
         'source': 'website',
+        'form_started_at': (timezone.now() - timedelta(seconds=10)).isoformat(),
     }
     value.update(overrides)
     return value
+
+
+def api_headers(key='00000000-0000-4000-8000-000000000001'):
+    return {'HTTP_IDEMPOTENCY_KEY': key}
+
+
+def clear_protection_cache():
+    caches['lead_protection'].clear()
 
 
 def test_serializer_normalizes_lead_values():
@@ -74,6 +93,86 @@ def test_lead_defaults_choices_and_representation():
     }
     assert set(Lead.Source.values) == {'website', 'manual'}
     assert str(lead) == 'Ana Souza — ana@example.com'
+
+
+@pytest.mark.django_db
+def test_email_delivery_has_safe_defaults_and_supported_values():
+    lead = Lead.objects.create(
+        name='Ana Souza', email='ana@example.com', whatsapp='+5511999999999',
+        project_type=Lead.ProjectType.INSTITUTIONAL_SITE, source=Lead.Source.WEBSITE,
+    )
+    delivery = EmailDelivery.objects.create(
+        lead=lead, kind=EmailDelivery.Kind.INTERNAL_NOTIFICATION,
+    )
+
+    assert delivery.status == EmailDelivery.Status.PENDING
+    assert delivery.attempts == 0
+    assert delivery.next_attempt_at is not None
+    assert delivery.last_attempt_at is None
+    assert delivery.sent_at is None
+    assert delivery.last_error_code == ''
+    assert set(EmailDelivery.Kind.values) == {'internal_notification', 'visitor_confirmation'}
+    assert set(EmailDelivery.Status.values) == {'pending', 'sent', 'failed'}
+
+
+@pytest.mark.django_db
+def test_email_delivery_kind_is_unique_per_lead():
+    lead = Lead.objects.create(
+        name='Ana Souza', email='ana@example.com', whatsapp='+5511999999999',
+        project_type=Lead.ProjectType.INSTITUTIONAL_SITE, source=Lead.Source.WEBSITE,
+    )
+    EmailDelivery.objects.create(lead=lead, kind=EmailDelivery.Kind.VISITOR_CONFIRMATION)
+
+    with pytest.raises(IntegrityError):
+        EmailDelivery.objects.create(lead=lead, kind=EmailDelivery.Kind.VISITOR_CONFIRMATION)
+
+
+@pytest.mark.django_db
+def test_idempotency_record_stores_only_safe_response_shape():
+    lead = Lead.objects.create(
+        name='Ana Souza', email='ana@example.com', whatsapp='+5511999999999',
+        project_type=Lead.ProjectType.INSTITUTIONAL_SITE, source=Lead.Source.WEBSITE,
+    )
+    record = IdempotencyRecord.objects.create(
+        key=uuid.uuid4(), fingerprint='a' * 64, lead=lead, response_status=201,
+        response_payload={'status': 'received', 'message': 'Recebemos sua solicitação.'},
+        expires_at=timezone.now() + timedelta(hours=24),
+    )
+
+    assert record.response_payload == {
+        'status': 'received', 'message': 'Recebemos sua solicitação.',
+    }
+
+
+@pytest.mark.django_db
+def test_idempotency_key_is_unique():
+    lead = Lead.objects.create(
+        name='Ana Souza', email='ana@example.com', whatsapp='+5511999999999',
+        project_type=Lead.ProjectType.INSTITUTIONAL_SITE, source=Lead.Source.WEBSITE,
+    )
+    key = uuid.uuid4()
+    values = {
+        'key': key, 'fingerprint': 'a' * 64, 'lead': lead, 'response_status': 201,
+        'response_payload': {'status': 'received'},
+        'expires_at': timezone.now() + timedelta(hours=24),
+    }
+    IdempotencyRecord.objects.create(**values)
+
+    with pytest.raises(IntegrityError):
+        IdempotencyRecord.objects.create(**values)
+
+
+def test_protected_fingerprint_is_deterministic_and_purpose_separated():
+    values = {'email': 'ana@example.com', 'name': 'Ana Souza'}
+
+    assert protected_fingerprint(values, purpose='lead-fingerprint') == protected_fingerprint(
+        {'name': 'Ana Souza', 'email': 'ana@example.com'}, purpose='lead-fingerprint',
+    )
+    assert protected_fingerprint(values, purpose='lead-fingerprint') != protected_fingerprint(
+        values, purpose='cache-email',
+    )
+    assert 'ana@example.com' not in protected_fingerprint(values, purpose='lead-fingerprint')
+    assert canonicalize({'b': 2, 'a': 1}) == b'{"a":1,"b":2}'
 
 
 @pytest.mark.parametrize(
@@ -237,8 +336,13 @@ def test_admin_form_labels_acquisition_source_in_portuguese():
 
 
 @pytest.mark.django_db
+@override_settings(
+    EMAIL_BACKEND='django.core.mail.backends.locmem.EmailBackend',
+    EMAIL_FROM_ADDRESS='from@example.com',
+    EMAIL_INTERNAL_RECIPIENT='internal@example.com',
+)
 def test_api_creates_lead_and_returns_safe_response():
-    response = APIClient().post('/api/v1/leads/', payload(), format='json')
+    response = APIClient().post('/api/v1/leads/', payload(), format='json', **api_headers())
 
     assert response.status_code == 201
     assert response.data['status'] == 'received'
@@ -250,6 +354,325 @@ def test_api_creates_lead_and_returns_safe_response():
     assert lead.source == Lead.Source.WEBSITE
     assert lead.acquisition_source == ''
     assert Lead.objects.count() == 1
+    assert EmailDelivery.objects.filter(lead=lead).count() == 2
+    assert set(EmailDelivery.objects.values_list('status', flat=True)) == {EmailDelivery.Status.SENT}
+
+
+def test_api_requires_a_valid_idempotency_key():
+    missing = APIClient().post('/api/v1/leads/', payload(), format='json')
+    invalid = APIClient().post(
+        '/api/v1/leads/', payload(), format='json', HTTP_IDEMPOTENCY_KEY='not-a-uuid'
+    )
+
+    assert missing.status_code == 400
+    assert missing.data['error']['code'] == 'idempotency_key_required'
+    assert invalid.status_code == 400
+    assert invalid.data['error']['code'] == 'idempotency_key_invalid'
+
+
+def test_api_rejects_honeypot_and_fast_submission_without_persisting():
+    honeypot = APIClient().post(
+        '/api/v1/leads/', payload(company_website='filled'), format='json', **api_headers()
+    )
+    fast = APIClient().post(
+        '/api/v1/leads/',
+        payload(form_started_at=timezone.now().isoformat()),
+        format='json',
+        **api_headers('00000000-0000-4000-8000-000000000002'),
+    )
+
+    assert honeypot.status_code == 400
+    assert honeypot.data['error']['code'] == 'invalid_submission'
+    assert fast.status_code == 429
+    assert fast.data['error']['code'] == 'submission_too_fast'
+
+
+@pytest.mark.django_db
+def test_api_replays_same_key_with_a_new_request_id_without_new_records():
+    clear_protection_cache()
+    client = APIClient()
+    first = client.post('/api/v1/leads/', payload(), format='json', **api_headers('00000000-0000-4000-8000-000000000003'))
+    replay = client.post('/api/v1/leads/', payload(), format='json', **api_headers('00000000-0000-4000-8000-000000000003'))
+
+    assert first.status_code == replay.status_code == 201
+    assert first.data['request_id'] != replay.data['request_id']
+    assert Lead.objects.count() == 1
+    assert EmailDelivery.objects.count() == 2
+    assert IdempotencyRecord.objects.count() == 1
+
+
+@pytest.mark.django_db
+def test_api_rejects_same_key_with_a_different_fingerprint():
+    clear_protection_cache()
+    client = APIClient()
+    key = '00000000-0000-4000-8000-000000000004'
+    first = client.post('/api/v1/leads/', payload(), format='json', **api_headers(key))
+    conflict = client.post(
+        '/api/v1/leads/', payload(message='Outra mensagem'), format='json', **api_headers(key)
+    )
+
+    assert first.status_code == 201
+    assert conflict.status_code == 409
+    assert conflict.data['error']['code'] == 'idempotency_conflict'
+    assert Lead.objects.count() == 1
+    assert EmailDelivery.objects.count() == 2
+    assert IdempotencyRecord.objects.count() == 1
+
+
+@pytest.mark.django_db
+def test_expired_key_can_be_reused_after_duplicate_window():
+    clear_protection_cache()
+    client = APIClient()
+    key = '00000000-0000-4000-8000-000000000005'
+    first = client.post('/api/v1/leads/', payload(), format='json', **api_headers(key))
+    lead = Lead.objects.get()
+    Lead.objects.filter(pk=lead.pk).update(
+        created_at=timezone.now() - timedelta(seconds=settings.LEAD_DUPLICATE_WINDOW_SECONDS + 1)
+    )
+    IdempotencyRecord.objects.filter(key=key).update(expires_at=timezone.now() - timedelta(seconds=1))
+    second = client.post('/api/v1/leads/', payload(), format='json', **api_headers(key))
+
+    assert first.status_code == second.status_code == 201
+    assert Lead.objects.count() == 2
+    assert EmailDelivery.objects.count() == 4
+    assert IdempotencyRecord.objects.count() == 1
+
+
+@pytest.mark.django_db
+def test_duplicate_window_reuses_lead_without_new_deliveries():
+    clear_protection_cache()
+    client = APIClient()
+    first = client.post('/api/v1/leads/', payload(), format='json', **api_headers('00000000-0000-4000-8000-000000000006'))
+    second = client.post('/api/v1/leads/', payload(), format='json', **api_headers('00000000-0000-4000-8000-000000000007'))
+
+    assert first.status_code == second.status_code == 201
+    assert Lead.objects.count() == 1
+    assert EmailDelivery.objects.count() == 2
+    assert IdempotencyRecord.objects.count() == 2
+
+
+@pytest.mark.django_db
+def test_api_rejects_future_timestamp_without_persistence():
+    response = APIClient().post(
+        '/api/v1/leads/',
+        payload(form_started_at=(timezone.now() + timedelta(minutes=1)).isoformat()),
+        format='json',
+        **api_headers('00000000-0000-4000-8000-000000000008'),
+    )
+
+    assert response.status_code == 429
+    assert response.data['error']['code'] == 'submission_too_fast'
+    assert response['Retry-After']
+    assert Lead.objects.count() == 0
+
+
+def test_protection_cache_keys_do_not_contain_identifiers():
+    sensitive = 'ana@example.com|+5511999999999|192.0.2.10'
+    key = protected_cache_key(sensitive, purpose='email')
+
+    assert sensitive not in key
+    assert 'ana@example.com' not in key
+    assert '+5511999999999' not in key
+    assert '192.0.2.10' not in key
+
+
+@pytest.mark.django_db
+def test_ip_throttling_uses_remote_addr_instead_of_forwarded_header():
+    clear_protection_cache()
+    responses = []
+    for index in range(6):
+        responses.append(APIClient().post(
+            '/api/v1/leads/',
+            payload(
+                email=f'ip-{index}@example.com',
+                whatsapp=f'1199999{index:04d}',
+            ),
+            format='json',
+            HTTP_REMOTE_ADDR='198.51.100.10',
+            HTTP_X_FORWARDED_FOR=f'203.0.113.{index + 1}',
+            **api_headers(f'00000000-0000-4000-8000-{index + 10:012d}'),
+        ))
+
+    assert [response.status_code for response in responses[:5]] == [201] * 5
+    assert responses[5].status_code == 429
+    assert responses[5].data['error']['code'] == 'rate_limited'
+
+
+@pytest.mark.django_db(transaction=True)
+def test_concurrent_same_key_creates_one_lead_and_two_deliveries():
+    clear_protection_cache()
+    key = '00000000-0000-4000-8000-000000000009'
+
+    def submit():
+        try:
+            client = APIClient()
+            return client.post('/api/v1/leads/', payload(), format='json', **api_headers(key))
+        finally:
+            connections.close_all()
+
+    try:
+        with ThreadPoolExecutor(max_workers=2) as executor:
+            responses = list(executor.map(lambda _: submit(), range(2)))
+    finally:
+        connections.close_all()
+
+    assert [response.status_code for response in responses] == [201, 201]
+    assert Lead.objects.count() == 1
+    assert EmailDelivery.objects.count() == 2
+    assert IdempotencyRecord.objects.count() == 1
+
+
+@pytest.mark.django_db
+def test_cleanup_idempotency_removes_only_expired_records():
+    lead = Lead.objects.create(
+        name='Cleanup', email='cleanup@example.com', whatsapp='+5511999999999',
+        project_type=Lead.ProjectType.LANDING_PAGE, source=Lead.Source.WEBSITE,
+    )
+    IdempotencyRecord.objects.create(
+        key=uuid.uuid4(), fingerprint='a' * 64, lead=lead, response_status=201,
+        response_payload={'status': 'received'}, expires_at=timezone.now() - timedelta(seconds=1),
+    )
+    active = IdempotencyRecord.objects.create(
+        key=uuid.uuid4(), fingerprint='b' * 64, lead=lead, response_status=201,
+        response_payload={'status': 'received'}, expires_at=timezone.now() + timedelta(hours=1),
+    )
+
+    call_command('cleanup_idempotency')
+
+    assert IdempotencyRecord.objects.count() == 1
+    assert IdempotencyRecord.objects.get(pk=active.pk).expires_at > timezone.now()
+
+
+def email_lead():
+    return Lead.objects.create(
+        name='Ana Souza', email='ana@example.com', whatsapp='+5511999999999',
+        project_type=Lead.ProjectType.INSTITUTIONAL_SITE,
+        business_name='Negócio fictício', message='Mensagem operacional',
+        source=Lead.Source.WEBSITE,
+    )
+
+
+@pytest.mark.django_db
+@override_settings(EMAIL_FROM_ADDRESS='from@example.com', EMAIL_INTERNAL_RECIPIENT='internal@example.com')
+def test_email_service_builds_plain_text_internal_and_visitor_messages():
+    lead = email_lead()
+    internal = EmailDelivery.objects.create(lead=lead, kind=EmailDelivery.Kind.INTERNAL_NOTIFICATION)
+    visitor = EmailDelivery.objects.create(lead=lead, kind=EmailDelivery.Kind.VISITOR_CONFIRMATION)
+
+    internal_message = build_message(internal)
+    visitor_message = build_message(visitor)
+
+    assert internal_message.subject == '[Repage] Nova solicitação de orçamento'
+    assert internal_message.from_email == 'from@example.com'
+    assert internal_message.to == ['internal@example.com']
+    assert internal_message.reply_to == [lead.email]
+    assert internal_message.content_subtype == 'plain'
+    assert 'Mensagem operacional' in internal_message.body
+    assert visitor_message.subject == 'Recebemos sua solicitação | Repage'
+    assert visitor_message.to == [lead.email]
+    assert 'não representa orçamento ou aceite do projeto' in visitor_message.body
+    assert 'Mensagem operacional' not in visitor_message.body
+
+
+@pytest.mark.django_db
+@override_settings(EMAIL_FROM_ADDRESS='from@example.com', EMAIL_INTERNAL_RECIPIENT='internal@example.com')
+def test_email_service_success_updates_delivery_once():
+    lead = email_lead()
+    delivery = EmailDelivery.objects.create(lead=lead, kind=EmailDelivery.Kind.VISITOR_CONFIRMATION)
+
+    process_delivery(delivery.id)
+    delivery.refresh_from_db()
+
+    assert len(mail.outbox) == 1
+    assert delivery.status == EmailDelivery.Status.SENT
+    assert delivery.attempts == 1
+    assert delivery.last_attempt_at is not None
+    assert delivery.sent_at is not None
+    assert delivery.last_error_code == ''
+    assert delivery.next_attempt_at is None
+    assert process_delivery(delivery.id) is None
+    assert len(mail.outbox) == 1
+
+
+@pytest.mark.django_db
+@override_settings(EMAIL_FROM_ADDRESS='from@example.com', EMAIL_INTERNAL_RECIPIENT='internal@example.com')
+def test_email_service_sanitizes_failure_and_schedules_retry():
+    lead = email_lead()
+    delivery = EmailDelivery.objects.create(lead=lead, kind=EmailDelivery.Kind.INTERNAL_NOTIFICATION)
+
+    with patch('django.core.mail.EmailMessage.send', side_effect=TimeoutError('secret raw error')):
+        process_delivery(delivery.id)
+    delivery.refresh_from_db()
+
+    assert delivery.status == EmailDelivery.Status.FAILED
+    assert delivery.attempts == 1
+    assert delivery.last_error_code == 'timeout'
+    assert 'secret raw error' not in delivery.last_error_code
+    assert delivery.next_attempt_at is not None
+    assert delivery.sent_at is None
+
+
+@pytest.mark.django_db
+@override_settings(EMAIL_FROM_ADDRESS='from@example.com', EMAIL_INTERNAL_RECIPIENT='internal@example.com')
+def test_email_deliveries_are_processed_independently():
+    lead = email_lead()
+    internal = EmailDelivery.objects.create(lead=lead, kind=EmailDelivery.Kind.INTERNAL_NOTIFICATION)
+    visitor = EmailDelivery.objects.create(lead=lead, kind=EmailDelivery.Kind.VISITOR_CONFIRMATION)
+
+    with patch('django.core.mail.EmailMessage.send', side_effect=[TimeoutError('secret'), 1]) as mocked_send:
+        process_delivery(internal.id)
+        process_delivery(visitor.id)
+    internal.refresh_from_db()
+    visitor.refresh_from_db()
+
+    assert internal.status == EmailDelivery.Status.FAILED
+    assert visitor.status == EmailDelivery.Status.SENT
+    assert mocked_send.call_count == 2
+    assert internal.attempts == 1
+    assert visitor.attempts == 1
+    assert internal.last_error_code == 'timeout'
+    assert internal.next_attempt_at is not None
+    assert visitor.sent_at is not None
+    assert visitor.next_attempt_at is None
+
+
+@pytest.mark.django_db
+@override_settings(
+    EMAIL_FROM_ADDRESS='from@example.com',
+    EMAIL_INTERNAL_RECIPIENT='internal@example.com',
+    EMAIL_RETRY_DELAYS_SECONDS=(900, 3600, 21600, 86400),
+)
+def test_fifth_email_failure_is_terminal_and_not_due_for_retry():
+    lead = email_lead()
+    delivery = EmailDelivery.objects.create(lead=lead, kind=EmailDelivery.Kind.INTERNAL_NOTIFICATION)
+
+    with patch('django.core.mail.EmailMessage.send', side_effect=TimeoutError('secret')) as send:
+        for attempt in range(5):
+            process_delivery(delivery.id)
+            if attempt < 4:
+                EmailDelivery.objects.filter(pk=delivery.pk).update(
+                    next_attempt_at=timezone.now() - timedelta(seconds=1)
+                )
+    delivery.refresh_from_db()
+
+    assert send.call_count == 5
+    assert delivery.status == EmailDelivery.Status.FAILED
+    assert delivery.attempts == 5
+    assert delivery.next_attempt_at is None
+    assert process_delivery(delivery.id) is None
+
+
+@pytest.mark.django_db
+def test_claim_lease_prevents_second_worker_until_expired():
+    lead = email_lead()
+    delivery = EmailDelivery.objects.create(lead=lead, kind=EmailDelivery.Kind.INTERNAL_NOTIFICATION)
+
+    first_claim = claim_delivery(delivery.id)
+    second_claim = claim_delivery(delivery.id)
+    assert first_claim is not None
+    assert second_claim is None
+    EmailDelivery.objects.filter(pk=delivery.pk).update(next_attempt_at=timezone.now() - timedelta(seconds=1))
+    assert claim_delivery(delivery.id) is not None
 
 
 @pytest.mark.django_db
@@ -258,6 +681,7 @@ def test_api_invalid_payload_does_not_persist():
         '/api/v1/leads/',
         payload(email='invalid', privacy_policy_acknowledged=False),
         format='json',
+        **api_headers(),
     )
 
     assert response.status_code == 400
@@ -271,6 +695,7 @@ def test_api_rejects_policy_version_without_persisting():
         '/api/v1/leads/',
         payload(privacy_policy_version='pre-launch-old'),
         format='json',
+        **api_headers(),
     )
 
     assert response.status_code == 400
@@ -279,7 +704,7 @@ def test_api_rejects_policy_version_without_persisting():
 
 
 def test_public_api_rejects_manual_source():
-    response = APIClient().post('/api/v1/leads/', payload(source='manual'), format='json')
+    response = APIClient().post('/api/v1/leads/', payload(source='manual'), format='json', **api_headers())
 
     assert response.status_code == 400
     assert response.data['error']['code'] == 'validation_error'
@@ -436,6 +861,10 @@ def test_admin_edits_operational_fields_in_place_with_shared_normalization():
                 'whatsapp': '+55 11 95824-4081',
                 'project_type': Lead.ProjectType.CUSTOM_SOLUTION,
                 'status': status,
+                'email_deliveries-TOTAL_FORMS': '0',
+                'email_deliveries-INITIAL_FORMS': '0',
+                'email_deliveries-MIN_NUM_FORMS': '0',
+                'email_deliveries-MAX_NUM_FORMS': '0',
                 '_save': 'Salvar e continuar editando',
             },
         )
@@ -454,7 +883,171 @@ def test_admin_edits_operational_fields_in_place_with_shared_normalization():
     assert lead.name == 'Lead Histórico'
     assert lead.business_name == 'Negócio histórico'
     assert lead.message == 'Mensagem integral fictícia'
-    assert [model.__name__ for model in Lead._meta.app_config.get_models()] == ['Lead']
+
+
+def test_email_delivery_is_registered_but_idempotency_record_is_not():
+    assert isinstance(admin.site._registry[EmailDelivery], EmailDeliveryAdmin)
+    assert IdempotencyRecord not in admin.site._registry
+
+
+def test_email_delivery_admin_is_readonly_and_lead_inline_is_readonly():
+    model_admin = admin.site._registry[EmailDelivery]
+    inline = LeadAdmin.inlines[0]
+
+    assert model_admin.list_filter == ('kind', 'status')
+    assert model_admin.readonly_fields == (
+        'lead', 'kind', 'status', 'attempts', 'next_attempt_at',
+        'last_attempt_at', 'last_error_code', 'sent_at', 'created_at', 'updated_at',
+    )
+    assert model_admin.has_add_permission(None) is False
+    assert model_admin.has_change_permission(None) is False
+    assert model_admin.has_delete_permission(None) is False
+    assert inline is EmailDeliveryInline
+    assert inline.extra == 0
+    assert inline.max_num == 0
+    inline_instance = inline(Lead, admin.site)
+    assert inline_instance.has_add_permission(None) is False
+    assert inline_instance.has_change_permission(None) is False
+    assert inline_instance.has_delete_permission(None) is False
+
+
+def admin_resend_user():
+    return get_user_model().objects.create_superuser(
+        username='delivery-admin',
+        email='delivery-admin@example.test',
+        password='Fictitious-Admin-Password-123!',
+    )
+
+
+@pytest.mark.django_db
+@override_settings(EMAIL_FROM_ADDRESS='from@example.com', EMAIL_INTERNAL_RECIPIENT='internal@example.com')
+def test_admin_resend_requires_confirmation_and_reuses_failed_delivery():
+    lead = email_lead()
+    delivery = EmailDelivery.objects.create(
+        lead=lead,
+        kind=EmailDelivery.Kind.VISITOR_CONFIRMATION,
+        status=EmailDelivery.Status.FAILED,
+        attempts=5,
+        next_attempt_at=None,
+        last_error_code='timeout',
+    )
+    client = Client()
+    client.force_login(admin_resend_user())
+    resend_url = reverse('admin:leads_emaildelivery_resend', args=[delivery.pk])
+
+    confirmation = client.get(resend_url)
+    assert confirmation.status_code == 200
+    assert 'Confirmar reenvio' in confirmation.content.decode()
+    delivery.refresh_from_db()
+    assert delivery.attempts == 5
+
+    response = client.post(resend_url)
+    assert response.status_code == 302
+    delivery.refresh_from_db()
+    assert delivery.status == EmailDelivery.Status.SENT
+    assert delivery.attempts == 6
+    assert delivery.next_attempt_at is None
+    assert IdempotencyRecord.objects.count() == 0
+    assert LogEntry.objects.filter(object_id=str(delivery.pk)).exists()
+
+
+@pytest.mark.django_db
+@override_settings(EMAIL_FROM_ADDRESS='from@example.com', EMAIL_INTERNAL_RECIPIENT='internal@example.com')
+def test_admin_resend_terminal_failure_stays_failed_without_automatic_retry():
+    lead = email_lead()
+    delivery = EmailDelivery.objects.create(
+        lead=lead,
+        kind=EmailDelivery.Kind.INTERNAL_NOTIFICATION,
+        status=EmailDelivery.Status.FAILED,
+        attempts=5,
+        next_attempt_at=None,
+        last_error_code='timeout',
+    )
+    client = Client()
+    client.force_login(admin_resend_user())
+    resend_url = reverse('admin:leads_emaildelivery_resend', args=[delivery.pk])
+
+    with patch('django.core.mail.EmailMessage.send', side_effect=TimeoutError('secret')):
+        response = client.post(resend_url)
+
+    assert response.status_code == 302
+    delivery.refresh_from_db()
+    assert delivery.status == EmailDelivery.Status.FAILED
+    assert delivery.attempts == 6
+    assert delivery.last_error_code == 'timeout'
+    assert delivery.next_attempt_at is None
+
+
+@pytest.mark.django_db
+def test_admin_resend_rejects_pending_and_sent_deliveries():
+    lead = email_lead()
+    pending = EmailDelivery.objects.create(
+        lead=lead,
+        kind=EmailDelivery.Kind.INTERNAL_NOTIFICATION,
+    )
+    sent = EmailDelivery.objects.create(
+        lead=lead,
+        kind=EmailDelivery.Kind.VISITOR_CONFIRMATION,
+        status=EmailDelivery.Status.SENT,
+        sent_at=timezone.now(),
+        next_attempt_at=None,
+    )
+    client = Client()
+    client.force_login(admin_resend_user())
+
+    for delivery in (pending, sent):
+        response = client.get(
+            reverse('admin:leads_emaildelivery_resend', args=[delivery.pk]),
+        )
+        assert response.status_code == 302
+        delivery.refresh_from_db()
+        assert delivery.attempts == 0
+
+
+@pytest.mark.django_db
+def test_admin_resend_requires_change_permission_and_csrf():
+    lead = email_lead()
+    delivery = EmailDelivery.objects.create(
+        lead=lead,
+        kind=EmailDelivery.Kind.INTERNAL_NOTIFICATION,
+        status=EmailDelivery.Status.FAILED,
+        next_attempt_at=None,
+    )
+    user = get_user_model().objects.create_user(
+        username='delivery-viewer',
+        password='Fictitious-Viewer-Password-123!',
+        is_staff=True,
+    )
+    user.user_permissions.add(
+        Permission.objects.get(codename='view_emaildelivery', content_type__app_label='leads'),
+    )
+    client = Client(enforce_csrf_checks=True)
+    client.force_login(user)
+    resend_url = reverse('admin:leads_emaildelivery_resend', args=[delivery.pk])
+    assert client.get(resend_url).status_code == 403
+
+    client.force_login(admin_resend_user())
+    assert client.get(resend_url).status_code == 200
+    assert client.post(resend_url).status_code == 403
+
+
+@pytest.mark.django_db
+def test_email_delivery_admin_list_requires_authentication_and_supports_filters():
+    lead = email_lead()
+    EmailDelivery.objects.create(
+        lead=lead,
+        kind=EmailDelivery.Kind.INTERNAL_NOTIFICATION,
+        status=EmailDelivery.Status.FAILED,
+    )
+    client = Client()
+    changelist = reverse('admin:leads_emaildelivery_changelist')
+
+    assert client.get(changelist).status_code == 302
+    client.force_login(admin_resend_user())
+    response = client.get(changelist, {'status': EmailDelivery.Status.FAILED})
+
+    assert response.status_code == 200
+    assert 'Reenviar' in response.content.decode()
 
 
 @pytest.mark.django_db
@@ -495,6 +1088,7 @@ def test_admin_creates_manual_lead_with_internal_values_and_shared_normalization
     assert lead.whatsapp == '+5511999999999'
     assert lead.business_name == 'Negócio manual'
     assert lead.acquisition_source == 'Indicação da Carol'
+    assert not lead.email_deliveries.exists()
 
     search_response = client.get(
         reverse('admin:leads_lead_changelist'),
@@ -518,6 +1112,7 @@ def test_admin_creates_manual_lead_with_internal_values_and_shared_normalization
     lead_without_acquisition = Lead.objects.get(email='manual-sem-origem@example.test')
     assert lead_without_acquisition.acquisition_source == ''
     assert lead_without_acquisition.source == Lead.Source.MANUAL
+    assert not lead_without_acquisition.email_deliveries.exists()
 
     detail_response = client.get(
         reverse('admin:leads_lead_change', args=[lead.pk]),

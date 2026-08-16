@@ -83,6 +83,58 @@ test.describe('lead form integration states', () => {
     expect(requestCount).toBe(1);
   });
 
+  test('reuses the attempt key after 429 and keeps the honeypot out of focus order', async ({ page }) => {
+    const requests: { headers: Record<string, string>; payload: Record<string, unknown> }[] = [];
+    await page.route(apiPath, async (route) => {
+      requests.push({
+        headers: route.request().headers(),
+        payload: route.request().postDataJSON() as Record<string, unknown>,
+      });
+      await route.fulfill({
+        status: requests.length === 1 ? 429 : 201,
+        contentType: 'application/json',
+        body: JSON.stringify(requests.length === 1
+          ? { error: { code: 'rate_limited', message: 'Tente novamente mais tarde.' }, request_id: 'e2e-429' }
+          : { status: 'received', message: 'Recebemos sua solicitação.', request_id: 'e2e-201' }),
+      });
+    });
+    await openContact(page);
+    await fillRequiredFields(page);
+
+    const honeypot = page.locator('input[name="company_website"]');
+    await expect(honeypot).toHaveCount(1);
+    await expect(honeypot).toHaveAttribute('tabindex', '-1');
+    await expect(honeypot).toHaveAttribute('aria-hidden', 'true');
+    await expect(honeypot).toHaveAttribute('autocomplete', 'off');
+    const honeypotStyles = await honeypot.evaluate((element) => {
+      const styles = getComputedStyle(element);
+      return {
+        position: styles.position,
+        width: styles.width,
+        height: styles.height,
+        overflow: styles.overflow,
+        clip: styles.clip,
+        tabIndex: (element as HTMLInputElement).tabIndex,
+      };
+    });
+    expect(honeypotStyles.position).toBe('absolute');
+    expect(honeypotStyles.width).toBe('1px');
+    expect(honeypotStyles.height).toBe('1px');
+    expect(['hidden', 'clip']).toContain(honeypotStyles.overflow);
+    expect(honeypotStyles.clip).toBe('rect(0px, 0px, 0px, 0px)');
+    expect(honeypotStyles.tabIndex).toBe(-1);
+
+    await page.getByRole('button', { name: 'Solicitar orçamento' }).click();
+    await expect(page.getByRole('alert')).toContainText('Tente novamente mais tarde.');
+    await expect(page.getByLabel('Nome')).toHaveValue('Ana Souza');
+    await page.getByRole('button', { name: 'Solicitar orçamento' }).click();
+    await expect(page.getByRole('status')).toContainText('Solicitação recebida.');
+
+    expect(requests).toHaveLength(2);
+    expect(requests[0].headers['idempotency-key']).toBe(requests[1].headers['idempotency-key']);
+    expect(requests[0].payload.form_started_at).toBe(requests[1].payload.form_started_at);
+  });
+
   test('has no horizontal overflow and keeps controls usable under reduced motion', async ({ page }) => {
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await openContact(page);

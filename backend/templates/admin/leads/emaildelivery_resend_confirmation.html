@@ -1,0 +1,15 @@
+{% extends "admin/base_site.html" %}
+
+{% block content %}
+<div id="content-main">
+  <h1>Confirmar reenvio</h1>
+  <p>Delivery: {{ delivery.get_kind_display }}</p>
+  <p>Lead: {{ delivery.lead.name }} ({{ delivery.lead_id }})</p>
+  <p>Status: {{ delivery.get_status_display }} · Tentativas: {{ delivery.attempts }}</p>
+  <form method="post">
+    {% csrf_token %}
+    <input type="submit" value="Confirmar reenvio">
+    <a href="{{ change_url }}">Cancelar</a>
+  </form>
+</div>
+{% endblock %}
