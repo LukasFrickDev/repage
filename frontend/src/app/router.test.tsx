@@ -4,6 +4,7 @@ import { MemoryRouter, useLocation, useNavigate } from 'react-router-dom';
 import { describe, expect, it, vi } from 'vitest';
 import { getCaseMetadata, routeMetadata } from './routeMetadata';
 import { AppRoutes } from './router';
+import { ConsentProvider } from '../features/consent/ConsentProvider';
 
 function LocationProbe() {
   const location = useLocation();
@@ -26,7 +27,9 @@ function renderAt(entry: string) {
   return render(
     <MemoryRouter initialEntries={[entry]}>
       <LocationProbe />
-      <AppRoutes />
+      <ConsentProvider>
+        <AppRoutes />
+      </ConsentProvider>
       <HistoryControls />
     </MemoryRouter>,
   );
@@ -37,8 +40,8 @@ describe('public routes', () => {
     ['/', 'Uma nova página para o seu negócio começa aqui.'],
     ['/portfolio', 'Projetos reais para contextos diferentes.'],
     ['/portfolio/axium', 'Axium'],
-    ['/privacidade', 'Política de Privacidade em preparação.'],
-    ['/cookies', 'Política de Cookies em preparação.'],
+    ['/privacidade', 'Política de Privacidade'],
+    ['/cookies', 'Política de Cookies'],
     ['/rota-inexistente', 'Página não encontrada.'],
   ])('renders %s with a main heading', (route, heading) => {
     renderAt(route);

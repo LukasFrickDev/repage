@@ -117,8 +117,8 @@ test('public routes expose the expected indexing metadata', async ({ page }) => 
     { path: '/portfolio/green-tweet', heading: 'GreenTweet', robots: 'index, follow' },
     { path: '/portfolio/a-alma-no-comando', heading: 'A Alma no Comando', robots: 'index, follow' },
     { path: '/portfolio/alicerce-da-alma', heading: 'Alicerce da Alma', robots: 'index, follow' },
-    { path: '/privacidade', heading: 'Política de Privacidade em preparação.', robots: 'noindex, nofollow' },
-    { path: '/cookies', heading: 'Política de Cookies em preparação.', robots: 'noindex, nofollow' },
+    { path: '/privacidade', heading: 'Política de Privacidade', robots: 'noindex, nofollow' },
+    { path: '/cookies', heading: 'Política de Cookies', robots: 'noindex, nofollow' },
     { path: '/rota-inexistente', heading: 'Página não encontrada.', robots: 'noindex, nofollow' },
   ]) {
     await page.goto(route.path);

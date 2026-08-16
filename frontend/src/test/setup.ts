@@ -4,6 +4,7 @@ import { afterEach, vi } from 'vitest';
 
 afterEach(() => {
   cleanup();
+  window.localStorage.clear();
   document.body.style.overflow = '';
 });
 

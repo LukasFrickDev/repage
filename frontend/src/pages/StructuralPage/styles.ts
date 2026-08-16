@@ -10,8 +10,12 @@ export const Page = styled.section`
 `;
 
 export const Container = styled.div`
-  width: min(100%, 62rem);
+  width: min(100%, 70rem);
   margin-inline: auto;
+`;
+
+export const DocumentHeader = styled.header`
+  max-width: 52rem;
 `;
 
 export const Eyebrow = styled.p`
@@ -40,6 +44,75 @@ export const Description = styled.p`
   color: ${colors.graphite};
   font-size: clamp(1rem, 1.5vw, 1.15rem);
   line-height: 1.7;
+`;
+
+export const DocumentMeta = styled.p`
+  margin-top: 1.25rem;
+  color: ${colors.graphite};
+  font-size: 0.9rem;
+  line-height: 1.6;
+`;
+
+export const DocumentBody = styled.div`
+  width: min(100%, 48rem);
+  margin-top: clamp(3.5rem, 7vw, 6rem);
+`;
+
+export const DocumentSection = styled.section`
+  & + & {
+    margin-top: clamp(2.75rem, 6vw, 4.5rem);
+  }
+`;
+
+export const SectionTitle = styled.h2`
+  margin-bottom: 1rem;
+  color: ${colors.ink};
+  font-family: ${fonts.heading};
+  font-size: clamp(1.55rem, 2.8vw, 2.25rem);
+  font-weight: 650;
+  letter-spacing: -0.035em;
+  line-height: 1.1;
+  scroll-margin-top: 6rem;
+`;
+
+export const Paragraph = styled.p`
+  color: ${colors.graphite};
+  font-size: 1rem;
+  line-height: 1.75;
+
+  & + & { margin-top: 1rem; }
+`;
+
+export const List = styled.ul`
+  margin: 1rem 0 0;
+  padding-left: 1.25rem;
+  color: ${colors.graphite};
+  font-size: 1rem;
+  line-height: 1.75;
+
+  li + li { margin-top: 0.55rem; }
+`;
+
+export const ActionButton = styled.button`
+  min-height: 3rem;
+  padding: 0.75rem 1rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid ${colors.ink};
+  border-radius: ${layout.radii.action};
+  background: transparent;
+  color: ${colors.ink};
+  font: inherit;
+  font-weight: 650;
+  cursor: pointer;
+
+  &:hover { border-color: ${colors.highlight}; }
+
+  &:focus-visible {
+    outline: 2px solid ${colors.blue};
+    outline-offset: 3px;
+  }
 `;
 
 export const Actions = styled.div`

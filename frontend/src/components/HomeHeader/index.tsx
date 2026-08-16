@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import type { KeyboardEvent } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { headerNavigation, heroContent } from '../../content/repageContent';
+import { ANALYTICS_EVENT_NAMES, trackEvent } from '../../services/analytics';
 import * as S from './styles';
 
 export function HomeHeader() {
@@ -105,7 +106,10 @@ export function HomeHeader() {
           {headerNavigation.map((item) => <Link key={item.href} to={item.href}>{item.label}</Link>)}
         </S.DesktopNavigation>
 
-        <S.DesktopCta to={heroContent.primaryCta.href}>
+        <S.DesktopCta
+          to={heroContent.primaryCta.href}
+          onClick={() => trackEvent(ANALYTICS_EVENT_NAMES.quoteCtaClick, { context: 'header' })}
+        >
           <span>{heroContent.primaryCta.label}</span>
           <ArrowRight size={16} aria-hidden="true" />
         </S.DesktopCta>
@@ -145,7 +149,10 @@ export function HomeHeader() {
                 </Link>
               );
             })}
-            <S.MobileCta to={heroContent.primaryCta.href} onClick={closeMenu}>
+            <S.MobileCta
+              to={heroContent.primaryCta.href}
+              onClick={() => { closeMenu(); trackEvent(ANALYTICS_EVENT_NAMES.quoteCtaClick, { context: 'header' }); }}
+            >
               <span>{heroContent.primaryCta.label}</span>
               <ArrowRight size={17} aria-hidden="true" />
             </S.MobileCta>
