@@ -1,6 +1,6 @@
 # 0008 — Consentimento, Analytics e páginas legais
 
-- **Status:** approved
+- **Status:** implemented
 - **Responsável:** Lukas Frick
 - **Data:** 16 de agosto de 2026
 - **Branch-base:** `main`

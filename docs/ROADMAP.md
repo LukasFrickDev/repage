@@ -23,8 +23,8 @@ A V1 deve servir como referência comercial da marca, apoiar prospecção e cond
 * A entrega 5 está concluída: backend Django/DRF, PostgreSQL, API pública de Leads, Django Admin, formulário persistido e migrations versionadas foram validados.
 * A entrega 6 está concluída: o Django Admin existente recebeu a experiência administrativa Repage, com Leads como superfície operacional principal.
 * A entrega 7 está concluída: e-mails, idempotência, proteção, retries e recuperação administrativa foram implementados, validados e documentados.
-* A próxima entrega é a 8 — Consentimento, Analytics e páginas legais; sua implementação não faz parte deste fechamento.
-* Consentimento, Analytics, SEO, prerender, CI/CD, deploy e lançamento continuam pendentes nas entregas seguintes.
+* A entrega 8 está concluída: consentimento, Analytics condicionado e páginas legais foram implementados e validados.
+* A próxima entrega é a 9 — SEO, sitemap e prerender; CI/CD, deploy e lançamento continuam pendentes nas entregas seguintes.
 
 ## Princípios de execução
 
@@ -178,7 +178,8 @@ A V1 deve servir como referência comercial da marca, apoiar prospecção e cond
   **Dependências:** Entregas 5, 6 e 7, revisão jurídica, versões das políticas, identificador do Analytics e eventos finais.
   **Validações:** não essenciais desativados por padrão, preferências persistidas, Analytics condicionado, ausência de dados pessoais e acessibilidade.
   **Critério de conclusão:** consentimento, páginas e Analytics funcionam de forma verificável e coerente com as políticas.
-  **Spec:** [`0008-consent-analytics-and-legal-pages.md`](specs/0008-consent-analytics-and-legal-pages.md) — `approved`.
+  **Status:** concluída.
+  **Spec:** [`0008-consent-analytics-and-legal-pages.md`](specs/0008-consent-analytics-and-legal-pages.md) — `implemented`.
 
 ## Entrega 9 — SEO, sitemap e prerender
 
