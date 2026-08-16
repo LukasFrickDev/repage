@@ -90,6 +90,10 @@ export const Navigation = styled.nav`
   a:nth-child(5) { grid-area: 3 / 1; }
   a:nth-child(6) { grid-area: 3 / 2; }
 
+  button {
+    grid-area: 4 / 1 / span 1 / span 2;
+  }
+
   a:nth-child(n + 5) {
     color: rgba(185, 192, 204, 0.55);
     font-size: 0.8rem;
@@ -128,6 +132,38 @@ export const Navigation = styled.nav`
   @media (prefers-reduced-motion: reduce) {
     a, a::after { transition: none; }
   }
+`;
+
+export const PreferencesButton = styled.button`
+  position: relative;
+  width: fit-content;
+  min-height: 2.45rem;
+  padding: 0.5rem 0;
+  border: 0;
+  background: transparent;
+  color: rgba(185, 192, 204, 0.55);
+  font-family: ${fonts.primary};
+  font-size: 0.8rem;
+  font-weight: 540;
+  text-align: left;
+
+  &::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    bottom: 0.18rem;
+    left: 0;
+    height: 1px;
+    background: ${colors.highlight};
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform ${motion.duration.fast} ${motion.easing.standard};
+  }
+
+  &:hover, &:focus-visible { color: ${colors.white}; }
+  &:hover::after, &:focus-visible::after { transform: scaleX(1); }
+
+  @media (max-width: ${breakpoints.tabletMax}) { min-height: 2.75rem; }
 `;
 
 export const BottomBand = styled.div`

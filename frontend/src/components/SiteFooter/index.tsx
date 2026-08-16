@@ -1,9 +1,12 @@
 import { Link } from 'react-router-dom';
 import { footerNavigation, legalNavigation, siteFooterContent } from '../../content/repageContent';
 import { siteConfig } from '../../config/site';
+import { useConsent } from '../../features/consent/useConsent';
 import * as S from './styles';
 
 export function SiteFooter() {
+  const { openPreferences } = useConsent();
+
   return (
     <S.Footer data-home-section="footer">
       <S.Container>
@@ -19,6 +22,7 @@ export function SiteFooter() {
           <S.Navigation aria-label="Navegação do rodapé">
             {footerNavigation.map((item) => <Link key={item.href} to={item.href}>{item.label}</Link>)}
             {legalNavigation.map((item) => <Link key={item.href} to={item.href}>{item.label}</Link>)}
+            <S.PreferencesButton type="button" onClick={openPreferences}>Preferências de cookies</S.PreferencesButton>
           </S.Navigation>
         </S.MainBand>
 

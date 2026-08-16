@@ -86,3 +86,4 @@ Somente spec aprovada orienta implementação planejada.
 | [`0005-lead-intake-backend-and-form.md`](0005-lead-intake-backend-and-form.md) | `implemented` | Backend, persistência de leads e formulário |
 | [`0006-repage-admin-experience.md`](0006-repage-admin-experience.md) | `implemented` | Experiência administrativa Repage |
 | [`0007-email-idempotency-and-protection.md`](0007-email-idempotency-and-protection.md) | `implemented` | E-mails, idempotência e proteção |
+| [`0008-consent-analytics-and-legal-pages.md`](0008-consent-analytics-and-legal-pages.md) | `approved` | Consentimento, Analytics e páginas legais |

@@ -4,6 +4,7 @@ import { MemoryRouter, useLocation, useNavigate } from 'react-router-dom';
 import { describe, expect, it, vi } from 'vitest';
 import { getCaseMetadata, routeMetadata } from './routeMetadata';
 import { AppRoutes } from './router';
+import { ConsentProvider } from '../features/consent/ConsentProvider';
 
 function LocationProbe() {
   const location = useLocation();
@@ -26,7 +27,9 @@ function renderAt(entry: string) {
   return render(
     <MemoryRouter initialEntries={[entry]}>
       <LocationProbe />
-      <AppRoutes />
+      <ConsentProvider>
+        <AppRoutes />
+      </ConsentProvider>
       <HistoryControls />
     </MemoryRouter>,
   );

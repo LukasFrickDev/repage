@@ -178,7 +178,7 @@ A V1 deve servir como referência comercial da marca, apoiar prospecção e cond
   **Dependências:** Entregas 5, 6 e 7, revisão jurídica, versões das políticas, identificador do Analytics e eventos finais.
   **Validações:** não essenciais desativados por padrão, preferências persistidas, Analytics condicionado, ausência de dados pessoais e acessibilidade.
   **Critério de conclusão:** consentimento, páginas e Analytics funcionam de forma verificável e coerente com as políticas.
-  **Spec:** obrigatória ao iniciar.
+  **Spec:** [`0008-consent-analytics-and-legal-pages.md`](specs/0008-consent-analytics-and-legal-pages.md) — `approved`.
 
 ## Entrega 9 — SEO, sitemap e prerender
 
