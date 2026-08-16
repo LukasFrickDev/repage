@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { useConsent } from './useConsent';
 import * as S from './styles';
 
-const BANNER_ENTRY_DELAY_MS = 1000;
+const BANNER_ENTRY_DELAY_MS = 1600;
 
 export function ConsentBanner() {
   const { acceptAll, rejectNonEssential, openPreferences } = useConsent();
@@ -18,21 +18,25 @@ export function ConsentBanner() {
     return () => window.clearTimeout(timeoutId);
   }, [isVisible]);
 
-  if (!isVisible) return null;
-
   return (
-    <S.Banner role="region" aria-labelledby="consent-banner-title">
+    <S.Banner
+      data-visible={isVisible}
+      role="region"
+      aria-hidden={!isVisible}
+      aria-labelledby="consent-banner-title"
+      inert={!isVisible}
+    >
       <S.BannerCopy>
         <S.BannerTitle id="consent-banner-title">Sua privacidade importa</S.BannerTitle>
         <S.BannerText>
           Usamos apenas tecnologias necessárias por padrão. O Analytics só é ativado com sua autorização.
-          {' '}Saiba mais na <Link to="/cookies">Política de Cookies</Link>.
+          {' '}Saiba mais na <Link to="/cookies" tabIndex={isVisible ? 0 : -1}>Política de Cookies</Link>.
         </S.BannerText>
       </S.BannerCopy>
       <S.BannerActions>
-        <S.SecondaryButton type="button" onClick={rejectNonEssential}>Recusar opcionais</S.SecondaryButton>
-        <S.SecondaryButton type="button" onClick={openPreferences}>Personalizar</S.SecondaryButton>
-        <S.PrimaryButton type="button" onClick={acceptAll}>Aceitar todos</S.PrimaryButton>
+        <S.SecondaryButton type="button" tabIndex={isVisible ? 0 : -1} onClick={rejectNonEssential}>Recusar opcionais</S.SecondaryButton>
+        <S.SecondaryButton type="button" tabIndex={isVisible ? 0 : -1} onClick={openPreferences}>Personalizar</S.SecondaryButton>
+        <S.PrimaryButton type="button" tabIndex={isVisible ? 0 : -1} onClick={acceptAll}>Aceitar todos</S.PrimaryButton>
       </S.BannerActions>
     </S.Banner>
   );

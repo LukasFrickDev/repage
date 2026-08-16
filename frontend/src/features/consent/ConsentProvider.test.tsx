@@ -24,15 +24,20 @@ describe('ConsentProvider', () => {
 
   afterEach(() => vi.useRealTimers());
 
-  it('reveals the banner after its short entry delay without moving focus', async () => {
+  it('keeps the banner mounted but inactive until its entry delay', () => {
     vi.useFakeTimers();
     renderConsent();
 
-    expect(screen.queryByRole('region', { name: 'Sua privacidade importa' })).not.toBeInTheDocument();
-    act(() => vi.advanceTimersByTime(999));
-    expect(screen.queryByRole('region', { name: 'Sua privacidade importa' })).not.toBeInTheDocument();
+    const banner = screen.getByRole('region', { hidden: true });
+    expect(banner).toHaveAttribute('aria-hidden', 'true');
+    expect(banner).toHaveAttribute('inert');
+    expect(within(banner).getByRole('button', { name: 'Recusar opcionais', hidden: true })).toHaveAttribute('tabindex', '-1');
+    expect(within(banner).getByRole('link', { name: 'Política de Cookies', hidden: true })).toHaveAttribute('tabindex', '-1');
+    act(() => vi.advanceTimersByTime(1599));
+    expect(banner).toHaveAttribute('aria-hidden', 'true');
     act(() => vi.advanceTimersByTime(1));
-    expect(screen.getByRole('region', { name: 'Sua privacidade importa' })).toBeInTheDocument();
+    expect(banner).toHaveAttribute('aria-hidden', 'false');
+    expect(within(banner).getByRole('button', { name: 'Recusar opcionais' })).toHaveAttribute('tabindex', '0');
     expect(document.activeElement).toBe(document.body);
     vi.useRealTimers();
   });
@@ -40,7 +45,7 @@ describe('ConsentProvider', () => {
   it('persists rejection after the delayed banner appears', async () => {
     vi.useFakeTimers();
     renderConsent();
-    act(() => vi.advanceTimersByTime(1000));
+    act(() => vi.advanceTimersByTime(1600));
     vi.useRealTimers();
     const user = userEvent.setup();
     await user.click(screen.getByRole('button', { name: 'Recusar opcionais' }));
@@ -73,7 +78,7 @@ describe('ConsentProvider', () => {
   it('opens an accessible preferences dialog and restores focus after Escape', async () => {
     vi.useFakeTimers();
     renderConsent();
-    act(() => vi.advanceTimersByTime(1000));
+    act(() => vi.advanceTimersByTime(1600));
     vi.useRealTimers();
     const user = userEvent.setup();
     const personalize = screen.getByRole('button', { name: 'Personalizar' });
@@ -94,7 +99,7 @@ describe('ConsentProvider', () => {
   it('saves customized categories and keeps the choice after remount', async () => {
     vi.useFakeTimers();
     const rendered = renderConsent();
-    act(() => vi.advanceTimersByTime(1000));
+    act(() => vi.advanceTimersByTime(1600));
     vi.useRealTimers();
     const user = userEvent.setup();
 

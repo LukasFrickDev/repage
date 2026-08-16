@@ -11,8 +11,6 @@ export const Banner = styled.aside`
   align-items: end;
   justify-content: space-between;
   gap: 1.5rem;
-  max-height: calc(100svh - 1.5rem);
-  overflow-y: auto;
   padding: clamp(0.8rem, 2.5vw, 1.15rem) clamp(0.85rem, 2.2vw, 1.75rem);
   border: 1px solid ${withAlpha(colors.neonBlue, 0.35)};
   border-radius: ${layout.radii.action};
@@ -21,13 +19,31 @@ export const Banner = styled.aside`
   color: ${colors.white};
   font-family: ${fonts.primary};
   pointer-events: none;
+  opacity: 0;
+  transform: translateY(0.5rem);
+  transition: opacity ${motion.duration.medium} ${motion.easing.standard}, transform ${motion.duration.medium} ${motion.easing.standard};
+  will-change: opacity, transform;
 
-  & > * { pointer-events: auto; }
+  &[data-visible='true'] {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  &[data-visible='true'] > * { pointer-events: auto; }
 
   @media (max-width: ${breakpoints.contentMax}) {
     align-items: stretch;
     flex-direction: column;
     gap: 0.75rem;
+  }
+
+  @media (max-height: 520px) {
+    max-height: calc(100svh - 1.5rem);
+    overflow-y: auto;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
   }
 `;
 
