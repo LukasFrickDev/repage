@@ -288,11 +288,15 @@ Cada rota pública deve possuir:
 - imagem social quando aplicável.
 Cases usam dados da fonte única.
 ## 18. Prerender
-Decisão:
+Decisão aceita no [`ADR 0001`](adr/0001-vite-static-prerender.md):
+- Vite SSG/build-time prerender;
+- React static APIs, `StaticRouter` e `hydrateRoot`;
 - manter React e Vite;
-- adicionar prerender às rotas públicas;
-- não migrar para Next.js na V1.
-O mecanismo exato permanece pendente.
+- não migrar para Next.js na V1;
+- sem SSR runtime;
+- frontend final continua estático.
+
+Essa decisão ainda será implementada na Entrega 9.
 A solução deve:
 - integrar ao build;
 - gerar HTML por rota e case;
@@ -881,7 +885,6 @@ Mitigar com validação, autorização e bloqueio de publicação.
 ### Retenção indefinida
 Mitigar definindo antes da produção e alinhando exclusão e backups.
 ## 58. Decisões adiadas
-- mecanismo exato de prerender;
 - provedor final de banco se a hospedagem falhar;
 - provedor alternativo de e-mail;
 - prazo de retenção de leads;
@@ -898,7 +901,6 @@ Mitigar definindo antes da produção e alinhando exclusão e backups.
 ## 59. Candidatos a ADR
 Criar ADR futuro para:
 - migração de framework;
-- mecanismo estrutural de prerender;
 - troca permanente de banco;
 - mudança de topologia;
 - mudança de hospedagem;
@@ -913,7 +915,6 @@ Não criar ADR retroativo para cada decisão já consolidada.
 ## 60. Pendências técnicas
 - Validar HomeHost.
 - Confirmar registrador.
-- Escolher prerender.
 - Confirmar Python e PostgreSQL.
 - Confirmar SSH, cron e Passenger.
 - Confirmar SMTP, SPF, DKIM e DMARC.

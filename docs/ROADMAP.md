@@ -194,7 +194,8 @@ A V1 deve servir como referência comercial da marca, apoiar prospecção e cond
   **Dependências:** Entregas 3, 4 e 8, conteúdo, slugs, imagens sociais, domínio e decisão do prerender.
   **Validações:** HTML, metadados, canonical, sitemap, robots, rotas geradas, hidratação e build.
   **Critério de conclusão:** páginas publicáveis geram HTML e metadados completos por fontes centralizadas.
-  **Spec:** obrigatória; a decisão estrutural de prerender pode exigir ADR.
+  **Spec:** [`0009-seo-sitemap-and-prerender.md`](specs/0009-seo-sitemap-and-prerender.md) — `approved`.
+  **ADR:** [`0001-vite-static-prerender.md`](adr/0001-vite-static-prerender.md) — `accepted`.
 
 ## Entrega 10 — CI/CD, deploy, backups e observabilidade
 

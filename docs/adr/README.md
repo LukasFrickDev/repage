@@ -59,4 +59,4 @@ A Arquitetura mostra o estado atual; o ADR preserva o motivo da escolha.
 
 | ADR | Status | Decisão |
 |---|---|---|
-| — | — | Nenhum ADR materializado |
+| [`0001-vite-static-prerender.md`](0001-vite-static-prerender.md) | `accepted` | Prerender estático preservando React/Vite, sem SSR runtime |
