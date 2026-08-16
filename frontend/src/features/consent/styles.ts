@@ -4,14 +4,16 @@ import { breakpoints, colors, fonts, layout, motion, withAlpha } from '../../sty
 export const Banner = styled.aside`
   position: fixed;
   z-index: 20;
-  right: 1rem;
-  bottom: 1rem;
-  left: 1rem;
+  right: clamp(0.75rem, 2vw, 1rem);
+  bottom: clamp(0.75rem, 2vw, 1rem);
+  left: clamp(0.75rem, 2vw, 1rem);
   display: flex;
   align-items: end;
   justify-content: space-between;
   gap: 1.5rem;
-  padding: 1.15rem clamp(1rem, 2.2vw, 1.75rem);
+  max-height: calc(100svh - 1.5rem);
+  overflow-y: auto;
+  padding: clamp(0.8rem, 2.5vw, 1.15rem) clamp(0.85rem, 2.2vw, 1.75rem);
   border: 1px solid ${withAlpha(colors.neonBlue, 0.35)};
   border-radius: ${layout.radii.action};
   background: ${withAlpha(colors.inkDeep, 0.98)};
@@ -25,7 +27,7 @@ export const Banner = styled.aside`
   @media (max-width: ${breakpoints.contentMax}) {
     align-items: stretch;
     flex-direction: column;
-    gap: 1rem;
+    gap: 0.75rem;
   }
 `;
 
@@ -43,7 +45,28 @@ export const BannerActions = styled.div`
   flex-wrap: wrap;
   justify-content: end;
   gap: 0.55rem;
-  @media (max-width: ${breakpoints.contentMax}) { justify-content: start; }
+  @media (max-width: ${breakpoints.tabletMax}) {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    justify-content: stretch;
+
+    & > button:first-child {
+      grid-column: 1;
+      grid-row: 1;
+    }
+
+    & > button:nth-child(2) {
+      grid-column: 1 / -1;
+      grid-row: 2;
+      justify-self: center;
+      min-width: 8.5rem;
+    }
+
+    & > button:last-child {
+      grid-column: 2;
+      grid-row: 1;
+    }
+  }
 `;
 
 const buttonBase = `
@@ -79,7 +102,12 @@ export const Dialog = styled.div`
   color: ${colors.ink};
   box-shadow: 0 1.5rem 4rem ${withAlpha(colors.ink, 0.35)};
 `;
-export const DialogHeader = styled.div` { display: flex; align-items: start; justify-content: space-between; gap: 1rem; }`;
+export const DialogHeader = styled.div`
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 1rem;
+`;
 export const DialogEyebrow = styled.p` { color: ${colors.highlight}; font-size: 0.72rem; font-weight: 750; letter-spacing: 0.09em; text-transform: uppercase; }`;
 export const DialogTitle = styled.h2` { margin-top: 0.35rem; font-size: clamp(1.7rem, 4vw, 2.4rem); letter-spacing: -0.045em; line-height: 1; }`;
 export const CloseButton = styled.button`
@@ -94,4 +122,16 @@ export const CategoryDescription = styled.p` { margin-top: 0.35rem; color: ${col
 export const RequiredStatus = styled.span` { flex: 0 0 auto; color: ${colors.graphite}; font-size: 0.78rem; font-weight: 700; }`;
 export const SwitchLabel = styled.label` { display: grid; justify-items: end; gap: 0.35rem; flex: 0 0 auto; color: ${colors.graphite}; font-size: 0.75rem; font-weight: 650; }`;
 export const Switch = styled.input` accent-color: ${colors.highlight}; width: 1.25rem; height: 1.25rem; `;
-export const DialogActions = styled.div` { display: flex; flex-wrap: wrap; justify-content: end; gap: 0.55rem; margin-top: 1.5rem; }`;
+export const DialogActions = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: end;
+  gap: 0.55rem;
+  margin-top: 1.5rem;
+
+  @media (max-width: ${breakpoints.tabletMax}) {
+    & > button:last-child {
+      margin-left: auto;
+    }
+  }
+`;

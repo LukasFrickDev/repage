@@ -1,7 +1,7 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { act, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ConsentProvider } from './ConsentProvider';
 import { CONSENT_STORAGE_KEY } from './types';
 
@@ -16,15 +16,34 @@ function renderConsent() {
 }
 
 describe('ConsentProvider', () => {
-  beforeEach(() => window.localStorage.clear());
+  beforeEach(() => {
+    vi.restoreAllMocks();
+    vi.useRealTimers();
+    window.localStorage.clear();
+  });
 
-  it('shows the initial banner without moving focus and persists rejection', async () => {
-    const user = userEvent.setup();
+  afterEach(() => vi.useRealTimers());
+
+  it('reveals the banner after its short entry delay without moving focus', async () => {
+    vi.useFakeTimers();
     renderConsent();
 
+    expect(screen.queryByRole('region', { name: 'Sua privacidade importa' })).not.toBeInTheDocument();
+    act(() => vi.advanceTimersByTime(999));
+    expect(screen.queryByRole('region', { name: 'Sua privacidade importa' })).not.toBeInTheDocument();
+    act(() => vi.advanceTimersByTime(1));
     expect(screen.getByRole('region', { name: 'Sua privacidade importa' })).toBeInTheDocument();
     expect(document.activeElement).toBe(document.body);
-    await user.click(screen.getByRole('button', { name: 'Rejeitar não essenciais' }));
+    vi.useRealTimers();
+  });
+
+  it('persists rejection after the delayed banner appears', async () => {
+    vi.useFakeTimers();
+    renderConsent();
+    act(() => vi.advanceTimersByTime(1000));
+    vi.useRealTimers();
+    const user = userEvent.setup();
+    await user.click(screen.getByRole('button', { name: 'Recusar opcionais' }));
 
     expect(screen.queryByRole('region', { name: 'Sua privacidade importa' })).not.toBeInTheDocument();
     expect(JSON.parse(window.localStorage.getItem(CONSENT_STORAGE_KEY) ?? '{}')).toMatchObject({
@@ -35,13 +54,34 @@ describe('ConsentProvider', () => {
     });
   });
 
-  it('opens an accessible preferences dialog and restores focus after Escape', async () => {
-    const user = userEvent.setup();
+  it('reveals the banner immediately when reduced motion is preferred', () => {
+    vi.spyOn(window, 'matchMedia').mockImplementation((query) => ({
+      matches: query === '(prefers-reduced-motion: reduce)',
+      media: query,
+      onchange: null,
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+    }));
+
     renderConsent();
+    expect(screen.getByRole('region', { name: 'Sua privacidade importa' })).toBeInTheDocument();
+  });
+
+  it('opens an accessible preferences dialog and restores focus after Escape', async () => {
+    vi.useFakeTimers();
+    renderConsent();
+    act(() => vi.advanceTimersByTime(1000));
+    vi.useRealTimers();
+    const user = userEvent.setup();
     const personalize = screen.getByRole('button', { name: 'Personalizar' });
 
     await user.click(personalize);
-    expect(screen.getByRole('dialog', { name: 'Preferências de cookies' })).toBeInTheDocument();
+    const dialog = screen.getByRole('dialog', { name: 'Preferências de cookies' });
+    expect(dialog).toBeInTheDocument();
+    expect(within(dialog).getByRole('button', { name: 'Recusar opcionais' })).toBeInTheDocument();
     expect(screen.getByRole('checkbox', { name: 'Permitir Analíticos' })).not.toBeChecked();
     expect(screen.getByRole('checkbox', { name: 'Permitir Publicitários' })).not.toBeChecked();
     expect(document.activeElement).toBe(screen.getByRole('button', { name: 'Fechar preferências' }));
@@ -52,8 +92,11 @@ describe('ConsentProvider', () => {
   });
 
   it('saves customized categories and keeps the choice after remount', async () => {
-    const user = userEvent.setup();
+    vi.useFakeTimers();
     const rendered = renderConsent();
+    act(() => vi.advanceTimersByTime(1000));
+    vi.useRealTimers();
+    const user = userEvent.setup();
 
     await user.click(screen.getByRole('button', { name: 'Personalizar' }));
     await user.click(screen.getByRole('checkbox', { name: 'Permitir Analíticos' }));

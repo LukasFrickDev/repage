@@ -1,6 +1,6 @@
 # 0008 — Consentimento, Analytics e páginas legais
 
-- **Status:** draft
+- **Status:** approved
 - **Responsável:** Lukas Frick
 - **Data:** 16 de agosto de 2026
 - **Branch-base:** `main`
@@ -254,7 +254,7 @@ Exibir na primeira visita enquanto não houver escolha válida.
 Ações principais:
 
 - `Aceitar todos`;
-- `Rejeitar não essenciais`;
+- `Recusar opcionais`;
 - `Personalizar`.
 
 O banner deve:
@@ -268,7 +268,7 @@ O banner deve:
 - não impedir navegação;
 - não usar linguagem manipulativa.
 
-`Aceitar todos` e `Rejeitar não essenciais` devem ter legibilidade e acessibilidade equivalentes.
+`Aceitar todos` e `Recusar opcionais` devem ter legibilidade e acessibilidade equivalentes.
 
 ## 12. Central de preferências
 

@@ -91,7 +91,7 @@ export function ConsentPreferencesDialog() {
               <S.CategoryTitle>Necessários</S.CategoryTitle>
               <S.CategoryDescription>Funcionam para segurança, navegação e preferências essenciais do site. Sempre ativos e não editáveis.</S.CategoryDescription>
             </S.CategoryText>
-            <S.RequiredStatus aria-label="Necessários sempre ativos">Obrigatórios</S.RequiredStatus>
+            <S.RequiredStatus aria-label="Necessários sempre ativos">Sempre ativo</S.RequiredStatus>
           </S.Category>
           <S.Category>
             <S.CategoryText>
@@ -116,7 +116,7 @@ export function ConsentPreferencesDialog() {
         </S.CategoryList>
 
         <S.DialogActions>
-          <S.SecondaryButton type="button" onClick={rejectNonEssential}>Rejeitar não essenciais</S.SecondaryButton>
+          <S.SecondaryButton type="button" onClick={rejectNonEssential}>Recusar opcionais</S.SecondaryButton>
           <S.SecondaryButton type="button" onClick={acceptAll}>Aceitar todos</S.SecondaryButton>
           <S.PrimaryButton type="button" onClick={save}>Salvar preferências</S.PrimaryButton>
         </S.DialogActions>
