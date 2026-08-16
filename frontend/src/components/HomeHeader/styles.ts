@@ -9,13 +9,11 @@ export const Header = styled(motion.header)<{ $scrolled: boolean; $open: boolean
   z-index: 20;
   border-bottom: 1px solid transparent;
   background: transparent;
-  transition: background ${motionTokens.duration.medium} ${motionTokens.easing.standard}, border-color ${motionTokens.duration.medium} ${motionTokens.easing.standard}, box-shadow ${motionTokens.duration.medium} ${motionTokens.easing.standard};
 
   ${({ $scrolled, $open }) => ($scrolled || $open) && css`
     border-color: rgba(245, 242, 236, 0.11);
-    background: rgba(16, 24, 39, 0.9);
+    background: ${colors.inkHeader};
     box-shadow: 0 10px 32px rgba(4, 8, 17, 0.15);
-    backdrop-filter: blur(12px);
   `}
 `;
 

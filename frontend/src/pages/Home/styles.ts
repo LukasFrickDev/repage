@@ -66,7 +66,6 @@ export const BrandEntrance = styled.div`
   pointer-events: none;
   background: ${colors.backgroundSecondary};
   animation: ${entranceLift} 1.48s cubic-bezier(0.76, 0, 0.24, 1) forwards;
-  will-change: transform;
 
   &::before {
     content: '';

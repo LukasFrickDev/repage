@@ -20,13 +20,9 @@ export const Banner = styled.aside`
   font-family: ${fonts.primary};
   pointer-events: none;
   opacity: 0;
-  transform: translateY(0.5rem);
-  transition: opacity ${motion.duration.medium} ${motion.easing.standard}, transform ${motion.duration.medium} ${motion.easing.standard};
-  will-change: opacity, transform;
 
   &[data-visible='true'] {
     opacity: 1;
-    transform: translateY(0);
   }
 
   &[data-visible='true'] > * { pointer-events: auto; }
@@ -42,9 +38,6 @@ export const Banner = styled.aside`
     overflow-y: auto;
   }
 
-  @media (prefers-reduced-motion: reduce) {
-    transition: none;
-  }
 `;
 
 export const BannerCopy = styled.div` { max-width: 43rem; }`;
