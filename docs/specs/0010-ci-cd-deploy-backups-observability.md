@@ -395,6 +395,10 @@ Hoje não existe `.github/` na `main`.
 
 A Entrega 10 deve criar workflows versionados.
 
+O workflow `.github/workflows/ci.yml` foi materializado nesta Fase 2 com jobs
+independentes de frontend e backend. A validação definitiva ainda depende da
+execução real no GitHub.
+
 Usar actions oficiais sempre que possível e shell/OpenSSH para deploy.
 
 Não introduzir action de terceiro para SSH/SFTP quando as ferramentas nativas do runner resolverem.
