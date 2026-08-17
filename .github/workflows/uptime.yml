@@ -1,0 +1,38 @@
+name: Uptime
+
+on:
+  schedule:
+    - cron: '17 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: Check public availability
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check homepage
+        run: |
+          set -Eeuo pipefail
+          if ! curl --fail --silent --show-error --location --max-time 15 --retry 3 --retry-delay 2 --retry-max-time 60 https://repage.com.br/ >/dev/null; then
+            echo 'Uptime check failed: homepage.' >&2
+            exit 1
+          fi
+
+      - name: Check API health
+        run: |
+          set -Eeuo pipefail
+          if ! curl --fail --silent --show-error --location --max-time 15 --retry 3 --retry-delay 2 --retry-max-time 60 https://api.repage.com.br/health/ >/dev/null; then
+            echo 'Uptime check failed: API health.' >&2
+            exit 1
+          fi
+
+      - name: Check API readiness
+        run: |
+          set -Eeuo pipefail
+          if ! curl --fail --silent --show-error --location --max-time 15 --retry 3 --retry-delay 2 --retry-max-time 60 https://api.repage.com.br/health/ready/ >/dev/null; then
+            echo 'Uptime check failed: API readiness.' >&2
+            exit 1
+          fi

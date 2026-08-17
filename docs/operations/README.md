@@ -64,3 +64,5 @@ Não criar arquivos vazios antecipadamente.
 | Procedimento | Ambiente | Última validação |
 |---|---|---|
 | [`production-deploy.md`](production-deploy.md) | HomeHost + Neon | Componentes operacionais validados; deploy end-to-end pendente |
+| [`production-smtp-and-cron.md`](production-smtp-and-cron.md) | HomeHost Python App + SMTP | SMTP e mecanismo de cron validados; ativação final pendente |
+| [`production-observability.md`](production-observability.md) | HomeHost + GitHub Actions | Componentes versionados; evidência de produção pendente |

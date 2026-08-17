@@ -686,7 +686,7 @@ Servidor SMTP real validado:
 
 - `mail.repage.com.br`;
 - porta `465`;
-- SSL/TLS;
+- SSL implícito (`EMAIL_USE_SSL=True` e `EMAIL_USE_TLS=False`);
 - autenticação obrigatória e funcional.
 
 Não ativar simultaneamente TLS e SSL.
@@ -747,6 +747,13 @@ cleanup_idempotency
 
 uma vez ao dia.
 
+Na Fase 4, os dois jobs foram materializados em wrappers versionados e
+allowlisted que chamam `cloudlinux-selector`, validam o `returncode` interno
+com o parser existente e não imprimem stdout/stderr bruto. Os horários finais
+documentados são `*/15 * * * *` para retry e `17 3 * * *` para cleanup, na hora
+local do servidor (`America/Sao_Paulo`, UTC-03:00). A ativação no cPanel ainda
+depende de implantação real.
+
 ### Backup PostgreSQL
 
 Executar rotina diária definida na seção de backups.
@@ -776,6 +783,13 @@ Requisitos:
 - sem traceback para visitante.
 
 Não adicionar Sentry apenas por preferência.
+
+O logging Django foi materializado com biblioteca padrão: formatter JSON
+sanitizado em stdout, nível configurável por `DJANGO_LOG_LEVEL`, request ID,
+método, path sem query string, status e duração monotônica no evento
+`request_completed`. O contexto do request ID é limpo ao final da request.
+Eventos de e-mail existentes continuam limitados a códigos e identificadores
+operacionais permitidos.
 
 ## 38. Passenger logs
 
@@ -817,6 +831,11 @@ Referência inicial:
 Falha do workflow é evidência de indisponibilidade e deve gerar a notificação normal do GitHub para o operador.
 
 Não fazer POST de Lead a cada monitoramento.
+
+O workflow `.github/workflows/uptime.yml` foi materializado com
+`17 * * * *`, `workflow_dispatch`, `contents: read`, sem secrets e sem
+Environment `production`. A execução horária real permanece pendente até o
+workflow estar na default branch/main.
 
 ## 41. Smoke pós-deploy
 

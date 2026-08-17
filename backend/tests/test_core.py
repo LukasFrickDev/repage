@@ -1,3 +1,5 @@
+import json
+import logging
 import os
 import subprocess
 import sys
@@ -7,9 +9,11 @@ from pathlib import Path
 import pytest
 from django.db import OperationalError
 from django.conf import settings
-from django.test import Client
+from django.test import Client, RequestFactory
 
+from apps.core.middleware import RequestIDMiddleware
 from apps.leads.protection import ProtectionUnavailable
+from apps.core.logging import StructuredFormatter, request_id_context
 from config import settings as project_settings
 
 
@@ -27,6 +31,57 @@ def test_health_returns_simple_success_and_request_id(client):
     assert response.status_code == 200
     assert response.json() == {'status': 'ok'}
     assert response['X-Request-ID']
+
+
+def test_request_logging_is_correlated_and_sanitized(client, caplog):
+    sensitive_value = 'PII-from-test-payload@example.com'
+
+    with caplog.at_level(logging.INFO):
+        response = client.post(
+            f'/health/?email={sensitive_value}',
+            data={'message': sensitive_value},
+        )
+
+    request_events = [record for record in caplog.records if record.msg == 'request_completed']
+    assert request_events
+    event = request_events[-1]
+    assert response.status_code == event.status_code == 405
+    assert response['X-Request-ID'] == event.request_id
+    assert event.method == 'POST'
+    assert event.path == '/health/'
+    assert event.duration_ms >= 0
+    assert sensitive_value not in caplog.text
+    assert request_id_context.get() is None
+
+
+def test_structured_formatter_emits_only_allowlisted_fields():
+    record = logging.LogRecord('test', logging.INFO, __file__, 1, 'test_event', (), None)
+    record.method = 'GET'
+    record.arbitrary_secret = 'must-not-be-serialized'
+
+    payload = json.loads(StructuredFormatter().format(record))
+
+    assert payload['event'] == 'test_event'
+    assert payload['method'] == 'GET'
+    assert 'arbitrary_secret' not in payload
+
+
+def test_request_logging_cleans_context_when_downstream_raises(caplog):
+    sensitive_value = 'secret-error-payload'
+
+    def raise_error(request):
+        raise RuntimeError(sensitive_value)
+
+    request = RequestFactory().get(f'/failure/?value={sensitive_value}')
+    middleware = RequestIDMiddleware(raise_error)
+
+    with caplog.at_level(logging.INFO), pytest.raises(RuntimeError):
+        middleware(request)
+
+    request_events = [record for record in caplog.records if record.msg == 'request_completed']
+    assert request_events[-1].status_code == 500
+    assert sensitive_value not in caplog.text
+    assert request_id_context.get() is None
 
 
 def test_readiness_reports_postgres_as_ready(client):
@@ -64,6 +119,7 @@ def load_settings_with_environment(code='import config.settings', **overrides):
         'DJANGO_ENVIRONMENT',
         'DJANGO_SECRET_KEY',
         'DJANGO_DEBUG',
+        'DJANGO_LOG_LEVEL',
         'DJANGO_ALLOWED_HOSTS',
         'DJANGO_STATIC_ROOT',
         'DJANGO_CORS_ALLOWED_ORIGINS',
@@ -146,11 +202,18 @@ print(settings.SECURE_CONTENT_TYPE_NOSNIFF)
 print(settings.SECURE_REFERRER_POLICY)
 print(settings.X_FRAME_OPTIONS)
 print(hasattr(settings, 'SECURE_PROXY_SSL_HEADER'))
+print(settings.EMAIL_BACKEND)
+print(settings.EMAIL_HOST)
+print(settings.EMAIL_PORT)
+print(settings.EMAIL_USE_SSL)
+print(settings.EMAIL_USE_TLS)
+print(settings.EMAIL_TIMEOUT)
 """,
         DJANGO_ENVIRONMENT='production',
         DJANGO_SECRET_KEY='x' * 64,
         DJANGO_DEBUG='False',
         DJANGO_ALLOWED_HOSTS='api.example.com',
+        DJANGO_LOG_LEVEL='INFO',
         DJANGO_STATIC_ROOT='/srv/repage/static',
         DJANGO_CORS_ALLOWED_ORIGINS='https://repage.com.br',
         DJANGO_CSRF_TRUSTED_ORIGINS='https://repage.com.br',
@@ -164,11 +227,11 @@ print(hasattr(settings, 'SECURE_PROXY_SSL_HEADER'))
         EMAIL_FROM_ADDRESS='notifications@example.com',
         EMAIL_INTERNAL_RECIPIENT='contact@example.com',
         EMAIL_HOST='smtp.example.internal',
-        EMAIL_PORT='587',
+        EMAIL_PORT='465',
         EMAIL_HOST_USER='smtp-user',
         EMAIL_HOST_PASSWORD='dummy-password',
-        EMAIL_USE_TLS='True',
-        EMAIL_USE_SSL='False',
+        EMAIL_USE_TLS='False',
+        EMAIL_USE_SSL='True',
         EMAIL_TIMEOUT='5',
     )
 
@@ -186,6 +249,12 @@ print(hasattr(settings, 'SECURE_PROXY_SSL_HEADER'))
         'same-origin',
         'DENY',
         'False',
+        'django.core.mail.backends.smtp.EmailBackend',
+        'smtp.example.internal',
+        '465',
+        'True',
+        'False',
+        '5',
     ]
 
 
@@ -202,6 +271,27 @@ def test_phase_one_cache_and_protection_settings():
     assert settings.EMAIL_DELIVERY_LEASE_SECONDS == 300
     assert settings.EMAIL_RETRY_BATCH_SIZE == 10
     assert settings.EMAIL_RETRY_DELAYS_SECONDS == (900, 3600, 21600, 86400)
+
+
+def test_settings_reject_invalid_log_level():
+    result = load_settings_with_environment(
+        DJANGO_ENVIRONMENT='development',
+        DJANGO_LOG_LEVEL='TRACE',
+    )
+
+    assert result.returncode != 0
+    assert 'DJANGO_LOG_LEVEL' in result.stderr
+
+
+def test_settings_reject_mutually_exclusive_email_security_modes():
+    result = load_settings_with_environment(
+        DJANGO_ENVIRONMENT='development',
+        EMAIL_USE_TLS='True',
+        EMAIL_USE_SSL='True',
+    )
+
+    assert result.returncode != 0
+    assert 'não podem estar ativos simultaneamente' in result.stderr
 
 
 @pytest.mark.parametrize(
@@ -239,11 +329,11 @@ def test_production_rejects_missing_critical_configuration(missing_name):
         'EMAIL_FROM_ADDRESS': 'notifications@example.com',
         'EMAIL_INTERNAL_RECIPIENT': 'contact@example.com',
         'EMAIL_HOST': 'smtp.example.internal',
-        'EMAIL_PORT': '587',
+        'EMAIL_PORT': '465',
         'EMAIL_HOST_USER': 'smtp-user',
         'EMAIL_HOST_PASSWORD': 'production-only-test-password',
-        'EMAIL_USE_TLS': 'True',
-        'EMAIL_USE_SSL': 'False',
+        'EMAIL_USE_TLS': 'False',
+        'EMAIL_USE_SSL': 'True',
         'EMAIL_TIMEOUT': '5',
     }
     production_environment.pop(missing_name)
