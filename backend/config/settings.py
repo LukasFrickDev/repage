@@ -102,6 +102,7 @@ if ENVIRONMENT == 'production':
         'HOST': required_env('POSTGRES_HOST'),
         'PORT': required_env('POSTGRES_PORT'),
     }
+    postgres_sslmode = 'require'
 else:
     postgres_config = {
         'NAME': os.getenv('POSTGRES_DB', 'repage'),
@@ -110,8 +111,15 @@ else:
         'HOST': os.getenv('POSTGRES_HOST', '127.0.0.1'),
         'PORT': os.getenv('POSTGRES_PORT', '5432'),
     }
+    postgres_sslmode = os.getenv('POSTGRES_SSLMODE', 'prefer').strip()
 
-DATABASES = {'default': {'ENGINE': 'django.db.backends.postgresql', **postgres_config}}
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        **postgres_config,
+        'OPTIONS': {'sslmode': postgres_sslmode},
+    }
+}
 
 CACHES = {
     'default': {
@@ -131,7 +139,22 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
+STATIC_ROOT = (
+    Path(required_env('DJANGO_STATIC_ROOT'))
+    if ENVIRONMENT == 'production'
+    else Path(os.getenv('DJANGO_STATIC_ROOT', BASE_DIR / 'staticfiles'))
+)
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+if ENVIRONMENT == 'production':
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SESSION_COOKIE_HTTPONLY = True
+    SESSION_COOKIE_SAMESITE = 'Lax'
+    SECURE_SSL_REDIRECT = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    SECURE_REFERRER_POLICY = 'same-origin'
+    X_FRAME_OPTIONS = 'DENY'
 
 if ENVIRONMENT == 'production':
     CORS_ALLOWED_ORIGINS = env_list('DJANGO_CORS_ALLOWED_ORIGINS')

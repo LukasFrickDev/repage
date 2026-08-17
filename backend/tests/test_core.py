@@ -58,13 +58,14 @@ def test_readiness_hides_cache_failure(client):
     assert 'secret cache details' not in response.content.decode()
 
 
-def load_settings_with_environment(**overrides):
+def load_settings_with_environment(code='import config.settings', **overrides):
     environment = os.environ.copy()
     for name in (
         'DJANGO_ENVIRONMENT',
         'DJANGO_SECRET_KEY',
         'DJANGO_DEBUG',
         'DJANGO_ALLOWED_HOSTS',
+        'DJANGO_STATIC_ROOT',
         'DJANGO_CORS_ALLOWED_ORIGINS',
         'PRIVACY_POLICY_VERSION',
         'POSTGRES_DB',
@@ -72,6 +73,7 @@ def load_settings_with_environment(**overrides):
         'POSTGRES_PASSWORD',
         'POSTGRES_HOST',
         'POSTGRES_PORT',
+        'POSTGRES_SSLMODE',
         'EMAIL_FROM_ADDRESS',
         'EMAIL_INTERNAL_RECIPIENT',
         'EMAIL_HOST',
@@ -97,7 +99,7 @@ def load_settings_with_environment(**overrides):
         environment.pop(name, None)
     environment.update(overrides)
     return subprocess.run(
-        [sys.executable, '-c', 'import config.settings'],
+        [sys.executable, '-c', code],
         cwd=BACKEND_DIR,
         env=environment,
         capture_output=True,
@@ -110,6 +112,81 @@ def test_development_keeps_local_configuration_defaults():
     result = load_settings_with_environment(DJANGO_ENVIRONMENT='development')
 
     assert result.returncode == 0, result.stderr
+
+
+def test_development_uses_local_static_root_and_postgres_ssl_default():
+    assert project_settings.STATIC_ROOT == BACKEND_DIR / 'staticfiles'
+    assert project_settings.DATABASES['default']['OPTIONS'] == {'sslmode': 'prefer'}
+
+
+def test_development_allows_configuring_postgres_sslmode():
+    result = load_settings_with_environment(
+        "from config import settings; print(settings.DATABASES['default']['OPTIONS'])",
+        DJANGO_ENVIRONMENT='development',
+        POSTGRES_SSLMODE='verify-full',
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert result.stdout.strip() == "{'sslmode': 'verify-full'}"
+
+
+def test_production_applies_static_root_postgres_tls_and_security_hardening():
+    result = load_settings_with_environment(
+        """
+from config import settings
+print(settings.STATIC_ROOT)
+print(settings.DATABASES['default']['ENGINE'])
+print(settings.DATABASES['default']['OPTIONS'])
+print(settings.SESSION_COOKIE_SECURE)
+print(settings.CSRF_COOKIE_SECURE)
+print(settings.SESSION_COOKIE_HTTPONLY)
+print(settings.SESSION_COOKIE_SAMESITE)
+print(settings.SECURE_SSL_REDIRECT)
+print(settings.SECURE_CONTENT_TYPE_NOSNIFF)
+print(settings.SECURE_REFERRER_POLICY)
+print(settings.X_FRAME_OPTIONS)
+print(hasattr(settings, 'SECURE_PROXY_SSL_HEADER'))
+""",
+        DJANGO_ENVIRONMENT='production',
+        DJANGO_SECRET_KEY='x' * 64,
+        DJANGO_DEBUG='False',
+        DJANGO_ALLOWED_HOSTS='api.example.com',
+        DJANGO_STATIC_ROOT='/srv/repage/static',
+        DJANGO_CORS_ALLOWED_ORIGINS='https://repage.com.br',
+        DJANGO_CSRF_TRUSTED_ORIGINS='https://repage.com.br',
+        PRIVACY_POLICY_VERSION='pre-launch-v1',
+        POSTGRES_DB='repage',
+        POSTGRES_USER='repage',
+        POSTGRES_PASSWORD='dummy-password',
+        POSTGRES_HOST='postgres.example.internal',
+        POSTGRES_PORT='5432',
+        POSTGRES_SSLMODE='disable',
+        EMAIL_FROM_ADDRESS='notifications@example.com',
+        EMAIL_INTERNAL_RECIPIENT='contact@example.com',
+        EMAIL_HOST='smtp.example.internal',
+        EMAIL_PORT='587',
+        EMAIL_HOST_USER='smtp-user',
+        EMAIL_HOST_PASSWORD='dummy-password',
+        EMAIL_USE_TLS='True',
+        EMAIL_USE_SSL='False',
+        EMAIL_TIMEOUT='5',
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert result.stdout.splitlines() == [
+        '/srv/repage/static',
+        'django.db.backends.postgresql',
+        "{'sslmode': 'require'}",
+        'True',
+        'True',
+        'True',
+        'Lax',
+        'True',
+        'True',
+        'same-origin',
+        'DENY',
+        'False',
+    ]
 
 
 def test_phase_one_cache_and_protection_settings():
@@ -133,6 +210,7 @@ def test_phase_one_cache_and_protection_settings():
         'DJANGO_SECRET_KEY',
         'DJANGO_DEBUG',
         'DJANGO_ALLOWED_HOSTS',
+        'DJANGO_STATIC_ROOT',
         'DJANGO_CORS_ALLOWED_ORIGINS',
         'PRIVACY_POLICY_VERSION',
         'POSTGRES_DB',
@@ -150,6 +228,7 @@ def test_production_rejects_missing_critical_configuration(missing_name):
         'DJANGO_SECRET_KEY': 'production-only-test-secret',
         'DJANGO_DEBUG': 'False',
         'DJANGO_ALLOWED_HOSTS': 'api.example.com',
+        'DJANGO_STATIC_ROOT': '/srv/repage/static',
         'DJANGO_CORS_ALLOWED_ORIGINS': 'https://repage.com.br',
         'PRIVACY_POLICY_VERSION': 'pre-launch-v1',
         'POSTGRES_DB': 'repage',

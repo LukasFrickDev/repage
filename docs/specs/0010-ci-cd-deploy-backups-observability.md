@@ -302,7 +302,11 @@ Readiness deve continuar verificando PostgreSQL e o cache de proteção.
 
 Adicionar/configurar `STATIC_ROOT` apropriado para produção.
 
-O caminho real deve ser definido somente depois de validar o document root do `api.repage.com.br`/Python App.
+O document root público de `api.repage.com.br` foi validado como
+`/home/re190924/api.repage.com.br`; arquivos colocados ali são servidos pelo
+LiteSpeed. `/home/re190924/repage_backend/public` não é o document root desse
+acesso. O destino real planejado para `collectstatic` é
+`/home/re190924/api.repage.com.br/static`, recebido por variável de ambiente.
 
 Preferir configuração por ambiente quando o caminho absoluto depender da conta.
 
@@ -347,6 +351,11 @@ Depois de validar HTTPS/proxy, configurar de forma explícita e testada:
 - `SECURE_REFERRER_POLICY` restritiva e compatível;
 - `X_FRAME_OPTIONS='DENY'`;
 - hosts/origins explícitos.
+
+O probe WSGI real confirmou `wsgi.url_scheme=https`, `HTTPS=on`, porta 443 e
+nenhum `X-Forwarded-Proto`/`X-Forwarded-SSL`. Portanto, a aplicação não deve
+configurar `SECURE_PROXY_SSL_HEADER` nem confiar nesses headers; `SECURE_SSL_REDIRECT=True`
+é compatível com o comportamento comprovado.
 
 Executar:
 
