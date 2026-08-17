@@ -1,6 +1,5 @@
 import { ArrowRight } from 'lucide-react';
 import { PrimaryCta } from '../../components/PrimaryCta';
-import { useReducedMotion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { routeMetadata, useRouteMetadata } from '../../app/routeMetadata';
 import { FeaturedProjectsSection } from '../../components/FeaturedProjectsSection';
@@ -12,10 +11,11 @@ import { SignatureSection } from '../../components/SignatureSection';
 import { ValuePropositionSection } from '../../components/ValuePropositionSection';
 import { heroContent } from '../../content/repageContent';
 import { ANALYTICS_EVENT_NAMES, trackEvent } from '../../services/analytics';
+import { useHydrationSafeReducedMotion } from '../../hooks/useHydrationSafeReducedMotion';
 import * as S from './styles';
 
 const Home = () => {
-  const prefersReducedMotion = useReducedMotion();
+  const prefersReducedMotion = useHydrationSafeReducedMotion();
   const entranceDelay = prefersReducedMotion ? 0 : 0.68;
   useRouteMetadata(routeMetadata.home);
 

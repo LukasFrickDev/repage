@@ -2,7 +2,6 @@ import {
   motion,
   type MotionValue,
   useMotionValue,
-  useReducedMotion,
   useScroll,
   useSpring,
   useTransform,
@@ -11,6 +10,7 @@ import { type CSSProperties, useRef } from 'react';
 import { processSectionContent } from '../../content/repageContent';
 import { breakpoints, colors, homepageTokens } from '../../styles/theme';
 import * as S from './styles';
+import { useHydrationSafeReducedMotion } from '../../hooks/useHydrationSafeReducedMotion';
 
 type AnchorAlignment = 'start' | 'center' | 'end';
 
@@ -261,7 +261,7 @@ function ProcessStep({ anchor, index, progress, range, reducedMotion, step }: Pr
 }
 
 export function ProcessSection() {
-  const prefersReducedMotion = Boolean(useReducedMotion());
+  const prefersReducedMotion = useHydrationSafeReducedMotion();
   const compactJourney = typeof window !== 'undefined'
     && window.matchMedia(`(max-width: ${breakpoints.contentMax})`).matches;
   const phoneJourney = typeof window !== 'undefined'

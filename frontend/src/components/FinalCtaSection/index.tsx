@@ -1,12 +1,13 @@
-import { useReducedMotion, useScroll, useSpring, useTransform } from 'framer-motion';
+import { useScroll, useSpring, useTransform } from 'framer-motion';
 import { useRef, useState } from 'react';
 import { finalCtaSectionContent } from '../../content/repageContent';
 import { LeadForm } from '../../features/lead-form';
 import * as S from './styles';
 import { ANALYTICS_EVENT_NAMES, trackEvent } from '../../services/analytics';
+import { useHydrationSafeReducedMotion } from '../../hooks/useHydrationSafeReducedMotion';
 
 export function FinalCtaSection() {
-  const prefersReducedMotion = Boolean(useReducedMotion());
+  const prefersReducedMotion = useHydrationSafeReducedMotion();
   const [formInteracted, setFormInteracted] = useState(false);
   const sectionRef = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({

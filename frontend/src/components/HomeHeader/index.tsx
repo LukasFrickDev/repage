@@ -1,10 +1,10 @@
 import { ArrowRight, Menu, X } from 'lucide-react';
-import { useReducedMotion } from 'framer-motion';
 import { useEffect, useRef, useState } from 'react';
 import type { KeyboardEvent } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { headerNavigation, heroContent } from '../../content/repageContent';
 import { ANALYTICS_EVENT_NAMES, trackEvent } from '../../services/analytics';
+import { useHydrationSafeReducedMotion } from '../../hooks/useHydrationSafeReducedMotion';
 import * as S from './styles';
 
 export function HomeHeader() {
@@ -13,7 +13,7 @@ export function HomeHeader() {
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const mobilePanelRef = useRef<HTMLDivElement>(null);
   const location = useLocation();
-  const prefersReducedMotion = useReducedMotion();
+  const prefersReducedMotion = useHydrationSafeReducedMotion();
   const closeMenu = () => setMenuOpen(false);
   const isNavigationItemActive = (href: string) => {
     const [path, hash] = href.split('#');

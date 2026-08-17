@@ -1,5 +1,14 @@
 import { expect, test, type Page } from '@playwright/test';
 
+const CONSENT_STORAGE_KEY = 'repage:consent:v1';
+const REJECTED_CONSENT = JSON.stringify({
+  version: 1,
+  necessary: true,
+  analytics: false,
+  advertising: false,
+  updatedAt: '2026-01-01T00:00:00.000Z',
+});
+
 type BrowserIssue = { kind: string; message: string };
 
 function collectBrowserIssues(page: Page): BrowserIssue[] {
@@ -58,7 +67,12 @@ test('keeps SPA navigation, metadata, back/forward and anchor focus after hydrat
     if (request.resourceType() === 'document') documentRequests.push(request.url());
   });
 
+  await page.addInitScript(({ key, value }) => window.localStorage.setItem(key, value), {
+    key: CONSENT_STORAGE_KEY,
+    value: REJECTED_CONSENT,
+  });
   await page.goto('/', { waitUntil: 'networkidle' });
+  await expect(page.getByRole('region', { name: 'Sua privacidade importa' })).toHaveCount(0);
   const initialDocumentRequests = documentRequests.length;
   await page.locator('[data-home-section="hero"]').getByRole('link', { name: 'Solicitar orçamento' }).click();
   await expect(page).toHaveURL(/\/#contato$/);
@@ -88,7 +102,7 @@ test('keeps SPA navigation, metadata, back/forward and anchor focus after hydrat
   await expect(page.getByRole('heading', { level: 1, name: 'Axium' })).toBeVisible();
   expect((await routeState(page)).canonical).toBe('https://repage.com.br/portfolio/axium');
 
-  await page.getByRole('link', { name: 'Privacidade' }).click();
+  await page.getByRole('navigation', { name: 'Navegação do rodapé' }).getByRole('link', { name: 'Privacidade' }).click();
   await expect(page).toHaveURL(/\/privacidade$/);
   await expect(page.locator('script[type="application/ld+json"][data-repage-structured-data="true"]')).toHaveCount(0);
   const privacy = await routeState(page);
