@@ -392,13 +392,14 @@ CSP continua evolutiva e só deve ser aplicada em enforcement se os testes reais
 
 GitHub continua sendo fonte oficial de código e o mecanismo aprovado de CI/deploy.
 
-Hoje não existe `.github/` na `main`.
-
 A Entrega 10 deve criar workflows versionados.
 
 O workflow de deploy foi materializado em `.github/workflows/deploy.yml` com
-`workflow_run` do CI bem-sucedido na `main` e `workflow_dispatch` restrito à
-`main`. A execução real end-to-end permanece pendente.
+`workflow_run` do CI bem-sucedido na `main`, aceitando eventos `push` e
+`workflow_dispatch` do próprio CI. Redeploy manual começa pelo
+`workflow_dispatch` do CI na `main`; `deploy.yml` não possui caminho manual
+direto. O deploy também confirma que o SHA aprovado continua sendo o HEAD de
+`origin/main`. A execução real end-to-end permanece pendente.
 
 O workflow `.github/workflows/ci.yml` foi materializado nesta Fase 2 com jobs
 independentes de frontend e backend. A validação definitiva ainda depende da
@@ -585,9 +586,14 @@ Preservar invariantes da Arquitetura:
 7. validar `404.html`;
 8. smoke após publicação.
 
-SSH/SFTP por chave já foram validados na conta. A implementação deve fechar o
-mecanismo de transferência versionado usando as ferramentas nativas
-compatíveis, sem expor a chave privada.
+O pacote mantém manifesto de arquivos gerenciados. A publicação remove apenas
+entradas do manifesto anterior que não existem no novo; arquivos externos
+desconhecidos do document root permanecem. O manifesto e archive anteriores
+formam o rollback inicial, sem arquitetura de releases ou symlinks.
+
+SSH/SFTP por chave já foram validados na conta. A implementação usa
+OpenSSH/SCP/tar e manifestos de arquivos gerenciados; o workflow aborta se o
+SHA aprovado não for o HEAD atual de `origin/main`.
 
 Preferir OpenSSH/SCP/tar ou ferramenta nativa equivalente, sem action externa desnecessária.
 
@@ -634,6 +640,10 @@ A cada deploy:
 12. inspecionar logs diante de falha.
 
 Não manter `.env` dentro do repositório ou pacote de deploy.
+
+O resultado JSON do `cloudlinux-selector --json` é validado antes do restart:
+`result` deve ser `success`, o campo Base64 deve decodificar para um resultado
+válido e o `returncode` interno deve ser `0`.
 
 ## 31. Migrations
 
@@ -821,7 +831,7 @@ Frontend:
 - `/cookies` 200;
 - `/sitemap.xml` 200;
 - `/robots.txt` 200 e deny-by-default durante Entrega 10;
-- rota inexistente usa 404 esperado.
+- rota inexistente responde HTTP 404; o arquivo `/404.html` é validado no build.
 
 Backend:
 
@@ -935,6 +945,8 @@ Rollback:
 
 - recompila ou reutiliza artefato verificável do SHA escolhido;
 - publica assets antes de HTML;
+- remove somente arquivos presentes no manifesto gerenciado anterior;
+- restaura o archive e o manifesto correspondentes;
 - valida rotas e smoke.
 
 Não manter cópia manual não rastreada como “versão de produção”.
@@ -945,6 +957,7 @@ Rollback de código:
 
 - redeploy de commit anterior conhecido;
 - reinstala dependências correspondentes;
+- não executa migrations como parte do rollback de código;
 - restart Passenger;
 - health/readiness;
 - smoke.
@@ -1216,6 +1229,7 @@ Com infraestrutura pronta:
 - deploy só inicia depois dos jobs necessários;
 - Environment `production` é usado;
 - SHA implantado é observável;
+- SHA aprovado é confirmado contra o HEAD atual de `origin/main`;
 - dois deploys não rodam simultaneamente;
 - frontend real é atualizado;
 - backend real é atualizado;
@@ -1223,6 +1237,7 @@ Com infraestrutura pronta:
 - Passenger reinicia;
 - health/readiness aprovam;
 - smoke aprova;
+- rota inexistente retorna HTTP 404;
 - logs acessíveis.
 
 ## 63. Validação do SMTP/cron

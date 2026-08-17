@@ -13,9 +13,9 @@ o Environment `production`, sem copiar segredos da aplicação para o workflow.
 
 ## Pré-condições
 
-- CI concluído com sucesso para o mesmo push em `main`;
-- workflow acionado por `workflow_run` bem-sucedido ou `workflow_dispatch` na
-  `main`;
+- CI concluído com sucesso para o mesmo SHA em `main`;
+- redeploy manual iniciado pelo `workflow_dispatch` do workflow `CI` na
+  `main`, seguido de `workflow_run` bem-sucedido;
 - Environment `production` restrito à `main`;
 - `VITE_SITE_INDEXING_ENABLED` igual a `false`;
 - private key exclusiva e host key ED25519 já cadastradas no Environment;
@@ -78,44 +78,59 @@ segredos no shell SSH.
 ## Deploy automatizado
 
 1. O workflow `CI` valida o commit.
-2. O workflow `Deploy production` é acionado pelo `workflow_run` bem-sucedido
-   do CI na `main`, ou manualmente apenas na `main`.
-3. O mesmo SHA é usado para checkout, build e empacotamento.
-4. O frontend é construído com `VITE_SITE_INDEXING_ENABLED=false` e os
+2. Redeploy manual significa executar `CI` por `workflow_dispatch` na `main`;
+   `Deploy production` não possui caminho manual direto.
+3. Após CI concluir com sucesso, `Deploy production` é acionado por
+   `workflow_run` para push ou dispatch na `main`.
+4. O deploy confirma que o SHA aprovado ainda é o HEAD atual de `origin/main`.
+5. O mesmo SHA é usado para checkout, build e empacotamento.
+6. O frontend é construído com `VITE_SITE_INDEXING_ENABLED=false` e os
    arquivos prerenderizados obrigatórios são verificados.
-5. O backend é empacotado sem `.env`, `.venv`, testes, caches, logs,
+7. O backend é empacotado sem `.env`, `.venv`, testes, caches, logs,
    `docker-compose.yml` ou arquivos locais.
-6. A private key é escrita somente em arquivo temporário com permissão restrita.
-7. SSH/SCP usa o `DEPLOY_SSH_KNOWN_HOSTS` pinado e
+8. A private key é escrita somente em arquivo temporário com permissão restrita.
+9. SSH/SCP usa o `DEPLOY_SSH_KNOWN_HOSTS` pinado e
    `StrictHostKeyChecking=yes`.
-8. Um arquivo de rollback do estado de código anterior é preservado em
-   `tmp/repage-rollback-frontend.tar.gz` e
-   `tmp/repage-rollback-backend.tar.gz`.
-9. Assets frontend são publicados antes dos HTMLs; o `.htaccess` e o
+10. O archive e o manifesto de rollback do estado gerenciado anterior são
+    preservados em `tmp/repage-rollback-frontend.tar.gz`,
+    `tmp/repage-rollback-backend.tar.gz`,
+    `tmp/repage-rollback-frontend.manifest` e
+    `tmp/repage-rollback-backend.manifest`.
+11. Assets frontend são publicados antes dos HTMLs; o `.htaccess` e o
    `404.html` fazem parte do artefato validado.
-10. Backend é atualizado sem substituir o `.env` externo nem o `tmp/` do
+12. Arquivos gerenciados removidos pelo novo SHA são removidos apenas a partir
+    do manifesto anterior; arquivos externos desconhecidos permanecem.
+13. Backend é atualizado sem substituir o `.env` externo nem o `tmp/` do
     Passenger.
-11. Requirements são instalados no virtualenv existente.
-12. O executor Django roda via `cloudlinux-selector`.
-13. O Passenger é reiniciado com:
+14. Requirements são instalados no virtualenv existente.
+15. O executor Django roda via `cloudlinux-selector`; o JSON retornado é
+    decodificado e o `returncode` interno precisa ser `0`.
+16. O Passenger é reiniciado com:
 
 ```bash
 touch /home/re190924/repage_backend/tmp/restart.txt
 ```
 
-14. O workflow verifica health, readiness, homepage, uma rota prerenderizada
-    e `404.html` com timeout e retries limitados.
+17. O workflow verifica health, readiness, homepage, uma rota prerenderizada
+    e uma rota inexistente com status HTTP exatamente `404`.
 
 ## Falhas conhecidas
 
 - O workflow não deve prosseguir se CI falhar.
+- Redeploy manual significa executar `CI` por `workflow_dispatch` na `main`;
+  `Deploy production` só reage ao `workflow_run` concluído com sucesso.
+- O deploy aborta se o SHA aprovado não for o HEAD atual de `origin/main`.
 - Falhas de `check --deploy`, migration, `createcachetable`, `collectstatic`,
   restart ou smoke encerram o deploy com erro.
+- Resultado JSON inválido, `result` diferente de `success`, Base64 inválido ou
+  `returncode` interno diferente de zero encerra o deploy antes do restart.
 - O shell SSH comum não possui as Environment Variables da Python App; não
   executar `manage.py` diretamente para operações de produção.
 - A regra manual atual de Force HTTPS/hostname pode causar redirect duplicado
   até ser reconciliada com o `.htaccess` versionado.
 - A presença do arquivo de rollback não constitui backup PostgreSQL.
+- O smoke HTTP real da rota inexistente permanece pendente até execução após
+  merge em `main`.
 
 ## Rollback inicial
 
@@ -132,11 +147,14 @@ tar -xzf /home/re190924/repage_backend/tmp/repage-rollback-frontend.tar.gz \
   -C /home/re190924/public_html
 tar -xzf /home/re190924/repage_backend/tmp/repage-rollback-backend.tar.gz \
   -C /home/re190924/repage_backend
-touch /home/re190924/repage_backend/tmp/restart.txt
 ```
 
-Depois, repetir os smoke tests do workflow. Não remover arquivos fora dos
-archives conhecidos.
+Antes de extrair, remova somente as entradas do manifesto atual que não
+existem no manifesto de rollback correspondente. Depois de restaurar o
+backend, reinstale o `requirements.txt` do archive anterior no virtualenv
+existente, execute `touch /home/re190924/repage_backend/tmp/restart.txt` e
+repita os smoke tests. Não remover arquivos fora dos manifestos e archives
+conhecidos.
 
 Rollback de código não reverte migrations. Migration destrutiva exige
 procedimento específico e backup validado da Fase 5.
@@ -158,6 +176,7 @@ Ainda pendente:
 - smoke pós-deploy executado pelo workflow;
 - rollback automatizado comprovado;
 - reconciliação final do redirect manual do cPanel com o `.htaccess`.
+- validação HTTP end-to-end da rota inexistente após merge em `main`.
 
 ## Segurança e privacidade
 

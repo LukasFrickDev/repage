@@ -5,7 +5,6 @@ on:
     workflows: [CI]
     types: [completed]
     branches: [main]
-  workflow_dispatch:
 
 permissions:
   contents: read
@@ -18,11 +17,11 @@ jobs:
   deploy:
     name: Deploy production
     if: >-
-      (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main') ||
-      (github.event_name == 'workflow_run' &&
-       github.event.workflow_run.conclusion == 'success' &&
-       github.event.workflow_run.event == 'push' &&
-       github.event.workflow_run.head_branch == 'main')
+      github.event_name == 'workflow_run' &&
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.head_branch == 'main' &&
+      (github.event.workflow_run.event == 'push' ||
+       github.event.workflow_run.event == 'workflow_dispatch')
     runs-on: ubuntu-latest
     environment: production
     env:
@@ -50,6 +49,16 @@ jobs:
           test -n "$VITE_PRIVACY_POLICY_VERSION"
           test -n "$DEPLOY_SHA"
 
+      - name: Verify deploy SHA is current main
+        run: |
+          set -Eeuo pipefail
+          git fetch --no-tags origin main:refs/remotes/origin/main
+          current_main_sha="$(git rev-parse refs/remotes/origin/main)"
+          if [ "$DEPLOY_SHA" != "$current_main_sha" ]; then
+            echo "Deploy aborted: approved SHA is not the current origin/main HEAD."
+            exit 1
+          fi
+
       - name: Setup Node
         uses: actions/setup-node@v7
         with:
@@ -75,6 +84,7 @@ jobs:
       - name: Package deploy artifacts
         run: |
           set -Eeuo pipefail
+          (cd frontend/dist && find . -type f -print | sed 's#^./##' | sort) > "$RUNNER_TEMP/frontend.manifest"
           tar -czf "$RUNNER_TEMP/frontend.tar.gz" -C frontend/dist .
           tar -czf "$RUNNER_TEMP/backend.tar.gz" \
             --exclude='./.env' \
@@ -90,12 +100,18 @@ jobs:
             --exclude='./env.txt' \
             --exclude='*.log' \
             -C backend .
+          tar -tzf "$RUNNER_TEMP/backend.tar.gz" \
+            | sed 's#^\./##' \
+            | awk 'NF && $0 !~ /\/$/' \
+            | sort > "$RUNNER_TEMP/backend.manifest"
 
       - name: Deploy over pinned SSH
         env:
           DEPLOY_SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
           FRONTEND_ARCHIVE: ${{ runner.temp }}/frontend.tar.gz
           BACKEND_ARCHIVE: ${{ runner.temp }}/backend.tar.gz
+          FRONTEND_MANIFEST: ${{ runner.temp }}/frontend.manifest
+          BACKEND_MANIFEST: ${{ runner.temp }}/backend.manifest
         run: bash .github/scripts/deploy-production.sh
 
       - name: Smoke production endpoints
@@ -105,4 +121,5 @@ jobs:
           curl --fail --silent --show-error --location --max-time 15 --retry 3 --retry-delay 2 https://api.repage.com.br/health/ready/ >/dev/null
           curl --fail --silent --show-error --location --max-time 15 --retry 3 --retry-delay 2 https://repage.com.br/ >/dev/null
           curl --fail --silent --show-error --location --max-time 15 --retry 3 --retry-delay 2 https://repage.com.br/portfolio/axium/ >/dev/null
-          curl --fail --silent --show-error --location --max-time 15 --retry 3 --retry-delay 2 https://repage.com.br/404.html >/dev/null
+          status_code="$(curl --silent --show-error --location --max-time 15 --retry 3 --retry-delay 2 --output /dev/null --write-out '%{http_code}' https://repage.com.br/route-that-does-not-exist-for-smoke)"
+          test "$status_code" = "404"
