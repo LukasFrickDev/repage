@@ -151,7 +151,21 @@ tar -xzf /home/re190924/repage_backend/tmp/repage-rollback-backend.tar.gz \
 
 Antes de extrair, remova somente as entradas do manifesto atual que não
 existem no manifesto de rollback correspondente. Depois de restaurar o
-backend, reinstale o `requirements.txt` do archive anterior no virtualenv
+backend, substitua atomicamente os manifestos current pelos manifestos de
+rollback:
+
+```bash
+cp /home/re190924/repage_backend/tmp/repage-rollback-frontend.manifest \
+  /home/re190924/repage_backend/tmp/repage-manifest-frontend.txt.rollback
+mv -f /home/re190924/repage_backend/tmp/repage-manifest-frontend.txt.rollback \
+  /home/re190924/repage_backend/tmp/repage-manifest-frontend.txt
+cp /home/re190924/repage_backend/tmp/repage-rollback-backend.manifest \
+  /home/re190924/repage_backend/tmp/repage-manifest-backend.txt.rollback
+mv -f /home/re190924/repage_backend/tmp/repage-manifest-backend.txt.rollback \
+  /home/re190924/repage_backend/tmp/repage-manifest-backend.txt
+```
+
+Depois, reinstale o `requirements.txt` do archive anterior no virtualenv
 existente, execute `touch /home/re190924/repage_backend/tmp/restart.txt` e
 repita os smoke tests. Não remover arquivos fora dos manifestos e archives
 conhecidos.
