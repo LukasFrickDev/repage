@@ -80,7 +80,6 @@ jobs:
       POSTGRES_PASSWORD: repage_ci_password
       POSTGRES_HOST: 127.0.0.1
       POSTGRES_PORT: '5432'
-      POSTGRES_SSLMODE: disable
     steps:
       - name: Checkout
         uses: actions/checkout@v7
