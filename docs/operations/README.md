@@ -63,4 +63,4 @@ Não criar arquivos vazios antecipadamente.
 
 | Procedimento | Ambiente | Última validação |
 |---|---|---|
-| — | — | Nenhum runbook materializado |
+| [`production-deploy.md`](production-deploy.md) | HomeHost + Neon | Componentes operacionais validados; deploy end-to-end pendente |

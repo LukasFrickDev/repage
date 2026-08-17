@@ -1,0 +1,19 @@
+RewriteEngine On
+
+# Canonical host first so www goes directly to HTTPS apex.
+RewriteCond %{HTTP_HOST} ^www\.repage\.com\.br$ [NC]
+RewriteRule ^ https://repage.com.br%{REQUEST_URI} [R=301,L,NE]
+
+# Redirect the apex to HTTPS when the hosting layer does not do it first.
+RewriteCond %{HTTP_HOST} ^repage\.com\.br$ [NC]
+RewriteCond %{HTTPS} !=on
+RewriteRule ^ https://repage.com.br%{REQUEST_URI} [R=301,L,NE]
+
+ErrorDocument 404 /404.html
+
+<IfModule mod_headers.c>
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set Referrer-Policy "same-origin"
+  Header always set Permissions-Policy "camera=(), microphone=(), geolocation=()"
+  Header always set X-Frame-Options "DENY"
+</IfModule>

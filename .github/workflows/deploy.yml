@@ -1,0 +1,108 @@
+name: Deploy production
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy production
+    if: >-
+      (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main') ||
+      (github.event_name == 'workflow_run' &&
+       github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.event == 'push' &&
+       github.event.workflow_run.head_branch == 'main')
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      DEPLOY_SSH_HOST: ${{ vars.DEPLOY_SSH_HOST }}
+      DEPLOY_SSH_PORT: ${{ vars.DEPLOY_SSH_PORT }}
+      DEPLOY_SSH_USER: ${{ vars.DEPLOY_SSH_USER }}
+      DEPLOY_FRONTEND_PATH: ${{ vars.DEPLOY_FRONTEND_PATH }}
+      DEPLOY_BACKEND_PATH: ${{ vars.DEPLOY_BACKEND_PATH }}
+      DEPLOY_SSH_KNOWN_HOSTS: ${{ vars.DEPLOY_SSH_KNOWN_HOSTS }}
+      VITE_API_BASE_URL: ${{ vars.VITE_API_BASE_URL }}
+      VITE_SITE_INDEXING_ENABLED: ${{ vars.VITE_SITE_INDEXING_ENABLED }}
+      VITE_PRIVACY_POLICY_VERSION: ${{ vars.VITE_PRIVACY_POLICY_VERSION }}
+      DEPLOY_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+    steps:
+      - name: Checkout deploy SHA
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+
+      - name: Validate production build inputs
+        run: |
+          set -Eeuo pipefail
+          test "$VITE_SITE_INDEXING_ENABLED" = "false"
+          test -n "$VITE_API_BASE_URL"
+          test -n "$VITE_PRIVACY_POLICY_VERSION"
+          test -n "$DEPLOY_SHA"
+
+      - name: Setup Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Build frontend SAFE
+        working-directory: frontend
+        run: |
+          set -Eeuo pipefail
+          npm ci
+          npm run build
+          test -f dist/index.html
+          test -f dist/404.html
+          test -f dist/portfolio/index.html
+          test -f dist/portfolio/axium/index.html
+          test -f dist/privacidade/index.html
+          test -f dist/sitemap.xml
+          test -f dist/robots.txt
+          test -f dist/.htaccess
+
+      - name: Package deploy artifacts
+        run: |
+          set -Eeuo pipefail
+          tar -czf "$RUNNER_TEMP/frontend.tar.gz" -C frontend/dist .
+          tar -czf "$RUNNER_TEMP/backend.tar.gz" \
+            --exclude='./.env' \
+            --exclude='./.env.*' \
+            --exclude='./.venv' \
+            --exclude='./.pytest_cache' \
+            --exclude='./.ruff_cache' \
+            --exclude='./__pycache__' \
+            --exclude='*/__pycache__' \
+            --exclude='./tmp' \
+            --exclude='./tests' \
+            --exclude='./docker-compose.yml' \
+            --exclude='./env.txt' \
+            --exclude='*.log' \
+            -C backend .
+
+      - name: Deploy over pinned SSH
+        env:
+          DEPLOY_SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
+          FRONTEND_ARCHIVE: ${{ runner.temp }}/frontend.tar.gz
+          BACKEND_ARCHIVE: ${{ runner.temp }}/backend.tar.gz
+        run: bash .github/scripts/deploy-production.sh
+
+      - name: Smoke production endpoints
+        run: |
+          set -Eeuo pipefail
+          curl --fail --silent --show-error --location --max-time 15 --retry 3 --retry-delay 2 https://api.repage.com.br/health/ >/dev/null
+          curl --fail --silent --show-error --location --max-time 15 --retry 3 --retry-delay 2 https://api.repage.com.br/health/ready/ >/dev/null
+          curl --fail --silent --show-error --location --max-time 15 --retry 3 --retry-delay 2 https://repage.com.br/ >/dev/null
+          curl --fail --silent --show-error --location --max-time 15 --retry 3 --retry-delay 2 https://repage.com.br/portfolio/axium/ >/dev/null
+          curl --fail --silent --show-error --location --max-time 15 --retry 3 --retry-delay 2 https://repage.com.br/404.html >/dev/null

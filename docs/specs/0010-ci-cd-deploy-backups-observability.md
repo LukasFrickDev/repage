@@ -31,8 +31,9 @@ A baseline atual possui:
 - `/health/`;
 - `/health/ready/`;
 - consentimento e Analytics condicionado;
-- nenhuma infraestrutura de CI/CD versionada em `.github/`;
-- nenhum runbook operacional materializado além do índice de operações.
+- CI versionado em `.github/workflows/ci.yml` e fundação de CD em
+  `.github/workflows/deploy.yml`;
+- runbook de deploy materializado, sem execução end-to-end após merge em `main`.
 
 A Entrega 10 transforma essa aplicação já pronta em uma operação de produção reproduzível, verificável e recuperável.
 
@@ -394,6 +395,10 @@ GitHub continua sendo fonte oficial de código e o mecanismo aprovado de CI/depl
 Hoje não existe `.github/` na `main`.
 
 A Entrega 10 deve criar workflows versionados.
+
+O workflow de deploy foi materializado em `.github/workflows/deploy.yml` com
+`workflow_run` do CI bem-sucedido na `main` e `workflow_dispatch` restrito à
+`main`. A execução real end-to-end permanece pendente.
 
 O workflow `.github/workflows/ci.yml` foi materializado nesta Fase 2 com jobs
 independentes de frontend e backend. A validação definitiva ainda depende da
