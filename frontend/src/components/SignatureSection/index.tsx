@@ -1,10 +1,11 @@
-import { useReducedMotion, useScroll, useSpring, useTransform } from 'framer-motion';
+import { useScroll, useSpring, useTransform } from 'framer-motion';
 import { useRef } from 'react';
 import { signatureSectionContent } from '../../content/repageContent';
 import * as S from './styles';
+import { useHydrationSafeReducedMotion } from '../../hooks/useHydrationSafeReducedMotion';
 
 export function SignatureSection() {
-  const prefersReducedMotion = Boolean(useReducedMotion());
+  const prefersReducedMotion = useHydrationSafeReducedMotion();
   const sectionRef = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({
     target: sectionRef,

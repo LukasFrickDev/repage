@@ -23,7 +23,7 @@ Código, migrations, mídia estática e documentação vivem no GitHub. Hospedag
 ### 1.7 Operação verificável
 Deploy, backup, restauração e health checks exigem evidência.
 ## 2. Arquitetura atual
-Estado atual ao concluir a Entrega 5:
+Estado atual ao concluir a Entrega 9:
 - React;
 - TypeScript;
 - Vite;
@@ -43,6 +43,11 @@ Estado atual ao concluir a Entrega 5:
 - API pública de Lead e Django Admin operacionais;
 - formulário público integrado com persistência real;
 - tokens em `frontend/src/styles/theme.ts`.
+- prerender build-time com Vite e APIs estáticas do React 19;
+- `StaticRouter` no prerender e `BrowserRouter` no cliente;
+- hydration com `hydrateRoot`;
+- Styled Components SSR com `ServerStyleSheet` e IDs determinísticos;
+- HTML específico por rota, metadata central compartilhada, sitemap derivado dos projetos públicos, robots condicionado à indexação explícita e JSON-LD factual.
 Dependências aprovadas para a arquitetura-alvo podem ainda não estar instaladas. O manifesto do projeto é a fonte do estado instalado.
 ## 3. Arquitetura-alvo
 ```text
@@ -288,23 +293,18 @@ Cada rota pública deve possuir:
 - imagem social quando aplicável.
 Cases usam dados da fonte única.
 ## 18. Prerender
-Decisão:
+Decisão aceita no [`ADR 0001`](adr/0001-vite-static-prerender.md):
+- Vite SSG/build-time prerender;
+- React static APIs, `StaticRouter` e `hydrateRoot`;
 - manter React e Vite;
-- adicionar prerender às rotas públicas;
-- não migrar para Next.js na V1.
-O mecanismo exato permanece pendente.
-A solução deve:
-- integrar ao build;
-- gerar HTML por rota e case;
-- falhar quando rota obrigatória não for gerada;
-- preservar hidratação;
-- suportar sitemap derivado;
-- funcionar na hospedagem estática.
-Escolha estrutural relevante pode exigir ADR.
+- não migrar para Next.js na V1;
+- sem SSR runtime;
+- frontend final continua estático.
+
+Essa decisão foi implementada na Entrega 9. O pipeline integra o prerender ao build, gera HTML por rota e case, valida outputs obrigatórios e falha diante de inconsistências. O frontend final continua estático e sem runtime SSR; a configuração da hospedagem para servir os diretórios e `404.html` permanece na Entrega 10.
 ## 19. Sitemap, robots e dados estruturados
-Sitemap é gerado a partir de rotas estáticas e projetos publicados. Não manter lista duplicada.
-Produção permite indexação conforme política. Ambientes não públicos impedem indexação. `robots.txt` não substitui controle de acesso.
-JSON-LD pode representar organização, site e breadcrumbs quando aplicável. Não inventar avaliação, preço, endereço ou resultado.
+Sitemap é gerado a partir de rotas estáticas e projetos publicados por `listPublicProjects()`, sem lista duplicada, excluindo legais, 404 e projetos não publicáveis. `robots.txt` é condicionado à configuração explícita de indexação: ambientes SAFE usam `Disallow: /`, enquanto o modo indexável permite a raiz e aponta para o sitemap canônico. `robots.txt` não substitui controle de acesso.
+JSON-LD factual e compartilhado entre SPA e prerender representa organização, site e breadcrumbs quando aplicável. A metadata central também alimenta SPA e HTML estático. O build valida outputs, metadata, canonical, sitemap, robots e structured data antes de concluir.
 ## 20. Resiliência do frontend
 Implementar:
 - Error Boundary;
@@ -881,7 +881,6 @@ Mitigar com validação, autorização e bloqueio de publicação.
 ### Retenção indefinida
 Mitigar definindo antes da produção e alinhando exclusão e backups.
 ## 58. Decisões adiadas
-- mecanismo exato de prerender;
 - provedor final de banco se a hospedagem falhar;
 - provedor alternativo de e-mail;
 - prazo de retenção de leads;
@@ -898,7 +897,6 @@ Mitigar definindo antes da produção e alinhando exclusão e backups.
 ## 59. Candidatos a ADR
 Criar ADR futuro para:
 - migração de framework;
-- mecanismo estrutural de prerender;
 - troca permanente de banco;
 - mudança de topologia;
 - mudança de hospedagem;
@@ -913,7 +911,6 @@ Não criar ADR retroativo para cada decisão já consolidada.
 ## 60. Pendências técnicas
 - Validar HomeHost.
 - Confirmar registrador.
-- Escolher prerender.
 - Confirmar Python e PostgreSQL.
 - Confirmar SSH, cron e Passenger.
 - Confirmar SMTP, SPF, DKIM e DMARC.

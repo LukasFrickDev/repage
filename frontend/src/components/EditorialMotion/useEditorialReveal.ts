@@ -1,13 +1,14 @@
-import { animate, useMotionValue, useReducedMotion, useScroll, useSpring, useTransform } from 'framer-motion';
+import { animate, useMotionValue, useScroll, useSpring, useTransform } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import type { RefObject } from 'react';
 import { editorialMotion } from '../../styles/editorialMotion';
+import { useHydrationSafeReducedMotion } from '../../hooks/useHydrationSafeReducedMotion';
 
 type EditorialRevealPreset = 'default' | 'media';
 type EditorialRevealOptions = { trigger?: 'scroll' | 'route'; start?: boolean };
 
 export function useEditorialReveal(targetRef: RefObject<HTMLElement | null>, preset: EditorialRevealPreset = 'default', { trigger = 'scroll', start = false }: EditorialRevealOptions = {}) {
-  const prefersReducedMotion = Boolean(useReducedMotion());
+  const prefersReducedMotion = useHydrationSafeReducedMotion();
   const [isCompact, setIsCompact] = useState(false);
   const { scrollYProgress } = useScroll({ target: targetRef, offset: editorialMotion.reveal.offset });
   const reveal = preset === 'media' ? editorialMotion.reveal.media : editorialMotion.reveal;

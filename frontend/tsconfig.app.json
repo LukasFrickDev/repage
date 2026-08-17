@@ -24,5 +24,10 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
   },
-  "include": ["src"]
+  "include": ["src"],
+  "exclude": [
+    "src/entry-server.tsx",
+    "src/data/projects/projectReadiness.test.ts",
+    "src/indexHtml.test.ts"
+  ]
 }

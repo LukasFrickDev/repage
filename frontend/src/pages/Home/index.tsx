@@ -1,7 +1,7 @@
 import { ArrowRight } from 'lucide-react';
 import { PrimaryCta } from '../../components/PrimaryCta';
-import { useReducedMotion } from 'framer-motion';
 import { Link } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 import { routeMetadata, useRouteMetadata } from '../../app/routeMetadata';
 import { FeaturedProjectsSection } from '../../components/FeaturedProjectsSection';
 import { FinalCtaSection } from '../../components/FinalCtaSection';
@@ -12,11 +12,33 @@ import { SignatureSection } from '../../components/SignatureSection';
 import { ValuePropositionSection } from '../../components/ValuePropositionSection';
 import { heroContent } from '../../content/repageContent';
 import { ANALYTICS_EVENT_NAMES, trackEvent } from '../../services/analytics';
+import { useHydrationSafeReducedMotion } from '../../hooks/useHydrationSafeReducedMotion';
 import * as S from './styles';
 
 const Home = () => {
-  const prefersReducedMotion = useReducedMotion();
+  const prefersReducedMotion = useHydrationSafeReducedMotion();
+  const [introFontReady, setIntroFontReady] = useState(false);
   const entranceDelay = prefersReducedMotion ? 0 : 0.68;
+
+  useEffect(() => {
+    let active = true;
+    const revealIntro = () => {
+      if (active) setIntroFontReady(true);
+    };
+    const timeoutId = window.setTimeout(revealIntro, 1200);
+
+    if (!document.fonts) {
+      revealIntro();
+    } else {
+      document.fonts.load('620 1em "Instrument Sans"').then(revealIntro, revealIntro);
+    }
+
+    return () => {
+      active = false;
+      window.clearTimeout(timeoutId);
+    };
+  }, []);
+
   useRouteMetadata(routeMetadata.home);
 
   return (
@@ -24,12 +46,12 @@ const Home = () => {
       <S.Hero data-home-section="hero" aria-labelledby="hero-title">
         <S.HeroBackdrop aria-hidden="true" />
         {!prefersReducedMotion && (
-          <S.BrandEntrance aria-hidden="true">
-            <S.BrandEntranceIdentity>
+          <S.BrandEntrance $fontReady={introFontReady} aria-hidden="true">
+            <S.BrandEntranceIdentity $fontReady={introFontReady}>
               <img src="/brands/logo-offwhiote.svg" alt="" />
               <span>Repage</span>
             </S.BrandEntranceIdentity>
-            <S.BrandEntranceLine />
+            <S.BrandEntranceLine $fontReady={introFontReady} />
           </S.BrandEntrance>
         )}
         <S.HeroInner>

@@ -1,12 +1,13 @@
-import { useReducedMotion, useScroll, useSpring, useTransform } from 'framer-motion';
+import { useScroll, useSpring, useTransform } from 'framer-motion';
 import { useRef, useState } from 'react';
 import { finalCtaSectionContent } from '../../content/repageContent';
 import { LeadForm } from '../../features/lead-form';
 import * as S from './styles';
 import { ANALYTICS_EVENT_NAMES, trackEvent } from '../../services/analytics';
+import { useHydrationSafeReducedMotion } from '../../hooks/useHydrationSafeReducedMotion';
 
 export function FinalCtaSection() {
-  const prefersReducedMotion = Boolean(useReducedMotion());
+  const prefersReducedMotion = useHydrationSafeReducedMotion();
   const [formInteracted, setFormInteracted] = useState(false);
   const sectionRef = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({
@@ -22,6 +23,8 @@ export function FinalCtaSection() {
   const titleMaskPosition = useTransform(progress, [0.17, 0.46], ['0 100%', '0 0%']);
   const descriptionOpacity = useTransform(progress, [0.38, 0.62], [0, 1]);
   const descriptionY = useTransform(progress, [0.38, 0.62], [8, 0]);
+  const formOpacity = useTransform(progress, [0.62, 0.8], [0, 1]);
+  const formY = useTransform(progress, [0.62, 0.8], [8, 0]);
 
   return (
     <S.Section
@@ -66,7 +69,11 @@ export function FinalCtaSection() {
         >
           {finalCtaSectionContent.description}
         </S.Description>
-        <LeadForm onInteractionStart={() => { setFormInteracted(true); trackEvent(ANALYTICS_EVENT_NAMES.leadFormStart); }} />
+        <S.FormReveal
+          style={prefersReducedMotion || formInteracted ? { opacity: 1, y: 0 } : { opacity: formOpacity, y: formY }}
+        >
+          <LeadForm onInteractionStart={() => { setFormInteracted(true); trackEvent(ANALYTICS_EVENT_NAMES.leadFormStart); }} />
+        </S.FormReveal>
       </S.Content>
     </S.Section>
   );

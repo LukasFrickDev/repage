@@ -1,5 +1,6 @@
-import { cubicBezier, useReducedMotion, useScroll, useTransform } from 'framer-motion';
+import { cubicBezier, useScroll, useTransform } from 'framer-motion';
 import * as S from './styles';
+import { useHydrationSafeReducedMotion } from '../../hooks/useHydrationSafeReducedMotion';
 
 const ease = [0.22, 1, 0.36, 1] as const;
 const scrollEase = cubicBezier(...ease);
@@ -11,7 +12,7 @@ interface PageExperienceProps {
 }
 
 export function PageExperience({ entranceDelay }: PageExperienceProps) {
-  const prefersReducedMotion = Boolean(useReducedMotion());
+  const prefersReducedMotion = useHydrationSafeReducedMotion();
   const delay = prefersReducedMotion ? 0 : entranceDelay + 0.04;
   const { scrollY } = useScroll();
   const stageProgress = useTransform(scrollY, [96, 300], [0, 1], { clamp: true });

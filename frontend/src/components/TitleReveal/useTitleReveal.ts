@@ -1,7 +1,8 @@
-import { animate, useReducedMotion, useMotionValue, useScroll, useSpring, useTransform } from 'framer-motion';
+import { animate, useMotionValue, useScroll, useSpring, useTransform } from 'framer-motion';
 import { useEffect } from 'react';
 import type { RefObject } from 'react';
 import { editorialMotion } from '../../styles/editorialMotion';
+import { useHydrationSafeReducedMotion } from '../../hooks/useHydrationSafeReducedMotion';
 
 type TitleRevealOptions = {
   offset?: ['start 92%', 'start 18%'];
@@ -17,7 +18,7 @@ export function useTitleReveal(
   targetRef: RefObject<HTMLElement | null>,
   { offset = editorialMotion.entry.scrollOffset, trigger = 'scroll', firstRange = [...editorialMotion.entry.firstPole] as [number, number], secondRange = [...editorialMotion.entry.secondPole] as [number, number], thirdRange = [...editorialMotion.entry.threePole.third] as [number, number], supportRange = [...editorialMotion.entry.support] as [number, number], shift = editorialMotion.entry.titleShift }: TitleRevealOptions = {},
 ) {
-  const prefersReducedMotion = Boolean(useReducedMotion());
+  const prefersReducedMotion = useHydrationSafeReducedMotion();
   const { scrollYProgress } = useScroll({ target: targetRef, offset });
   const mountTarget = useMotionValue(prefersReducedMotion ? 1 : 0);
   const mountProgress = useSpring(mountTarget, editorialMotion.spring);

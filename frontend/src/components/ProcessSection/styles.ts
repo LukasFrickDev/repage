@@ -12,6 +12,10 @@ export const Section = styled.section`
   padding: clamp(7rem, 12vw, 12rem) ${homepageTokens.sectionPaddingInline};
   background: ${colors.white};
   color: ${colors.background};
+
+  @media (max-width: ${breakpoints.mobileMax}) {
+    padding-bottom: clamp(2.5rem, 8vw, 4rem);
+  }
 `;
 
 export const Container = styled.div`
@@ -120,6 +124,7 @@ export const ProcessJourneyStage = styled.div`
     width: min(100%, ${homepageTokens.process.mobileJourneyWidth});
     height: ${homepageTokens.process.mobileJourneyHeight};
   }
+
 `;
 
 export const DesktopTrajectory = styled.svg`
@@ -187,8 +192,8 @@ export const Step = styled.li<{ $align: AnchorAlignment }>`
 
   @media (max-width: ${breakpoints.contentMax}) {
     top: var(--mobile-anchor-y);
-    left: var(--mobile-anchor-x);
-    width: calc(100% - var(--mobile-anchor-x));
+    left: 0;
+    width: 100%;
   }
 `;
 
@@ -201,8 +206,8 @@ export const MarkerAnchor = styled.span`
   aspect-ratio: 1;
   transform: translate(-50%, -50%);
 
-  @media (max-width: ${breakpoints.mobileMax}) {
-    top: clamp(2.9625rem, 12.5vw, 3.240625rem);
+  @media (max-width: ${breakpoints.contentMax}) {
+    left: var(--mobile-anchor-x);
   }
 `;
 
@@ -249,9 +254,9 @@ export const StepDetails = styled(motion.div)`
   }
 
   @media (max-width: ${breakpoints.contentMax}) {
-    top: ${homepageTokens.process.markerContentGap};
-    left: 2rem !important;
-    width: calc(100% - 2rem);
+    top: 0;
+    left: calc(var(--mobile-content-x) + ${homepageTokens.process.markerSize} + 2rem) !important;
+    width: calc(100% - var(--mobile-content-x) - ${homepageTokens.process.markerSize} - 2rem);
   }
 `;
 
@@ -264,6 +269,10 @@ export const Number = styled(motion.span)`
   font-weight: 620;
   letter-spacing: -0.08em;
   line-height: 0.82;
+
+  @media (max-width: ${breakpoints.contentMax}) {
+    transform: translateY(-50%);
+  }
 `;
 
 export const StepContent = styled.div`

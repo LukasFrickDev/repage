@@ -2,7 +2,7 @@ import { ArrowLeft, ArrowRight, ExternalLink, Monitor, Smartphone } from 'lucide
 import { Link, useParams } from 'react-router-dom';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
-import { getCaseMetadata, routeMetadata, useRouteMetadata } from '../../app/routeMetadata';
+import { getRouteMetadata, useRouteMetadata } from '../../app/routeMetadata';
 import { PrimaryCta } from '../../components/PrimaryCta';
 import { EditorialInkBackdrop } from '../../components/EditorialInkBackdrop';
 import { ProjectBrowserFrame } from '../../components/ProjectBrowserFrame';
@@ -20,7 +20,9 @@ import * as S from './styles';
 export function CasePage() {
   const { slug = '' } = useParams();
   const project = findPublicProjectBySlug(slug);
-  useRouteMetadata(project ? getCaseMetadata(project.routeMetadata) : routeMetadata.notFound);
+  const readiness = project ? findReadinessBySlug(project.slug) : undefined;
+  const cover = project && readiness?.assets.find((asset) => asset.path === project.media.cover);
+  useRouteMetadata(getRouteMetadata(`/portfolio/${slug}`));
 
   if (!project) {
     return (
@@ -35,8 +37,6 @@ export function CasePage() {
     );
   }
 
-  const readiness = findReadinessBySlug(project.slug);
-  const cover = readiness?.assets.find((asset) => asset.path === project.media.cover);
   const neighbors = findPublicProjectNeighbors(project.slug);
 
   if (!cover || cover.kind !== 'screenshot' || !cover.roles.includes('cover')) {

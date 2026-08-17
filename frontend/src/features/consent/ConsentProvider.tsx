@@ -1,6 +1,7 @@
 import {
   type PropsWithChildren,
   useCallback,
+  useEffect,
   useMemo,
   useState,
 } from 'react';
@@ -15,13 +16,16 @@ import {
 } from './types';
 
 export function ConsentProvider({ children }: PropsWithChildren) {
-  const [initialConsent] = useState(() => {
-    const stored = readConsentPreference();
-    return { preference: stored ?? defaultConsentPreference(), hasValidChoice: stored !== null };
-  });
-  const [preference, setPreference] = useState<ConsentPreference>(initialConsent.preference);
-  const [hasValidChoice, setHasValidChoice] = useState(initialConsent.hasValidChoice);
+  const [preference, setPreference] = useState<ConsentPreference>(defaultConsentPreference);
+  const [hasValidChoice, setHasValidChoice] = useState(false);
   const [preferencesOpen, setPreferencesOpen] = useState(false);
+
+  useEffect(() => {
+    const stored = readConsentPreference();
+    if (!stored) return;
+    setPreference(stored);
+    setHasValidChoice(true);
+  }, []);
 
   const save = useCallback((next: Pick<ConsentPreference, 'analytics' | 'advertising'>) => {
     const nextPreference: ConsentPreference = {

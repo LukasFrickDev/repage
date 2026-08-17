@@ -3,7 +3,6 @@ import type { RefObject } from 'react';
 import { ArrowRight } from 'lucide-react';
 import {
   useMotionValueEvent,
-  useReducedMotion,
   useScroll,
   useSpring,
   useTransform,
@@ -11,6 +10,7 @@ import {
 import type { MotionValue } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { featuredProjectsSectionContent } from '../../content/repageContent';
+import { useHydrationSafeReducedMotion } from '../../hooks/useHydrationSafeReducedMotion';
 import { ProjectBrowserFrame } from '../ProjectBrowserFrame';
 import { ProjectCaseLink } from '../ProjectCaseLink';
 import type { Project } from '../../data/projects';
@@ -178,7 +178,7 @@ function usePortfolioProgress(target: RefObject<HTMLDivElement | null>) {
 }
 
 export function FeaturedProjectsSection() {
-  const prefersReducedMotion = useReducedMotion();
+  const prefersReducedMotion = useHydrationSafeReducedMotion();
   const [activeProject, setActiveProject] = useState(-1);
   const trackRef = useRef<HTMLDivElement>(null);
   const progress = usePortfolioProgress(trackRef);

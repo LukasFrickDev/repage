@@ -1,15 +1,18 @@
 import { BrowserRouter } from 'react-router-dom';
+import { AppErrorBoundary } from './app/AppErrorBoundary';
 import { AppRoutes } from './app/router';
 import { ConsentProvider } from './features/consent/ConsentProvider';
 
-const App = () => {
+export function AppContent({ prerender = false }: { prerender?: boolean }) {
   return (
-    <BrowserRouter>
+    <AppErrorBoundary prerender={prerender}>
       <ConsentProvider>
         <AppRoutes />
       </ConsentProvider>
-    </BrowserRouter>
+    </AppErrorBoundary>
   );
-};
+}
+
+const App = () => <BrowserRouter><AppContent /></BrowserRouter>;
 
 export default App;

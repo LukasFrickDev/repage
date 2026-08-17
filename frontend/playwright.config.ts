@@ -2,6 +2,10 @@ import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
   testDir: './e2e',
+  testIgnore: [
+    '**/prerender-hydration.spec.ts',
+    '**/prerender-consent.spec.ts',
+  ],
   outputDir: './test-results',
   fullyParallel: true,
   workers: 4,

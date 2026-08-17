@@ -24,7 +24,7 @@ A V1 deve servir como referência comercial da marca, apoiar prospecção e cond
 * A entrega 6 está concluída: o Django Admin existente recebeu a experiência administrativa Repage, com Leads como superfície operacional principal.
 * A entrega 7 está concluída: e-mails, idempotência, proteção, retries e recuperação administrativa foram implementados, validados e documentados.
 * A entrega 8 está concluída: consentimento, Analytics condicionado e páginas legais foram implementados e validados.
-* A próxima entrega é a 9 — SEO, sitemap e prerender; CI/CD, deploy e lançamento continuam pendentes nas entregas seguintes.
+* A entrega 9 está concluída: SEO, metadata, sitemap, robots, JSON-LD, prerender build-time, hydration e QA foram validados; a próxima entrega é a 10 — CI/CD, deploy, backups e observabilidade.
 
 ## Princípios de execução
 
@@ -181,7 +181,7 @@ A V1 deve servir como referência comercial da marca, apoiar prospecção e cond
   **Status:** concluída.
   **Spec:** [`0008-consent-analytics-and-legal-pages.md`](specs/0008-consent-analytics-and-legal-pages.md) — `implemented`.
 
-## Entrega 9 — SEO, sitemap e prerender
+## Entrega 9 — SEO, sitemap e prerender — concluída
 
 **Objetivo:** tornar rotas públicas indexáveis, compartilháveis e renderizadas com HTML específico.
 **Resultado esperado:** cada rota e case possui HTML e metadados completos sem migração de framework.
@@ -194,7 +194,9 @@ A V1 deve servir como referência comercial da marca, apoiar prospecção e cond
   **Dependências:** Entregas 3, 4 e 8, conteúdo, slugs, imagens sociais, domínio e decisão do prerender.
   **Validações:** HTML, metadados, canonical, sitemap, robots, rotas geradas, hidratação e build.
   **Critério de conclusão:** páginas publicáveis geram HTML e metadados completos por fontes centralizadas.
-  **Spec:** obrigatória; a decisão estrutural de prerender pode exigir ADR.
+  **Status:** concluída; checkpoint técnico final `3b63109b976b31712c08a13f857453b1ede018ae`, validações técnicas e revisão visual aprovadas.
+  **Spec:** [`0009-seo-sitemap-and-prerender.md`](specs/0009-seo-sitemap-and-prerender.md) — `implemented`.
+  **ADR:** [`0001-vite-static-prerender.md`](adr/0001-vite-static-prerender.md) — `accepted`.
 
 ## Entrega 10 — CI/CD, deploy, backups e observabilidade
 

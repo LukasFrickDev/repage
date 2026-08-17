@@ -7,16 +7,17 @@ const BANNER_ENTRY_DELAY_MS = 1600;
 
 export function ConsentBanner() {
   const { acceptAll, rejectNonEssential, openPreferences } = useConsent();
-  const [isVisible, setIsVisible] = useState(() => (
-    window.matchMedia('(prefers-reduced-motion: reduce)').matches
-  ));
+  const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
-    if (isVisible) return undefined;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      setIsVisible(true);
+      return undefined;
+    }
 
     const timeoutId = window.setTimeout(() => setIsVisible(true), BANNER_ENTRY_DELAY_MS);
     return () => window.clearTimeout(timeoutId);
-  }, [isVisible]);
+  }, []);
 
   return (
     <S.Banner

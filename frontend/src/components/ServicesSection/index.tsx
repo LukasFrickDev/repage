@@ -1,8 +1,9 @@
-import { useReducedMotion, useScroll, useSpring, useTransform } from 'framer-motion';
+import { useScroll, useSpring, useTransform } from 'framer-motion';
 import { useRef } from 'react';
 import { servicesSectionContent } from '../../content/repageContent';
 import { breakpoints, homepageTokens } from '../../styles/theme';
 import * as S from './styles';
+import { useHydrationSafeReducedMotion } from '../../hooks/useHydrationSafeReducedMotion';
 
 const ease = [0.22, 1, 0.36, 1] as const;
 
@@ -102,7 +103,7 @@ const mediaSignature = {
 };
 
 export function ServicesSection() {
-  const prefersReducedMotion = Boolean(useReducedMotion());
+  const prefersReducedMotion = useHydrationSafeReducedMotion();
   const compactMotion = typeof window !== 'undefined'
     && window.matchMedia(`(max-width: ${breakpoints.tabletMax})`).matches;
   const introRef = useRef<HTMLDivElement>(null);
