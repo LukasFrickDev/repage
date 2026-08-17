@@ -1,6 +1,7 @@
 import contextvars
 import json
 import logging
+import re
 from datetime import datetime, timezone
 
 
@@ -18,6 +19,14 @@ ALLOWED_FIELDS = (
     'attempts',
     'error_code',
 )
+EVENT_CODE_PATTERN = re.compile(r'[a-z][a-z0-9_.-]{0,63}')
+
+
+def event_code(record: logging.LogRecord) -> str:
+    message = record.msg
+    if record.args or not isinstance(message, str) or EVENT_CODE_PATTERN.fullmatch(message) is None:
+        return 'log_message'
+    return message
 
 
 class StructuredFormatter(logging.Formatter):
@@ -29,7 +38,7 @@ class StructuredFormatter(logging.Formatter):
             ).isoformat(timespec='milliseconds').replace('+00:00', 'Z'),
             'level': record.levelname,
             'logger': record.name,
-            'event': record.getMessage(),
+            'event': event_code(record),
         }
         request_id = getattr(record, 'request_id', None) or request_id_context.get()
         if request_id is not None:

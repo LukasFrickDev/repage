@@ -21,7 +21,9 @@ class RequestIDMiddleware:
         try:
             response = self.get_response(request)
             response['X-Request-ID'] = request.request_id
-            logger.info(
+            level = logging.ERROR if response.status_code >= 500 else logging.INFO
+            logger.log(
+                level,
                 'request_completed',
                 extra={
                     'request_id': request.request_id,

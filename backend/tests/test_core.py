@@ -7,8 +7,9 @@ from unittest.mock import patch
 from pathlib import Path
 
 import pytest
-from django.db import OperationalError
 from django.conf import settings
+from django.db import OperationalError
+from django.http import HttpResponse
 from django.test import Client, RequestFactory
 
 from apps.core.middleware import RequestIDMiddleware
@@ -49,6 +50,7 @@ def test_request_logging_is_correlated_and_sanitized(client, caplog):
     assert response['X-Request-ID'] == event.request_id
     assert event.method == 'POST'
     assert event.path == '/health/'
+    assert event.levelno == logging.INFO
     assert event.duration_ms >= 0
     assert sensitive_value not in caplog.text
     assert request_id_context.get() is None
@@ -66,6 +68,33 @@ def test_structured_formatter_emits_only_allowlisted_fields():
     assert 'arbitrary_secret' not in payload
 
 
+def test_structured_formatter_does_not_interpolate_arbitrary_message_args():
+    record = logging.LogRecord(
+        'test',
+        logging.WARNING,
+        __file__,
+        1,
+        'Falha para %s',
+        ('cliente@example.com',),
+        None,
+    )
+
+    payload = json.loads(StructuredFormatter().format(record))
+    serialized = json.dumps(payload)
+
+    assert payload['event'] == 'log_message'
+    assert 'cliente@example.com' not in serialized
+    assert 'Falha para' not in serialized
+
+
+def test_structured_formatter_preserves_stable_event_code():
+    record = logging.LogRecord('test', logging.INFO, __file__, 1, 'request_completed', (), None)
+
+    payload = json.loads(StructuredFormatter().format(record))
+
+    assert payload['event'] == 'request_completed'
+
+
 def test_request_logging_cleans_context_when_downstream_raises(caplog):
     sensitive_value = 'secret-error-payload'
 
@@ -80,7 +109,26 @@ def test_request_logging_cleans_context_when_downstream_raises(caplog):
 
     request_events = [record for record in caplog.records if record.msg == 'request_completed']
     assert request_events[-1].status_code == 500
+    assert request_events[-1].levelno == logging.ERROR
     assert sensitive_value not in caplog.text
+    assert request_id_context.get() is None
+
+
+def test_request_logging_marks_returned_5xx_as_error_and_cleans_context(caplog):
+    def return_server_error(request):
+        return HttpResponse(status=500)
+
+    request = RequestFactory().get('/failure/?value=not-logged')
+    middleware = RequestIDMiddleware(return_server_error)
+
+    with caplog.at_level(logging.INFO):
+        response = middleware(request)
+
+    request_events = [record for record in caplog.records if record.msg == 'request_completed']
+    assert response.status_code == 500
+    assert response['X-Request-ID'] == request_events[-1].request_id
+    assert request_events[-1].status_code == 500
+    assert request_events[-1].levelno == logging.ERROR
     assert request_id_context.get() is None
 
 
