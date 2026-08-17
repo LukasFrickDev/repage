@@ -3,6 +3,7 @@ import { StaticRouter } from 'react-router-dom';
 import { ServerStyleSheet } from 'styled-components';
 import { AppContent } from './App';
 import { getRouteMetadata, resolveRouteMetadata, type EffectiveRouteMetadata } from './app/routeMetadata';
+import { generateRobotsTxt, generateSitemapXml, listSitemapUrls } from './app/seoFiles';
 import { isSiteIndexingEnabled } from './config/site';
 import { listPrerenderRoutes } from './prerenderRoutes';
 
@@ -32,3 +33,4 @@ export async function renderPathname(pathname: string): Promise<{ markup: string
 
 export { listPrerenderRoutes };
 export { isSiteIndexingEnabled };
+export { generateRobotsTxt, generateSitemapXml, listSitemapUrls };

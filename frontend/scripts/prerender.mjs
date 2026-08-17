@@ -77,6 +77,8 @@ async function main() {
     await mkdir(dirname(destination), { recursive: true });
     await writeFile(destination, html);
   }
+  await writeFile(join(distRoot, 'sitemap.xml'), server.generateSitemapXml(), 'utf8');
+  await writeFile(join(distRoot, 'robots.txt'), server.generateRobotsTxt(), 'utf8');
   console.log(`Prerendered ${routes.length} routes.`);
 }
 
