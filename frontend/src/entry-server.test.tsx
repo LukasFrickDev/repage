@@ -18,6 +18,7 @@ describe('static entry', () => {
     expect(rendered.metadata.canonical).toBeUndefined();
     expect(rendered.metadata.openGraph).toEqual({});
     expect(rendered.metadata.twitter).toEqual({});
+    expect(rendered.metadata.structuredData).toEqual([]);
   });
 
   it.each(['/', '/privacidade', '/portfolio/axium'])('shares metadata between SPA and prerender for %s', async (pathname) => {
@@ -28,6 +29,7 @@ describe('static entry', () => {
     applyRouteMetadata(getRouteMetadata(pathname), isolatedDocument, false);
 
     expect(rendered.metadata).toEqual(expected);
+    expect(rendered.metadata.structuredData).toEqual(expected.structuredData);
     expect(isolatedDocument.title).toBe(expected.title);
     expect(isolatedDocument.querySelector('meta[name="robots"]')?.getAttribute('content')).toBe(expected.robots);
     expect(isolatedDocument.querySelector('link[rel="canonical"]')?.getAttribute('href')).toBe(expected.canonical);

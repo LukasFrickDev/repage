@@ -23,9 +23,13 @@ export type RouteMetadata = {
   openGraph: { type: 'website' };
 };
 
+export type StructuredDataObject = Record<string, unknown>;
+export type StructuredData = readonly StructuredDataObject[];
+
 export type EffectiveRouteMetadata = Omit<RouteMetadata, 'openGraph'> & {
   openGraph: Record<string, string>;
   twitter: Record<string, string>;
+  structuredData: StructuredData;
 };
 
 export type RouteMetadataKey = 'home' | 'portfolio' | 'privacy' | 'cookies' | 'notFound';
@@ -148,6 +152,111 @@ export function getRouteMetadata(pathname: string): RouteMetadata {
   });
 }
 
+function normalizePathname(pathname: string): string {
+  return pathname.split('?')[0].split('#')[0] || '/';
+}
+
+function breadcrumbItem(position: number, name: string, item: string): StructuredDataObject {
+  return { '@type': 'ListItem', position, name, item };
+}
+
+export function getRouteStructuredData(pathname: string): StructuredData {
+  const path = normalizePathname(pathname);
+  if (path === '/') {
+    return [
+      { '@context': 'https://schema.org', '@type': 'Organization', name: siteConfig.brand.name, url: siteConfig.canonicalOrigin, slogan: siteConfig.slogan },
+      { '@context': 'https://schema.org', '@type': 'WebSite', name: siteConfig.brand.name, url: siteConfig.canonicalOrigin, slogan: siteConfig.slogan },
+    ];
+  }
+  if (path === '/portfolio') {
+    return [{
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        breadcrumbItem(1, 'Início', `${siteConfig.canonicalOrigin}/`),
+        breadcrumbItem(2, 'Portfólio', `${siteConfig.canonicalOrigin}/portfolio`),
+      ],
+    }];
+  }
+
+  const caseMatch = path.match(/^\/portfolio\/([^/]+)$/);
+  if (!caseMatch) return [];
+  const project = findPublicProjectBySlug(caseMatch[1]);
+  if (!project) return [];
+  return [{
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      breadcrumbItem(1, 'Início', `${siteConfig.canonicalOrigin}/`),
+      breadcrumbItem(2, 'Portfólio', `${siteConfig.canonicalOrigin}/portfolio`),
+      breadcrumbItem(3, project.title, `${siteConfig.canonicalOrigin}${path}`),
+    ],
+  }];
+}
+
+function assertCanonicalUrl(value: unknown, label: string): asserts value is string {
+  if (typeof value !== 'string') throw new Error(`JSON-LD ${label} deve ser uma URL.`);
+  const url = new URL(value);
+  if (url.origin !== siteConfig.canonicalOrigin || url.search || url.hash) {
+    throw new Error(`JSON-LD ${label} deve usar URL canônica absoluta.`);
+  }
+}
+
+function assertAllowedKeys(value: StructuredDataObject, keys: readonly string[], label: string): void {
+  if (Object.keys(value).some((key) => !keys.includes(key))) throw new Error(`JSON-LD ${label} contém campo não permitido.`);
+}
+
+export function validateRouteStructuredData(pathname: string, data: StructuredData): void {
+  const path = pathname ? normalizePathname(pathname) : '';
+  const isHome = path === '/';
+  const isPortfolio = path === '/portfolio';
+  const caseMatch = path.match(/^\/portfolio\/([^/]+)$/);
+  const project = caseMatch ? findPublicProjectBySlug(caseMatch[1]) : undefined;
+  const expectedTypes = isHome ? ['Organization', 'WebSite'] : (isPortfolio || project ? ['BreadcrumbList'] : []);
+
+  if (data.some((entry) => entry['@context'] !== 'https://schema.org')) throw new Error('JSON-LD deve usar @context schema.org.');
+  if (data.some((entry) => !expectedTypes.includes(String(entry['@type'])))) throw new Error('JSON-LD contém tipo não permitido para a rota.');
+  if (data.length !== expectedTypes.length) throw new Error('JSON-LD possui quantidade inesperada de schemas.');
+
+  if (isHome) {
+    data.forEach((entry) => {
+      assertAllowedKeys(entry, ['@context', '@type', 'name', 'url', 'slogan'], String(entry['@type']));
+      if (entry.name !== siteConfig.brand.name || entry.slogan !== siteConfig.slogan) throw new Error('JSON-LD home contém dados factuais divergentes.');
+      assertCanonicalUrl(entry.url, `${String(entry['@type'])}.url`);
+    });
+    return;
+  }
+
+  if (!expectedTypes.length) {
+    if (data.length) throw new Error('JSON-LD não é permitido nesta rota.');
+    return;
+  }
+
+  const breadcrumb = data[0];
+  assertAllowedKeys(breadcrumb, ['@context', '@type', 'itemListElement'], 'BreadcrumbList');
+  if (!Array.isArray(breadcrumb.itemListElement) || breadcrumb.itemListElement.length !== expectedTypes.length + (project ? 2 : 1)) {
+    throw new Error('BreadcrumbList possui itens inválidos.');
+  }
+  breadcrumb.itemListElement.forEach((item, index) => {
+    if (!item || typeof item !== 'object') throw new Error('BreadcrumbList possui item inválido.');
+    const breadcrumbItemValue = item as StructuredDataObject;
+    assertAllowedKeys(breadcrumbItemValue, ['@type', 'position', 'name', 'item'], 'ListItem');
+    if (breadcrumbItemValue['@type'] !== 'ListItem' || breadcrumbItemValue.position !== index + 1) {
+      throw new Error('BreadcrumbList possui posições não sequenciais.');
+    }
+    assertCanonicalUrl(breadcrumbItemValue.item, `ListItem[${index}].item`);
+  });
+  const items = breadcrumb.itemListElement as StructuredDataObject[];
+  if (items[0].name !== 'Início' || items[1].name !== 'Portfólio') throw new Error('BreadcrumbList possui nomes inválidos.');
+  if (project && (items[2].name !== project.title || items[2].item !== `${siteConfig.canonicalOrigin}${path}`)) {
+    throw new Error('BreadcrumbList do case não corresponde ao projeto público.');
+  }
+}
+
+export function serializeStructuredData(data: StructuredData): string {
+  return JSON.stringify(data).replaceAll('<', '\\u003c').replaceAll('>', '\\u003e').replaceAll('&', '\\u0026').replaceAll('\u2028', '\\u2028').replaceAll('\u2029', '\\u2029');
+}
+
 export function resolveRouteMetadata(
   metadata: RouteMetadata,
   indexingEnabled = isSiteIndexingEnabled(),
@@ -172,12 +281,15 @@ export function resolveRouteMetadata(
     'twitter:image': social.url,
     'twitter:image:alt': social.alt,
   } : {};
+  const structuredData = metadata.path ? getRouteStructuredData(metadata.path) : [];
+  validateRouteStructuredData(metadata.path ?? '', structuredData);
 
   return {
     ...metadata,
     robots: indexingEnabled ? metadata.robots : 'noindex, nofollow',
     openGraph,
     twitter,
+    structuredData,
   };
 }
 
@@ -206,6 +318,16 @@ function setCanonical(documentRef: Document, canonical: string | undefined) {
   if (!link.isConnected) documentRef.head.append(link);
 }
 
+function applyStructuredData(documentRef: Document, data: StructuredData): void {
+  documentRef.head.querySelectorAll('script[data-repage-structured-data="true"]').forEach((script) => script.remove());
+  if (!data.length) return;
+  const script = documentRef.createElement('script');
+  script.type = 'application/ld+json';
+  script.dataset.repageStructuredData = 'true';
+  script.textContent = serializeStructuredData(data);
+  documentRef.head.append(script);
+}
+
 export function applyRouteMetadata(
   metadata: RouteMetadata,
   documentRef: Document = document,
@@ -222,11 +344,13 @@ export function applyRouteMetadata(
       .forEach((name) => removeMeta(documentRef, 'property', name));
     ['twitter:card', 'twitter:title', 'twitter:description', 'twitter:image', 'twitter:image:alt']
       .forEach((name) => removeMeta(documentRef, 'name', name));
+    applyStructuredData(documentRef, effective.structuredData);
     return;
   }
 
   Object.entries(effective.openGraph).forEach(([name, content]) => upsertMeta(documentRef, 'property', name, content));
   Object.entries(effective.twitter).forEach(([name, content]) => upsertMeta(documentRef, 'name', name, content));
+  applyStructuredData(documentRef, effective.structuredData);
 }
 
 export function useRouteMetadata(metadata: RouteMetadata = fallbackMetadata) {

@@ -10,7 +10,7 @@ function escapeHtml(value) {
   return value.replaceAll('&', '&amp;').replaceAll('"', '&quot;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
 }
 
-function metadataTags(metadata) {
+function metadataTags(metadata, serializeStructuredData) {
   const tags = [
     `<title>${escapeHtml(metadata.title)}</title>`,
     `<meta name="description" content="${escapeHtml(metadata.description)}" />`,
@@ -19,6 +19,9 @@ function metadataTags(metadata) {
   if (metadata.canonical) tags.push(`<link rel="canonical" href="${escapeHtml(metadata.canonical)}" />`);
   Object.entries(metadata.openGraph).forEach(([name, content]) => tags.push(`<meta property="${name}" content="${escapeHtml(content)}" />`));
   Object.entries(metadata.twitter).forEach(([name, content]) => tags.push(`<meta name="${name}" content="${escapeHtml(content)}" />`));
+  if (metadata.structuredData.length) {
+    tags.push(`<script type="application/ld+json" data-repage-structured-data="true">${serializeStructuredData(metadata.structuredData)}</script>`);
+  }
   return tags.join('\n    ');
 }
 
@@ -69,7 +72,7 @@ async function main() {
   for (const pathname of routes) {
     const rendered = await server.renderPathname(pathname);
     const html = template
-      .replace('</head>', `    ${rendered.styles}\n    ${metadataTags(rendered.metadata)}\n  </head>`)
+      .replace('</head>', `    ${rendered.styles}\n    ${metadataTags(rendered.metadata, server.serializeStructuredData)}\n  </head>`)
       .replace('<div id="root"></div>', `<div id="root">${rendered.markup}</div>`)
       .replace('</body>', `${scripts}\n  </body>`);
     assertOutput(html, pathname, rendered.metadata);

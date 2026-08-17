@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { applyRouteMetadata, fallbackMetadata, routeMetadata } from './routeMetadata';
+import {
+  applyRouteMetadata,
+  fallbackMetadata,
+  getRouteStructuredData,
+  routeMetadata,
+  serializeStructuredData,
+  validateRouteStructuredData,
+} from './routeMetadata';
 import { isSiteIndexingEnabled } from '../config/site';
 
 describe('route metadata', () => {
@@ -51,5 +58,41 @@ describe('route metadata', () => {
     expect(isolatedDocument.querySelector('meta[property="og:title"]')).toBeNull();
     expect(isolatedDocument.querySelector('meta[name="twitter:title"]')).toBeNull();
     expect(isolatedDocument.querySelectorAll('meta[name="description"]')).toHaveLength(1);
+  });
+
+  it('resolves only factual JSON-LD for the allowed routes', () => {
+    const home = getRouteStructuredData('/');
+    expect(home.map((entry) => entry['@type'])).toEqual(['Organization', 'WebSite']);
+    expect(home).toEqual([
+      { '@context': 'https://schema.org', '@type': 'Organization', name: 'Repage', url: 'https://repage.com.br', slogan: 'Uma nova página para o seu negócio começa aqui.' },
+      { '@context': 'https://schema.org', '@type': 'WebSite', name: 'Repage', url: 'https://repage.com.br', slogan: 'Uma nova página para o seu negócio começa aqui.' },
+    ]);
+    expect(getRouteStructuredData('/portfolio')[0].itemListElement).toEqual([
+      { '@type': 'ListItem', position: 1, name: 'Início', item: 'https://repage.com.br/' },
+      { '@type': 'ListItem', position: 2, name: 'Portfólio', item: 'https://repage.com.br/portfolio' },
+    ]);
+    const caseData = getRouteStructuredData('/portfolio/axium')[0].itemListElement as Array<Record<string, unknown>>;
+    expect(caseData[2]).toMatchObject({ position: 3, name: 'Axium', item: 'https://repage.com.br/portfolio/axium' });
+    expect(getRouteStructuredData('/privacidade')).toEqual([]);
+    expect(getRouteStructuredData('/cookies')).toEqual([]);
+    expect(getRouteStructuredData('/__404__')).toEqual([]);
+    expect(() => validateRouteStructuredData('/portfolio/axium', getRouteStructuredData('/portfolio/axium'))).not.toThrow();
+  });
+
+  it('replaces SPA JSON-LD without duplicates and serializes safely', () => {
+    const isolatedDocument = document.implementation.createHTMLDocument();
+    applyRouteMetadata(routeMetadata.home, isolatedDocument, true);
+    expect(isolatedDocument.querySelectorAll('script[type="application/ld+json"]')).toHaveLength(1);
+    expect(isolatedDocument.querySelector('script[type="application/ld+json"]')?.textContent).toContain('Organization');
+
+    applyRouteMetadata(routeMetadata.portfolio, isolatedDocument, true);
+    expect(isolatedDocument.querySelectorAll('script[type="application/ld+json"]')).toHaveLength(1);
+    expect(isolatedDocument.querySelector('script[type="application/ld+json"]')?.textContent).toContain('BreadcrumbList');
+
+    applyRouteMetadata(routeMetadata.privacy, isolatedDocument, true);
+    expect(isolatedDocument.querySelector('script[type="application/ld+json"]')).toBeNull();
+    const serialized = serializeStructuredData([{ '@context': 'https://schema.org', '@type': 'Thing', name: '</script><script>unsafe' }]);
+    expect(serialized).not.toContain('</script>');
+    expect(serialized).toContain('\\u003c/script\\u003e');
   });
 });
