@@ -88,3 +88,4 @@ Somente spec aprovada orienta implementação planejada.
 | [`0007-email-idempotency-and-protection.md`](0007-email-idempotency-and-protection.md) | `implemented` | E-mails, idempotência e proteção |
 | [`0008-consent-analytics-and-legal-pages.md`](0008-consent-analytics-and-legal-pages.md) | `implemented` | Consentimento, Analytics e páginas legais |
 | [`0009-seo-sitemap-and-prerender.md`](0009-seo-sitemap-and-prerender.md) | `implemented` | SEO, sitemap e prerender |
+| [`0010-ci-cd-deploy-backups-observability.md`](0010-ci-cd-deploy-backups-observability.md) | `approved` | CI/CD, deploy, backups e observabilidade |

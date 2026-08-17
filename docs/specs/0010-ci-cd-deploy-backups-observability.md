@@ -1,12 +1,12 @@
 # 0010 — CI/CD, deploy, backups e observabilidade
 
-- **Status:** draft
+- **Status:** approved
 - **Responsável:** Lukas Frick
 - **Data:** 17 de agosto de 2026
 - **Branch-base:** `main`
 - **Entrega do roadmap:** 10 — CI/CD, deploy, backups e observabilidade
 - **Spec predecessora:** `0009-seo-sitemap-and-prerender.md`
-- **ADR relacionado:** `0001-vite-static-prerender.md` — `accepted`
+- **ADR relacionado:** `0001-vite-static-prerender.md` — `accepted`; `0002-postgresql-neon-production-provider.md` — `accepted`
 - **Documentos relacionados:** `AGENTS.md`, `frontend/AGENTS.md`, `backend/AGENTS.md`, `docs/PRODUCT.md`, `docs/ARCHITECTURE.md`, `docs/ROADMAP.md`, `docs/operations/README.md`
 
 ## 1. Contexto
@@ -50,27 +50,31 @@ A Entrega 10 transforma essa aplicação já pronta em uma operação de produç
 
 Esses fatos deixam de ser tratados como hipóteses genéricas na documentação.
 
-### Ainda não validado operacionalmente
+### Confirmado operacionalmente na conta
 
-- SSH/SFTP da conta;
-- autenticação por chave para automação;
-- porta/host SSH efetivos da conta;
-- caminhos absolutos do servidor;
-- configuração real do `Setup Python App`;
-- app root e startup WSGI;
-- restart do Passenger;
-- subdomínio `api.repage.com.br`;
-- SSL do subdomínio da API;
-- versão real do Python escolhida na aplicação;
-- versão real do PostgreSQL disponível no servidor;
-- criação do banco e usuário PostgreSQL de produção;
-- cron real da conta;
-- SMTP real usado pelo Django;
-- caminhos e retenção de logs da hospedagem;
-- mecanismo final de deploy remoto;
-- backup externo e teste de restauração.
+- SSH externo e SFTP por chave funcionais em `h66.servidorhh.com`, porta `64413`, usuário `re190924`;
+- home `/home/re190924`;
+- Python `3.12.13` e `Setup Python App` funcionais;
+- app root `/home/re190924/repage_backend`;
+- virtualenv `/home/re190924/virtualenv/repage_backend/3.12/`;
+- Passenger/WSGI funcional e restart pelo cPanel validado;
+- `https://api.repage.com.br/` chegando corretamente à aplicação WSGI;
+- HTTPS da API e redirecionamento HTTP → HTTPS permanente;
+- PostgreSQL nativo da HomeHost identificado como `13.23`, incompatível com Django 5.2;
+- conexão HomeHost → Neon por TLS;
+- toolchain cliente PostgreSQL 18.4 privada em `/home/re190924/tools/postgresql-18/`, com `psql`, `pg_dump` e `pg_restore`;
+- `psql`, `pg_dump` e restore controlado validados contra o Neon;
+- cron do cPanel executado em teste real e removido ao final;
+- SMTP real em `mail.repage.com.br:465` com SSL/TLS e autenticação;
+- Passenger stderr em `/home/re190924/repage_backend/stderr.log`;
+- Raw Access do cPanel disponível para apex/API e arquivamento habilitado;
+- Force HTTPS Redirect no apex e na API;
+- redirecionamento `www.repage.com.br` → `https://repage.com.br` validado em HTTP e HTTPS, preservando path;
+- diretório de backup `/home/re190924/backups/repage/postgresql` com permissão `700`;
+- quota de 51.200 MB, com uso observado de aproximadamente 319 MB.
 
-A spec não pode converter esses itens em “confirmados” sem evidência da conta real.
+Esses fatos orientam a implementação, mas não equivalem à implementação dos
+workflows, automações ou runbooks desta spec.
 
 ## 3. Capacidades públicas atuais da HomeHost consideradas
 
@@ -168,26 +172,19 @@ Preservar:
 - Registro.br como registrador;
 - DNS atualmente delegado à HomeHost.
 
-Na Entrega 10:
-
-- criar/validar `api.repage.com.br`;
-- validar `www.repage.com.br`;
-- configurar redirecionamento permanente de `www` para apex;
-- validar A/CNAME efetivos;
-- não alterar nameservers sem necessidade comprovada;
-- não migrar DNS para Cloudflare por preferência.
+Na Entrega 10, versionar a configuração definitiva de redirects e validar os
+registros efetivos. O redirect atual de `http://www` pode passar por dois 301
+por sobreposição entre Force HTTPS e a regra de hostname; isso deve ser
+refinado na implementação versionada.
 
 ## 9. HTTPS e SSL
 
-Já existe HTTPS funcional no domínio principal.
+HTTPS funcional existe no domínio principal e em `api.repage.com.br`.
 
-A Entrega 10 deve:
-
-- validar certificado e cadeia no apex;
-- emitir/validar SSL para `api.repage.com.br`;
-- validar redirecionamento HTTP → HTTPS;
-- validar que o Django reconhece a requisição como segura;
-- somente configurar `SECURE_PROXY_SSL_HEADER` se o comportamento real do proxy da HomeHost for confirmado e confiável.
+A Entrega 10 deve versionar a configuração definitiva, validar a cadeia e
+confirmar que o Django reconhece a requisição como segura. Somente configurar
+`SECURE_PROXY_SSL_HEADER` se o comportamento real do proxy da HomeHost for
+confirmado e confiável.
 
 Não confiar cegamente em `X-Forwarded-Proto`.
 
@@ -240,32 +237,30 @@ A atualização exige:
 
 ## 12. PostgreSQL de produção
 
-PostgreSQL permanece obrigatório.
-
-Não trocar para MySQL.
-
-Antes de criar a base definitiva, validar no servidor:
-
-```sql
-SELECT version();
-```
-
-Requisito mínimo para Django 5.2:
+PostgreSQL permanece obrigatório como engine estrutural. O PostgreSQL nativo
+da HomeHost é `13.23` e não é compatível com Django 5.2; portanto, a produção
+utilizará Neon, conforme o ADR 0002:
 
 ```text
-PostgreSQL >= 14
+Django/HomeHost → PostgreSQL/Neon
 ```
 
-Se a HomeHost não fornecer versão compatível ou estabilidade suficiente:
+Estado aprovado do Neon:
 
-- não adaptar silenciosamente a aplicação para MySQL;
-- parar;
-- avaliar a alternativa Neon já prevista na Arquitetura;
-- materializar ADR antes de uma troca permanente do banco/topologia.
+- projeto Repage;
+- branch `production`;
+- região AWS South America East 1 / São Paulo;
+- PostgreSQL 18;
+- database `repage`;
+- role/owner `repage_app`.
+
+Não fazer downgrade do Django nem migrar para MySQL. A aplicação não deve
+depender de recursos específicos do Neon, preservando a portabilidade futura
+para outro PostgreSQL compatível.
 
 ## 13. Banco de produção
 
-Criar banco e usuário dedicados à Repage.
+O banco e a role dedicados já estão definidos no Neon para a produção.
 
 Princípios:
 
@@ -274,7 +269,7 @@ Princípios:
 - menor exposição possível;
 - não usar usuário administrativo global da hospedagem;
 - não versionar connection string;
-- banco não fica publicamente exposto se acesso remoto não for necessário.
+- conexão com o Neon usa TLS.
 
 Configuração continua por:
 
@@ -284,7 +279,8 @@ Configuração continua por:
 - `POSTGRES_HOST`;
 - `POSTGRES_PORT`.
 
-Não introduzir `DATABASE_URL` apenas por preferência.
+Não introduzir `DATABASE_URL` apenas por preferência e não versionar a
+connection string.
 
 ## 14. DatabaseCache
 
@@ -571,7 +567,9 @@ Preservar invariantes da Arquitetura:
 7. validar `404.html`;
 8. smoke após publicação.
 
-O mecanismo exato de transferência deve ser fechado depois de validar SSH/SFTP e comandos disponíveis na conta.
+SSH/SFTP por chave já foram validados na conta. A implementação deve fechar o
+mecanismo de transferência versionado usando as ferramentas nativas
+compatíveis, sem expor a chave privada.
 
 Preferir OpenSSH/SCP/tar ou ferramenta nativa equivalente, sem action externa desnecessária.
 
@@ -636,14 +634,14 @@ Não usar `migrate --fake` como procedimento comum.
 
 ## 32. Restart do Passenger
 
-O mecanismo exato deve ser validado na conta HomeHost.
+O restart pelo cPanel já foi validado na conta HomeHost. O deploy deve
+documentar e automatizar esse mecanismo quando possível; não inventar comando
+root/systemctl em hospedagem compartilhada.
 
 Prioridade:
 
 1. comando/arquivo oficialmente aceito pela aplicação cPanel quando automatizável;
-2. restart pelo mecanismo do `Setup Python App` quando necessário no bootstrap/recuperação.
-
-Não inventar comando root/systemctl em hospedagem compartilhada.
+2. restart pelo mecanismo do `Setup Python App` no bootstrap/recuperação.
 
 ## 33. SMTP de produção
 
@@ -656,21 +654,20 @@ EMAIL_FROM_ADDRESS=notificacoes@repage.com.br
 EMAIL_INTERNAL_RECIPIENT=contato@repage.com.br
 ```
 
-Servidor SMTP, porta e autenticação vêm da configuração real da conta HomeHost.
+Servidor SMTP real validado:
 
-HomeHost atualmente documenta:
-
-- 587 + STARTTLS;
-- 465 + SSL;
-- autenticação obrigatória.
-
-Escolher exatamente uma modalidade depois de consultar os dados recomendados do cPanel.
+- `mail.repage.com.br`;
+- porta `465`;
+- SSL/TLS;
+- autenticação obrigatória e funcional.
 
 Não ativar simultaneamente TLS e SSL.
 
 ## 34. Validação SMTP
 
-Antes de fechar a entrega:
+Essa configuração já foi validada com envio real controlado de
+`notificacoes@repage.com.br` para `contato@repage.com.br`. A implementação ainda
+deve:
 
 - enviar teste controlado do Django;
 - validar autenticação e TLS/SSL;
@@ -694,7 +691,9 @@ Na Entrega 10:
 
 ## 36. Cron
 
-A conta HomeHost/cPanel oferece tarefas cron, mas a execução real precisa ser testada.
+ A execução real temporária do cron do cPanel já foi validada e a tarefa foi
+ removida ao final do teste. A implementação deve criar as tarefas definitivas
+ e registrar seus comandos no runbook.
 
 Configurar pelo menos:
 
@@ -734,8 +733,6 @@ Todos os comandos cron devem:
 
 ## 37. Logs de produção
 
-Hoje não existe configuração explícita `LOGGING` no Django.
-
 A Entrega 10 deve configurar logging mínimo com biblioteca padrão, sem nova plataforma obrigatória.
 
 Requisitos:
@@ -754,17 +751,12 @@ Não adicionar Sentry apenas por preferência.
 
 ## 38. Passenger logs
 
-No `Setup Python App`, configurar caminho de Passenger log não público e acessível ao operador.
+O Passenger stderr já está disponível em
+`/home/re190924/repage_backend/stderr.log`. O Raw Access do cPanel também está
+disponível para apex e API, com arquivamento de raw logs para a home habilitado.
+O runbook deve documentar consulta, correlação e limpeza sem versionar logs.
 
-Runbook deve documentar:
-
-- onde consultar;
-- como identificar erro de startup;
-- como correlacionar request ID quando disponível;
-- como verificar falha pós-deploy;
-- política prática de limpeza/rotação oferecida pela conta.
-
-Não versionar logs.
+Não versionar logs nem registrar formulário integral, PII ou segredos.
 
 ## 39. Observabilidade proporcional
 
@@ -833,7 +825,11 @@ GitHub protege código e mídia versionada; não protege PostgreSQL.
 
 ## 43. Backup PostgreSQL local no servidor
 
-Criar rotina diária com `pg_dump` em formato adequado a restauração, armazenada fora de qualquer diretório público.
+O diretório local de backup validado é
+`/home/re190924/backups/repage/postgresql`, fora de diretório público e com
+permissão `700`. A rotina definitiva deve usar `pg_dump` compatível com
+PostgreSQL 18, a partir da toolchain privada em
+`/home/re190924/tools/postgresql-18/`.
 
 Referência inicial de retenção no servidor:
 
@@ -883,14 +879,10 @@ Antes de alteração destrutiva ou migration de risco:
 
 Backup só é considerado validado após restauração real.
 
-Antes de fechar a Entrega 10:
-
-- criar banco PostgreSQL temporário e isolado;
-- restaurar um dump real de produção inicial/controlado;
-- validar schema e consistência básica sem expor dados;
-- não usar o banco restaurado como development;
-- remover o banco temporário após teste;
-- registrar evidência sem registrar PII.
+Restore real controlado já foi validado em database temporário: dado criado,
+dump custom, remoção/recriação do database, `pg_restore` e recuperação do dado.
+A implementação deve transformar esse procedimento em automação/runbook e
+preservar o teste sem expor PII.
 
 Depois do lançamento, referência operacional:
 
@@ -1084,7 +1076,7 @@ Isso pertence ao fechamento de lançamento depois que indexação estiver autori
 - validar conta HomeHost;
 - SSH/SFTP/chave;
 - Python 3.12;
-- PostgreSQL >=14;
+- PostgreSQL/Neon compatível com Django 5.2;
 - paths;
 - `api.repage.com.br`;
 - SSL;
@@ -1322,7 +1314,7 @@ Não implementar:
 - New Relic;
 - Cloudflare por preferência;
 - CDN nova;
-- banco novo sem falha comprovada do PostgreSQL HomeHost;
+- troca de provedor PostgreSQL sem falha comprovada do Neon ou ADR;
 - mudança para MySQL;
 - novo provedor SMTP sem falha comprovada da HomeHost.
 
@@ -1334,7 +1326,7 @@ Não implementar:
 - [ ] chave exclusiva de deploy configurada.
 - [ ] host key fixada; nenhum `StrictHostKeyChecking=no`.
 - [ ] Python 3.12 real validado ou incompatibilidade formalmente tratada.
-- [ ] PostgreSQL real >=14 validado.
+- [ ] PostgreSQL/Neon de produção definido e validado por TLS.
 - [ ] banco/usuário de produção dedicados.
 - [ ] `api.repage.com.br` funcional.
 - [ ] SSL da API funcional.
@@ -1362,7 +1354,7 @@ Não implementar:
 - [ ] Passenger reinicia.
 - [ ] health/readiness pós-deploy passam.
 - [ ] smoke pós-deploy automatizado passa.
-- [ ] SMTP HomeHost real validado.
+- [ ] SMTP real `mail.repage.com.br:465` com SSL/TLS e autenticação validado.
 - [ ] `notificacoes@repage.com.br` usado como remetente.
 - [ ] `contato@repage.com.br` usado como destinatário interno.
 - [ ] SPF/DKIM/DMARC/PTR revalidados.
@@ -1396,7 +1388,7 @@ Não implementar:
 
 São bloqueadores reais:
 
-- HomeHost não oferecer PostgreSQL >=14;
+- Neon não permanecer acessível por TLS ou não oferecer PostgreSQL compatível;
 - SSH/SFTP seguro não permitir deploy automatizado e não existir alternativa segura equivalente;
 - Python App não suportar Django/WSGI necessário;
 - impossibilidade de SSL em `api.repage.com.br`;
@@ -1447,18 +1439,15 @@ Não apagar histórico de ADR.
 
 ## 74. ADR
 
-Nenhum ADR novo é obrigatório para a direção atual porque:
+O ADR [`0002-postgresql-neon-production-provider.md`](../adr/0002-postgresql-neon-production-provider.md)
+registra a decisão atual: PostgreSQL permanece a engine e Neon é o provedor de
+produção por causa da incompatibilidade do PostgreSQL 13.23 da HomeHost com
+Django 5.2.
 
-- HomeHost já é a hospedagem aprovada/contratada;
-- PostgreSQL continua o banco aprovado;
-- GitHub Actions já é a direção arquitetural;
-- Passenger/WSGI já é a topologia aprovada;
-- política inicial de backups estava pendente, não está sendo substituída.
-
-Criar ADR somente se a implementação exigir mudança estrutural real, por exemplo:
+Criar outro ADR somente se a implementação exigir mudança estrutural real, por exemplo:
 
 - trocar HomeHost;
-- migrar PostgreSQL para Neon permanentemente;
+- migrar PostgreSQL/Neon para outro provedor;
 - mudar topologia;
 - abandonar Passenger/WSGI;
 - adotar plataforma externa como dependência obrigatória;

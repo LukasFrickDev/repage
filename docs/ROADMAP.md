@@ -24,7 +24,7 @@ A V1 deve servir como referência comercial da marca, apoiar prospecção e cond
 * A entrega 6 está concluída: o Django Admin existente recebeu a experiência administrativa Repage, com Leads como superfície operacional principal.
 * A entrega 7 está concluída: e-mails, idempotência, proteção, retries e recuperação administrativa foram implementados, validados e documentados.
 * A entrega 8 está concluída: consentimento, Analytics condicionado e páginas legais foram implementados e validados.
-* A entrega 9 está concluída: SEO, metadata, sitemap, robots, JSON-LD, prerender build-time, hydration e QA foram validados; a próxima entrega é a 10 — CI/CD, deploy, backups e observabilidade.
+* A entrega 9 está concluída: SEO, metadata, sitemap, robots, JSON-LD, prerender build-time, hydration e QA foram validados; a entrega 10 — CI/CD, deploy, backups e observabilidade — está aprovada e em execução.
 
 ## Princípios de execução
 
@@ -200,6 +200,8 @@ A V1 deve servir como referência comercial da marca, apoiar prospecção e cond
 
 ## Entrega 10 — CI/CD, deploy, backups e observabilidade
 
+**Status:** aprovada; em execução.
+
 **Objetivo:** criar processo reproduzível e verificável de entrega e operação.
 **Resultado esperado:** pull requests são validados, deploys são controlados e produção possui health, logs, backups externos e recuperação documentada.
 **Escopo principal:**
@@ -233,11 +235,12 @@ A V1 deve servir como referência comercial da marca, apoiar prospecção e cond
 * Conteúdo incompleto pode bloquear homepage, portfólio e lançamento.
 * Projetos pagos dependem de autorização aplicável.
 * Mídia pesada pode comprometer desempenho e responsividade.
-* Hospedagem deve confirmar Python, PostgreSQL, SSH, Passenger, cron, logs e limites.
+* HomeHost, Python, SSH/SFTP, Passenger, API HTTPS, SMTP, cron de teste, logs e diretório local de backup já possuem validações operacionais; a automação e os runbooks ainda precisam ser implementados.
+* PostgreSQL permanece a engine estrutural; a produção usa Neon porque o PostgreSQL 13.23 nativo da HomeHost é incompatível com Django 5.2.
 * SMTP depende de autenticação, TLS, SPF, DKIM, DMARC e entregabilidade.
 * Retenção de leads e backups deve ser definida antes de produção.
 * Políticas exigem revisão jurídica antes da publicação.
-* O mecanismo de prerender ainda exige decisão técnica.
+* O prerender build-time está decidido e validado; a Entrega 10 trata apenas da publicação e operação do artefato.
 * Domínio, DNS, SSL e Analytics dependem de acessos reais.
 * Falha de e-mail não pode reverter persistência do Lead.
 * Nenhum bloqueio autoriza conteúdo, autorização ou evidência inventada.

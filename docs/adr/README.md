@@ -60,3 +60,4 @@ A Arquitetura mostra o estado atual; o ADR preserva o motivo da escolha.
 | ADR | Status | Decisão |
 |---|---|---|
 | [`0001-vite-static-prerender.md`](0001-vite-static-prerender.md) | `accepted` | Prerender estático preservando React/Vite, sem SSR runtime |
+| [`0002-postgresql-neon-production-provider.md`](0002-postgresql-neon-production-provider.md) | `accepted` | PostgreSQL permanece a engine; Neon é o provedor de produção atual |
