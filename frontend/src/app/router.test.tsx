@@ -1,9 +1,10 @@
 import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter, useLocation, useNavigate } from 'react-router-dom';
-import { describe, expect, it, vi } from 'vitest';
+import { beforeAll, describe, expect, it, vi } from 'vitest';
 import { getCaseMetadata, routeMetadata } from './routeMetadata';
 import { AppRoutes } from './router';
+import { listPublicProjects } from '../data/projects/publication';
 import { ConsentProvider } from '../features/consent/ConsentProvider';
 
 function LocationProbe() {
@@ -36,6 +37,15 @@ function renderAt(entry: string) {
 }
 
 describe('public routes', () => {
+  beforeAll(async () => {
+    await Promise.all([
+      import('../pages/Case'),
+      import('../pages/Portfolio'),
+      import('../pages/Privacy'),
+      import('../pages/Cookies'),
+    ]);
+  });
+
   it.each([
     ['/', 'Uma nova página para o seu negócio começa aqui.'],
     ['/portfolio', 'Projetos reais para contextos diferentes.'],
@@ -45,11 +55,29 @@ describe('public routes', () => {
     ['/rota-inexistente', 'Página não encontrada.'],
   ])('renders %s with a main heading', async (route, heading) => {
     renderAt(route);
-    await vi.dynamicImportSettled();
+    await act(async () => {
+      await vi.dynamicImportSettled();
+    });
 
     expect(screen.getByRole('main')).toBeInTheDocument();
     await waitFor(() => expect(screen.getByRole('heading', { level: 1, name: heading })).toBeInTheDocument());
   }, 15000);
+
+  it.each(listPublicProjects().map(({ slug }) => slug))('navigates the top case back link to the portfolio for %s', async (slug) => {
+    const user = userEvent.setup();
+    renderAt(`/portfolio/${slug}`);
+    await act(async () => {
+      await vi.dynamicImportSettled();
+    });
+
+    await waitFor(() => expect(screen.getAllByRole('link', { name: 'Voltar ao portfólio' })).toHaveLength(2));
+    const backLinks = screen.getAllByRole('link', { name: 'Voltar ao portfólio' });
+    const topBackLink = backLinks[0];
+    expect(topBackLink).toHaveAttribute('href', '/portfolio');
+
+    await user.click(topBackLink);
+    expect(screen.getByTestId('location')).toHaveTextContent('/portfolio');
+  });
 
   it('renders the public 404 for an unknown project slug', async () => {
     renderAt('/portfolio/slug-inexistente');

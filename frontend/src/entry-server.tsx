@@ -8,11 +8,13 @@ import { isSiteIndexingEnabled } from './config/site';
 import { listPrerenderRoutes } from './prerenderRoutes';
 
 async function streamToString(stream: NodeJS.ReadableStream): Promise<string> {
-  const chunks: Buffer[] = [];
+  const decoder = new TextDecoder();
+  const chunks: string[] = [];
   for await (const chunk of stream as AsyncIterable<Uint8Array | string>) {
-    chunks.push(Buffer.from(chunk));
+    chunks.push(typeof chunk === 'string' ? chunk : decoder.decode(chunk, { stream: true }));
   }
-  return Buffer.concat(chunks).toString('utf8');
+  chunks.push(decoder.decode());
+  return chunks.join('');
 }
 
 export async function renderPathname(pathname: string): Promise<{ markup: string; styles: string; metadata: EffectiveRouteMetadata }> {

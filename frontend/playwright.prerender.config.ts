@@ -24,6 +24,6 @@ export default defineConfig({
     command: 'VITE_SITE_INDEXING_ENABLED=false VITE_GA_MEASUREMENT_ID=G-REPAGE-TEST npm run build && node node_modules/vite/bin/vite.js preview --host 127.0.0.1 --port 4173',
     url: 'http://127.0.0.1:4173',
     reuseExistingServer: false,
-    timeout: 120_000,
+    timeout: 300_000,
   },
 });

@@ -61,6 +61,8 @@ export const IntroMain = styled.div`
 `;
 
 export const BackLink = styled(Link)`
+  position: relative;
+  z-index: 2;
   display: inline-flex;
   align-items: center;
   gap: 0.45rem;

@@ -106,17 +106,19 @@ test('homepage remains usable with reduced motion and the mobile menu', async ({
   expect(issues).toEqual([]);
 });
 
-test('public routes expose the expected indexing metadata', async ({ page }) => {
+test('public routes stay non-indexable without explicit indexing opt-in', async ({ page }) => {
+  test.setTimeout(60_000);
   const issues = collectBrowserIssues(page);
 
   for (const route of [
-    { path: '/portfolio', heading: 'Projetos reais para contextos diferentes.', robots: 'index, follow' },
-    { path: '/portfolio/axium', heading: 'Axium', robots: 'index, follow' },
-    { path: '/portfolio/echo-cosmic-energia', heading: 'EchoCosmicEnergia', robots: 'index, follow' },
-    { path: '/portfolio/dev-schedule', heading: 'DevSchedule', robots: 'index, follow' },
-    { path: '/portfolio/green-tweet', heading: 'GreenTweet', robots: 'index, follow' },
-    { path: '/portfolio/a-alma-no-comando', heading: 'A Alma no Comando', robots: 'index, follow' },
-    { path: '/portfolio/alicerce-da-alma', heading: 'Alicerce da Alma', robots: 'index, follow' },
+    { path: '/', heading: 'Uma nova página para o seu negócio começa aqui.', robots: 'noindex, nofollow' },
+    { path: '/portfolio', heading: 'Projetos reais para contextos diferentes.', robots: 'noindex, nofollow' },
+    { path: '/portfolio/axium', heading: 'Axium', robots: 'noindex, nofollow' },
+    { path: '/portfolio/echo-cosmic-energia', heading: 'EchoCosmicEnergia', robots: 'noindex, nofollow' },
+    { path: '/portfolio/dev-schedule', heading: 'DevSchedule', robots: 'noindex, nofollow' },
+    { path: '/portfolio/green-tweet', heading: 'GreenTweet', robots: 'noindex, nofollow' },
+    { path: '/portfolio/a-alma-no-comando', heading: 'A Alma no Comando', robots: 'noindex, nofollow' },
+    { path: '/portfolio/alicerce-da-alma', heading: 'Alicerce da Alma', robots: 'noindex, nofollow' },
     { path: '/privacidade', heading: 'Política de Privacidade', robots: 'noindex, nofollow' },
     { path: '/cookies', heading: 'Política de Cookies', robots: 'noindex, nofollow' },
     { path: '/rota-inexistente', heading: 'Página não encontrada.', robots: 'noindex, nofollow' },

@@ -344,9 +344,12 @@ export function ProcessSection() {
     [homepageTokens.process.journeyProgressStart, homepageTokens.process.journeyProgressEnd, homepageTokens.process.journeyTerminalHoldEnd],
     [0, 1, 1],
   );
-  const mobilePathLength = prefersReducedMotion
-    ? staticProgress
-    : useTransform(mobileScrollYProgress, mobileMarkerArrivalProgress, mobileGeometry.anchorOffsets);
+  const animatedMobilePathLength = useTransform(
+    mobileScrollYProgress,
+    mobileMarkerArrivalProgress,
+    mobileGeometry.anchorOffsets,
+  );
+  const mobilePathLength = prefersReducedMotion ? staticProgress : animatedMobilePathLength;
   const activeGeometry = compactJourney ? mobileGeometry : desktopGeometry;
   const stepRanges = createStepRanges(
     compactJourney ? mobileMarkerArrivalProgress : activeGeometry.anchorOffsets,

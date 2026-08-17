@@ -60,6 +60,20 @@ test('hydrates all required prerendered routes without browser issues', async ({
   expect(issues).toEqual([]);
 });
 
+test('navigates from the top case back link to the portfolio', async ({ page }) => {
+  const issues = collectBrowserIssues(page);
+  await page.goto('/portfolio/axium/', { waitUntil: 'networkidle' });
+  await expect(page.getByRole('heading', { level: 1, name: 'Axium' })).toBeVisible();
+
+  const topBackLink = page.locator('main header').getByRole('link', { name: 'Voltar ao portfólio' });
+  await expect(topBackLink).toHaveAttribute('href', '/portfolio');
+  await topBackLink.click();
+
+  await expect(page).toHaveURL(/\/portfolio$/);
+  await expect(page.getByRole('heading', { level: 1, name: 'Projetos reais para contextos diferentes.' })).toBeVisible();
+  expect(issues).toEqual([]);
+});
+
 test('keeps SPA navigation, metadata, back/forward and anchor focus after hydration', async ({ page }) => {
   const issues = collectBrowserIssues(page);
   const documentRequests: string[] = [];
