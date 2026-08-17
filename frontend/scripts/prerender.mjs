@@ -10,34 +10,15 @@ function escapeHtml(value) {
   return value.replaceAll('&', '&amp;').replaceAll('"', '&quot;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
 }
 
-function metadataTags(metadata, indexingEnabled) {
-  const robots = indexingEnabled ? metadata.robots : 'noindex, nofollow';
+function metadataTags(metadata) {
   const tags = [
     `<title>${escapeHtml(metadata.title)}</title>`,
     `<meta name="description" content="${escapeHtml(metadata.description)}" />`,
-    `<meta name="robots" content="${robots}" />`,
+    `<meta name="robots" content="${metadata.robots}" />`,
   ];
   if (metadata.canonical) tags.push(`<link rel="canonical" href="${escapeHtml(metadata.canonical)}" />`);
-  if (metadata.path) {
-    const social = metadata.socialImage;
-    tags.push(
-      `<meta property="og:title" content="${escapeHtml(metadata.title)}" />`,
-      `<meta property="og:description" content="${escapeHtml(metadata.description)}" />`,
-      `<meta property="og:url" content="${escapeHtml(metadata.canonical)}" />`,
-      `<meta property="og:type" content="${metadata.openGraph.type}" />`,
-      '<meta property="og:site_name" content="Repage" />',
-      '<meta property="og:locale" content="pt_BR" />',
-      `<meta property="og:image" content="${escapeHtml(social.url)}" />`,
-      `<meta property="og:image:width" content="${social.width}" />`,
-      `<meta property="og:image:height" content="${social.height}" />`,
-      `<meta property="og:image:alt" content="${escapeHtml(social.alt)}" />`,
-      '<meta name="twitter:card" content="summary_large_image" />',
-      `<meta name="twitter:title" content="${escapeHtml(metadata.title)}" />`,
-      `<meta name="twitter:description" content="${escapeHtml(metadata.description)}" />`,
-      `<meta name="twitter:image" content="${escapeHtml(social.url)}" />`,
-      `<meta name="twitter:image:alt" content="${escapeHtml(social.alt)}" />`,
-    );
-  }
+  Object.entries(metadata.openGraph).forEach(([name, content]) => tags.push(`<meta property="${name}" content="${escapeHtml(content)}" />`));
+  Object.entries(metadata.twitter).forEach(([name, content]) => tags.push(`<meta name="${name}" content="${escapeHtml(content)}" />`));
   return tags.join('\n    ');
 }
 
@@ -61,7 +42,7 @@ function outputPath(pathname) {
   return join(distRoot, pathname.slice(1), 'index.html');
 }
 
-export function assertOutput(html, pathname, metadata, indexingEnabled) {
+export function assertOutput(html, pathname, metadata) {
   if (!html.includes('<div id="root">')) throw new Error(`Output sem root: ${pathname}`);
   if (/<div id="root">\s*<\/div>/.test(html)) throw new Error(`Root vazio: ${pathname}`);
   if (!/<h1\b/i.test(html)) throw new Error(`Heading ausente: ${pathname}`);
@@ -69,8 +50,7 @@ export function assertOutput(html, pathname, metadata, indexingEnabled) {
   for (const required of [`<title>${escapeHtml(metadata.title)}</title>`, `name="description"`, `name="robots"`]) {
     if (!html.includes(required)) throw new Error(`Metadata ausente (${required}) em ${pathname}`);
   }
-  const expectedRobots = indexingEnabled ? metadata.robots : 'noindex, nofollow';
-  if (!html.includes(`name="robots" content="${expectedRobots}"`)) throw new Error(`Robots incorreto: ${pathname}`);
+  if (!html.includes(`name="robots" content="${metadata.robots}"`)) throw new Error(`Robots incorreto: ${pathname}`);
   if (pathname === '/__404__') {
     if (html.includes('rel="canonical"')) throw new Error('404 não pode possuir canonical.');
   } else if (!metadata.canonical || !html.includes(`rel="canonical" href="${metadata.canonical}"`)) {
@@ -83,17 +63,16 @@ async function main() {
   const rawTemplate = await readFile(join(distRoot, 'index.html'), 'utf8');
   const { template: templateWithoutScripts, scripts } = removeRuntimeScripts(rawTemplate);
   const template = stripRuntimeMetadata(templateWithoutScripts);
-  const indexingEnabled = server.isSiteIndexingEnabled?.() ?? false;
   const routes = server.listPrerenderRoutes();
   if (new Set(routes).size !== routes.length) throw new Error('Rotas duplicadas no prerender.');
 
   for (const pathname of routes) {
     const rendered = await server.renderPathname(pathname);
     const html = template
-      .replace('</head>', `    ${rendered.styles}\n    ${metadataTags(rendered.metadata, indexingEnabled)}\n  </head>`)
+      .replace('</head>', `    ${rendered.styles}\n    ${metadataTags(rendered.metadata)}\n  </head>`)
       .replace('<div id="root"></div>', `<div id="root">${rendered.markup}</div>`)
       .replace('</body>', `${scripts}\n  </body>`);
-    assertOutput(html, pathname, rendered.metadata, indexingEnabled);
+    assertOutput(html, pathname, rendered.metadata);
     const destination = outputPath(pathname);
     await mkdir(dirname(destination), { recursive: true });
     await writeFile(destination, html);

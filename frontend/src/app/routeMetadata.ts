@@ -23,6 +23,11 @@ export type RouteMetadata = {
   openGraph: { type: 'website' };
 };
 
+export type EffectiveRouteMetadata = Omit<RouteMetadata, 'openGraph'> & {
+  openGraph: Record<string, string>;
+  twitter: Record<string, string>;
+};
+
 export type RouteMetadataKey = 'home' | 'portfolio' | 'privacy' | 'cookies' | 'notFound';
 
 const defaultSocialImage: SocialImage = {
@@ -143,6 +148,39 @@ export function getRouteMetadata(pathname: string): RouteMetadata {
   });
 }
 
+export function resolveRouteMetadata(
+  metadata: RouteMetadata,
+  indexingEnabled = isSiteIndexingEnabled(),
+): EffectiveRouteMetadata {
+  const social = metadata.socialImage;
+  const openGraph: Record<string, string> = metadata.path ? {
+    'og:title': metadata.title,
+    'og:description': metadata.description,
+    'og:url': metadata.canonical ?? '',
+    'og:type': metadata.openGraph.type,
+    'og:site_name': siteConfig.brand.name,
+    'og:locale': siteConfig.socialLocale,
+    'og:image': social.url,
+    'og:image:width': String(social.width),
+    'og:image:height': String(social.height),
+    'og:image:alt': social.alt,
+  } : {};
+  const twitter: Record<string, string> = metadata.path ? {
+    'twitter:card': 'summary_large_image',
+    'twitter:title': metadata.title,
+    'twitter:description': metadata.description,
+    'twitter:image': social.url,
+    'twitter:image:alt': social.alt,
+  } : {};
+
+  return {
+    ...metadata,
+    robots: indexingEnabled ? metadata.robots : 'noindex, nofollow',
+    openGraph,
+    twitter,
+  };
+}
+
 function upsertMeta(documentRef: Document, attribute: 'name' | 'property', value: string, content: string) {
   const elements = [...documentRef.head.querySelectorAll<HTMLMetaElement>(`meta[${attribute}="${value}"]`)];
   const element = elements[0] ?? documentRef.createElement('meta');
@@ -173,39 +211,22 @@ export function applyRouteMetadata(
   documentRef: Document = document,
   indexingEnabled = isSiteIndexingEnabled(),
 ) {
-  documentRef.title = metadata.title;
-  upsertMeta(documentRef, 'name', 'description', metadata.description);
-  upsertMeta(documentRef, 'name', 'robots', indexingEnabled ? metadata.robots : 'noindex, nofollow');
-  setCanonical(documentRef, metadata.canonical);
+  const effective = resolveRouteMetadata(metadata, indexingEnabled);
+  documentRef.title = effective.title;
+  upsertMeta(documentRef, 'name', 'description', effective.description);
+  upsertMeta(documentRef, 'name', 'robots', effective.robots);
+  setCanonical(documentRef, effective.canonical);
 
-  const openGraph: Record<string, string> = {
-    'og:title': metadata.title,
-    'og:description': metadata.description,
-    'og:url': metadata.canonical ?? '',
-    'og:type': metadata.openGraph.type,
-    'og:site_name': siteConfig.brand.name,
-    'og:locale': siteConfig.socialLocale,
-    'og:image': metadata.socialImage.url,
-    'og:image:width': String(metadata.socialImage.width),
-    'og:image:height': String(metadata.socialImage.height),
-    'og:image:alt': metadata.socialImage.alt,
-  };
-  const twitter: Record<string, string> = {
-    'twitter:card': 'summary_large_image',
-    'twitter:title': metadata.title,
-    'twitter:description': metadata.description,
-    'twitter:image': metadata.socialImage.url,
-    'twitter:image:alt': metadata.socialImage.alt,
-  };
-
-  if (!metadata.path) {
-    Object.keys(openGraph).forEach((name) => removeMeta(documentRef, 'property', name));
-    Object.keys(twitter).forEach((name) => removeMeta(documentRef, 'name', name));
+  if (!effective.path) {
+    ['og:title', 'og:description', 'og:url', 'og:type', 'og:site_name', 'og:locale', 'og:image', 'og:image:width', 'og:image:height', 'og:image:alt']
+      .forEach((name) => removeMeta(documentRef, 'property', name));
+    ['twitter:card', 'twitter:title', 'twitter:description', 'twitter:image', 'twitter:image:alt']
+      .forEach((name) => removeMeta(documentRef, 'name', name));
     return;
   }
 
-  Object.entries(openGraph).forEach(([name, content]) => upsertMeta(documentRef, 'property', name, content));
-  Object.entries(twitter).forEach(([name, content]) => upsertMeta(documentRef, 'name', name, content));
+  Object.entries(effective.openGraph).forEach(([name, content]) => upsertMeta(documentRef, 'property', name, content));
+  Object.entries(effective.twitter).forEach(([name, content]) => upsertMeta(documentRef, 'name', name, content));
 }
 
 export function useRouteMetadata(metadata: RouteMetadata = fallbackMetadata) {
