@@ -2,8 +2,7 @@ import { ArrowLeft, ArrowRight, ExternalLink, Monitor, Smartphone } from 'lucide
 import { Link, useParams } from 'react-router-dom';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
-import { getCaseMetadata, routeMetadata, useRouteMetadata } from '../../app/routeMetadata';
-import { siteConfig } from '../../config/site';
+import { getRouteMetadata, useRouteMetadata } from '../../app/routeMetadata';
 import { PrimaryCta } from '../../components/PrimaryCta';
 import { EditorialInkBackdrop } from '../../components/EditorialInkBackdrop';
 import { ProjectBrowserFrame } from '../../components/ProjectBrowserFrame';
@@ -23,14 +22,7 @@ export function CasePage() {
   const project = findPublicProjectBySlug(slug);
   const readiness = project ? findReadinessBySlug(project.slug) : undefined;
   const cover = project && readiness?.assets.find((asset) => asset.path === project.media.cover);
-  useRouteMetadata(project
-    ? getCaseMetadata(project.routeMetadata, {
-      path: `/portfolio/${project.slug}`,
-      ...(cover?.kind === 'screenshot' ? {
-        socialImage: { url: `${siteConfig.canonicalOrigin}${cover.path}`, width: cover.width, height: cover.height, alt: cover.alt },
-      } : {}),
-    })
-    : routeMetadata.notFound);
+  useRouteMetadata(getRouteMetadata(`/portfolio/${slug}`));
 
   if (!project) {
     return (

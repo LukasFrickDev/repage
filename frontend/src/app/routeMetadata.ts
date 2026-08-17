@@ -1,5 +1,7 @@
 import { useEffect } from 'react';
 import { isSiteIndexingEnabled, siteConfig } from '../config/site';
+import { findPublicProjectBySlug } from '../data/projects/publication';
+import { findReadinessBySlug } from '../data/projects/projectReadiness';
 
 export type IndexingState = 'index' | 'noindex';
 export type RobotsPolicy = 'index, follow' | 'noindex, follow' | 'noindex, nofollow';
@@ -113,6 +115,32 @@ export function getCaseMetadata(
     'index, follow',
     options.socialImage,
   );
+}
+
+export function getRouteMetadata(pathname: string): RouteMetadata {
+  const path = pathname.split('?')[0].split('#')[0] || '/';
+  if (path === '/') return routeMetadata.home;
+  if (path === '/portfolio') return routeMetadata.portfolio;
+  if (path === '/privacidade') return routeMetadata.privacy;
+  if (path === '/cookies') return routeMetadata.cookies;
+
+  const caseMatch = path.match(/^\/portfolio\/([^/]+)$/);
+  if (!caseMatch) return routeMetadata.notFound;
+
+  const project = findPublicProjectBySlug(caseMatch[1]);
+  if (!project) return routeMetadata.notFound;
+  const cover = findReadinessBySlug(project.slug)?.assets.find((asset) => asset.path === project.media.cover);
+  return getCaseMetadata(project.routeMetadata, {
+    path,
+    ...(cover?.kind === 'screenshot' ? {
+      socialImage: {
+        url: `${siteConfig.canonicalOrigin}${cover.path}`,
+        width: cover.width,
+        height: cover.height,
+        alt: cover.alt,
+      },
+    } : {}),
+  });
 }
 
 function upsertMeta(documentRef: Document, attribute: 'name' | 'property', value: string, content: string) {

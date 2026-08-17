@@ -43,25 +43,27 @@ describe('public routes', () => {
     ['/privacidade', 'Política de Privacidade'],
     ['/cookies', 'Política de Cookies'],
     ['/rota-inexistente', 'Página não encontrada.'],
-  ])('renders %s with a main heading', (route, heading) => {
+  ])('renders %s with a main heading', async (route, heading) => {
     renderAt(route);
+    await vi.dynamicImportSettled();
 
     expect(screen.getByRole('main')).toBeInTheDocument();
-    expect(screen.getByRole('heading', { level: 1, name: heading })).toBeInTheDocument();
-  });
+    await waitFor(() => expect(screen.getByRole('heading', { level: 1, name: heading })).toBeInTheDocument());
+  }, 15000);
 
-  it('renders the public 404 for an unknown project slug', () => {
+  it('renders the public 404 for an unknown project slug', async () => {
     renderAt('/portfolio/slug-inexistente');
+    await vi.dynamicImportSettled();
 
-    expect(screen.getByRole('heading', { level: 1, name: 'Projeto não encontrado.' })).toBeInTheDocument();
+    await waitFor(() => expect(screen.getByRole('heading', { level: 1, name: 'Projeto não encontrado.' })).toBeInTheDocument());
     expect(screen.getByRole('link', { name: 'Ver portfólio' })).toHaveAttribute('href', '/portfolio');
   });
 
-  it('renders the shared Echo case shell with factual content and next navigation', () => {
+  it('renders the shared Echo case shell with factual content and next navigation', async () => {
     renderAt('/portfolio/echo-cosmic-energia');
 
+    await waitFor(() => expect(screen.getByRole('heading', { level: 1, name: 'EchoCosmicEnergia' })).toBeInTheDocument());
     const caseMain = within(screen.getByRole('main'));
-    expect(screen.getByRole('heading', { level: 1, name: 'EchoCosmicEnergia' })).toBeInTheDocument();
     expect(caseMain.queryByText('Projeto pago')).not.toBeInTheDocument();
     expect(caseMain.queryByText(/Lukas Frick/)).not.toBeInTheDocument();
     expect(screen.getByText('Experiência full stack com catálogo, loja, conteúdo editorial e diferentes pontos de contato em uma presença digital integrada.')).toBeInTheDocument();
@@ -81,9 +83,10 @@ describe('public routes', () => {
     expect(screen.getAllByRole('heading', { level: 1 })).toHaveLength(1);
   });
 
-  it('renders Echo inline gallery groups with screenshots before typed inline videos', () => {
+  it('renders Echo inline gallery groups with screenshots before typed inline videos', async () => {
     renderAt('/portfolio/echo-cosmic-energia');
 
+    await waitFor(() => expect(screen.getByRole('region', { name: 'O trabalho em uso.' })).toBeInTheDocument());
     const gallery = within(screen.getByRole('main')).getByRole('region', { name: 'O trabalho em uso.' });
     expect(within(gallery).getByText('DESKTOP')).toBeInTheDocument();
     expect(within(gallery).getByText('MOBILE')).toBeInTheDocument();
@@ -132,6 +135,7 @@ describe('public routes', () => {
     const user = userEvent.setup();
     renderAt('/portfolio/echo-cosmic-energia');
 
+    await waitFor(() => expect(screen.getByRole('region', { name: 'O trabalho em uso.' })).toBeInTheDocument());
     const gallery = within(screen.getByRole('main')).getByRole('region', { name: 'O trabalho em uso.' });
     const screenshotTriggers = within(gallery).getAllByRole('button', { name: /^Ampliar:/ });
     expect(screenshotTriggers).toHaveLength(6);
@@ -153,6 +157,7 @@ describe('public routes', () => {
     const pauseSpy = vi.spyOn(HTMLMediaElement.prototype, 'pause').mockImplementation(() => undefined);
     renderAt('/portfolio/echo-cosmic-energia');
 
+    await waitFor(() => expect(screen.getByRole('region', { name: 'O trabalho em uso.' })).toBeInTheDocument());
     const gallery = within(screen.getByRole('main')).getByRole('region', { name: 'O trabalho em uso.' });
     const expandButtons = within(gallery).getAllByRole('button', { name: 'Abrir vídeo no viewer' });
     expect(expandButtons).toHaveLength(2);
@@ -184,9 +189,10 @@ describe('public routes', () => {
     pauseSpy.mockRestore();
   });
 
-  it('uses the registered video fallback without opening the screenshot viewer', () => {
+  it('uses the registered video fallback without opening the screenshot viewer', async () => {
     renderAt('/portfolio/echo-cosmic-energia');
 
+    await waitFor(() => expect(screen.getByRole('region', { name: 'O trabalho em uso.' })).toBeInTheDocument());
     const gallery = within(screen.getByRole('main')).getByRole('region', { name: 'O trabalho em uso.' });
     const video = gallery.querySelector('video');
     expect(video).toBeInTheDocument();
@@ -200,15 +206,16 @@ describe('public routes', () => {
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
 
-  it('renders the shared case gallery for all public project routes', () => {
-    ['axium', 'dev-schedule', 'green-tweet', 'a-alma-no-comando', 'alicerce-da-alma'].forEach((slug) => {
+  it('renders the shared case gallery for all public project routes', async () => {
+    for (const slug of ['axium', 'dev-schedule', 'green-tweet', 'a-alma-no-comando', 'alicerce-da-alma']) {
       const { unmount } = renderAt(`/portfolio/${slug}`);
+      await waitFor(() => expect(screen.getByRole('region', { name: 'O trabalho em uso.' })).toBeInTheDocument());
       const gallery = within(screen.getByRole('main')).getByRole('region', { name: 'O trabalho em uso.' });
       expect(within(gallery).getByText('DESKTOP')).toBeInTheDocument();
       expect(within(gallery).getByText('MOBILE')).toBeInTheDocument();
       expect(within(gallery).getAllByRole('img').length).toBeGreaterThan(0);
       unmount();
-    });
+    }
   });
 
   it('resets immediately when navigating to a new route without a hash', async () => {
@@ -220,9 +227,10 @@ describe('public routes', () => {
     expect(window.scrollTo).toHaveBeenCalledWith({ top: 0, left: 0, behavior: 'auto' });
   });
 
-  it('renders the six editorial portfolio projects with their covers and solution types', () => {
+  it('renders the six editorial portfolio projects with their covers and solution types', async () => {
     renderAt('/portfolio');
 
+    await waitFor(() => expect(screen.getByRole('region', { name: 'Projetos do portfólio' })).toBeInTheDocument());
     const portfolio = screen.getByRole('region', { name: 'Projetos do portfólio' });
     expect(within(portfolio).getAllByRole('listitem')).toHaveLength(6);
     expect(within(portfolio).getAllByRole('heading', { level: 2 }).map((heading) => heading.textContent)).toEqual([
@@ -352,6 +360,7 @@ describe('public routes', () => {
 
     await user.click(screen.getByRole('link', { name: 'Ver projetos' }));
 
+    await waitFor(() => expect(screen.getByRole('heading', { level: 1, name: 'Projetos reais para contextos diferentes.' })).toBeInTheDocument());
     const heading = screen.getByRole('heading', { level: 1, name: 'Projetos reais para contextos diferentes.' });
     expect(screen.getByTestId('location')).toHaveTextContent('/portfolio');
     expect(heading).toHaveFocus();
