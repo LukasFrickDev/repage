@@ -1,6 +1,6 @@
 # 0009 — SEO, sitemap e prerender
 
-- **Status:** approved
+- **Status:** implemented
 - **Responsável:** Lukas Frick
 - **Data:** 16 de agosto de 2026
 - **Branch-base:** `main`
@@ -8,13 +8,19 @@
 - **ADR relacionado:** `docs/adr/0001-vite-static-prerender.md` — deve estar `accepted` antes da implementação estrutural do prerender
 - **Specs predecessoras relevantes:** `0001-frontend-foundation-and-routing.md`, `0003-definitive-homepage.md`, `0004-portfolio-and-cases.md`, `0008-consent-analytics-and-legal-pages.md`
 
+## Estado de implementação
+
+A Entrega 9 foi concluída no checkpoint técnico final `3b63109b976b31712c08a13f857453b1ede018ae` (`fix(seo): harden final prerender validation`). A implementação preserva React, Vite, React Router declarativo e frontend estático, sem SSR em runtime.
+
+As validações finais disponíveis confirmaram lint, typecheck, Vitest (19 arquivos / 135 testes), audit de produção sem vulnerabilidades, builds SAFE e INDEXABLE, 11 outputs obrigatórios, hidratação, navegação SPA, consentimento/Analytics deny-by-default, metadata, canonical, sitemap, robots, JSON-LD, 404 e revisão visual humana. O E2E padrão e o E2E específico de prerender também foram validados localmente. Não foram declarados CI, deploy ou validação em produção real; a Entrega 10 permanece futura.
+
 ## 1. Contexto
 
-As Entregas 1–8 estão implementadas, validadas e integradas à `main`.
+As Entregas 1–8 estão implementadas, validadas e integradas à `main`; a Entrega 9 está implementada nesta branch conforme o checkpoint técnico final.
 
 A baseline já possui React 19, TypeScript, Vite 7, Styled Components 6, React Router 7 em modo declarativo, homepage definitiva, `/portfolio`, seis cases públicos, `/privacidade`, `/cookies`, 404, fonte tipada de projetos, publication gate/readiness, metadados básicos por rota, imagens sociais dos projetos, consentimento e GA4 condicionado.
 
-O frontend ainda é uma SPA no primeiro carregamento: `index.html` contém `#root` vazio, o cliente usa `createRoot`, metadados são aplicados no browser e não há HTML específico por rota, canonical, Open Graph completo, Twitter Card, sitemap, JSON-LD final ou prerender integrado ao build.
+O frontend continua sendo uma SPA após a hidratação, mas o build agora gera HTML específico por rota, metadata completa, sitemap, robots e JSON-LD aplicável antes do JavaScript.
 
 ## 2. Objetivo
 
@@ -716,7 +722,7 @@ Não redesenhar páginas.
 - modo indexável e bloqueado;
 - revisão visual proporcional.
 
-### Fase 5 — Fechamento
+### Fase 5 — Fechamento — concluída
 
 - bateria completa;
 - segurança/privacidade;
@@ -830,41 +836,41 @@ Mitigar fazendo rota obrigatória com erro falhar o build.
 
 ## 47. Critérios de aceite
 
-- [ ] `main` pós-0008 é baseline.
-- [ ] ADR de prerender aceito antes da implementação estrutural.
-- [ ] React/Vite/React Router declarativo preservados.
-- [ ] Nenhum SSR runtime em produção.
-- [ ] Domínio canônico centralizado.
-- [ ] Indexação deny-by-default por ambiente.
-- [ ] Home/portfolio/cases possuem metadata completa.
-- [ ] Legal pages possuem canonical/social e permanecem noindex.
-- [ ] 404 é noindex/nofollow e sem canonical.
-- [ ] Open Graph completo.
-- [ ] Twitter Card completo.
-- [ ] Social image padrão existe e foi aprovada.
-- [ ] Social images de cases são reais/autorizadas.
-- [ ] JSON-LD factual/seguro.
-- [ ] Sitemap deriva de `listPublicProjects()`.
-- [ ] Sitemap exclui legal/404/draft/external.
-- [ ] Robots funciona nos dois modos.
-- [ ] HTML específico gerado para todas as rotas obrigatórias.
-- [ ] `404.html` gerado.
-- [ ] Nenhum root obrigatório vazio.
-- [ ] Cliente hidrata HTML prerenderizado.
-- [ ] Sem hydration mismatch.
-- [ ] ConsentProvider server/hydration-safe.
-- [ ] GA permanece deny-by-default e não roda no prerender.
-- [ ] Styled Components é SSR-safe.
-- [ ] Rotas secundárias têm lazy loading compatível.
-- [ ] Error Boundary existe sem mascarar build failure.
-- [ ] SPA/âncoras/foco continuam funcionais.
-- [ ] Reduced motion não causa mismatch.
-- [ ] Build falha diante de saída obrigatória incompleta.
-- [ ] Nenhuma Entrega 10 antecipada.
-- [ ] lint/typecheck/test/build/E2E aprovados.
-- [ ] `git diff --check` aprovado.
-- [ ] revisão visual proporcional aprovada.
-- [ ] documentação reconciliada.
+- [x] `main` pós-0008 é baseline.
+- [x] ADR de prerender aceito antes da implementação estrutural.
+- [x] React/Vite/React Router declarativo preservados.
+- [x] Nenhum SSR runtime em produção.
+- [x] Domínio canônico centralizado.
+- [x] Indexação deny-by-default por ambiente.
+- [x] Home/portfolio/cases possuem metadata completa.
+- [x] Legal pages possuem canonical/social e permanecem noindex.
+- [x] 404 é noindex/nofollow e sem canonical.
+- [x] Open Graph completo.
+- [x] Twitter Card completo.
+- [x] Social image padrão existe e foi aprovada.
+- [x] Social images de cases são reais/autorizadas.
+- [x] JSON-LD factual/seguro.
+- [x] Sitemap deriva de `listPublicProjects()`.
+- [x] Sitemap exclui legal/404/draft/external.
+- [x] Robots funciona nos dois modos.
+- [x] HTML específico gerado para todas as rotas obrigatórias.
+- [x] `404.html` gerado.
+- [x] Nenhum root obrigatório vazio.
+- [x] Cliente hidrata HTML prerenderizado.
+- [x] Sem hydration mismatch.
+- [x] ConsentProvider server/hydration-safe.
+- [x] GA permanece deny-by-default e não roda no prerender.
+- [x] Styled Components é SSR-safe.
+- [x] Rotas secundárias têm lazy loading compatível.
+- [x] Error Boundary existe sem mascarar build failure.
+- [x] SPA/âncoras/foco continuam funcionais.
+- [x] Reduced motion não causa mismatch.
+- [x] Build falha diante de saída obrigatória incompleta.
+- [x] Nenhuma Entrega 10 antecipada.
+- [x] lint/typecheck/test/build/E2E aprovados.
+- [x] `git diff --check` aprovado.
+- [x] revisão visual proporcional aprovada.
+- [x] documentação reconciliada.
 
 ## 48. Documentação no fechamento
 
@@ -879,7 +885,7 @@ Mitigar fazendo rota obrigatória com erro falhar o build.
 
 ## 49. Definição de pronto
 
-A Entrega 9 está concluída quando o artefato estático do build contém HTML real e metadata correta por rota, hidrata sem regressão e está pronto para ser servido pela Entrega 10 sem depender de crawler executar JavaScript para descobrir conteúdo principal.
+A Entrega 9 está concluída: o artefato estático do build contém HTML real e metadata correta por rota, hidrata sem regressão e está pronto para ser servido pela Entrega 10 sem depender de crawler executar JavaScript para descobrir conteúdo principal.
 
 Fluxo:
 
