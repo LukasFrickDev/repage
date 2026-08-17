@@ -35,6 +35,7 @@ type CurveHandles = {
 };
 
 type StepRange = [number, number];
+const PATH_ARRIVAL_EPSILON = 0.001;
 
 const desktopViewBox = { width: 1200, height: 620 };
 const mobileViewBox = { width: 100, height: 1280 };
@@ -42,8 +43,6 @@ const mobileBaseX = 16;
 const mobileWaveAmplitude = 5;
 const mobileFirstMarkerY = 56;
 const mobileStepPitch = 205;
-const mobileJourneyProgressEnd = 0.56;
-const mobileJourneyTerminalHoldEnd = 0.66;
 
 function mobileMarkerY(index: number) {
   return mobileFirstMarkerY + index * mobileStepPitch;
@@ -79,6 +78,14 @@ const journeyAnchors: JourneyAnchor[] = [
     mobile: { x: mobileMarkerX(5), y: mobileMarkerY(5) },
   },
 ];
+
+const mobileLastMarkerIndex = journeyAnchors.length - 1;
+const mobilePathStart = mobileMarkerY(0) / mobileViewBox.height;
+const mobilePathEnd = mobileMarkerY(mobileLastMarkerIndex) / mobileViewBox.height;
+const mobileMarkerArrivalProgress = journeyAnchors.map(({ mobile }) => (
+  (mobile.y - journeyAnchors[0].mobile.y)
+  / (journeyAnchors[mobileLastMarkerIndex].mobile.y - journeyAnchors[0].mobile.y)
+));
 
 const desktopCurveHandles: CurveHandles[] = [
   { from: { x: 12, y: 34 }, to: { x: -8, y: -32 } },
@@ -174,11 +181,17 @@ const desktopGeometry = createJourneyGeometry(
 );
 const mobileGeometry = createJourneyGeometry(journeyAnchors.map(({ mobile }) => mobile));
 
-function createStepRanges(anchorOffsets: number[], progressEnd: number): StepRange[] {
-  const progressStart = homepageTokens.process.journeyProgressStart;
+function createStepRanges(
+  anchorOffsets: number[],
+  progressStart: number,
+  progressEnd: number,
+  activateAtArrival = false,
+): StepRange[] {
 
   return anchorOffsets.map((offset, index) => {
     const arrival = progressStart + offset * (progressEnd - progressStart);
+
+    if (activateAtArrival) return [arrival, Math.min(arrival + 0.01, 1)];
 
     return index === 0
       ? [progressStart - 0.025, progressStart + 0.035]
@@ -189,41 +202,53 @@ function createStepRanges(anchorOffsets: number[], progressEnd: number): StepRan
 type ProcessStepProps = {
   anchor: JourneyAnchor;
   index: number;
+  lineProgress: MotionValue<number>;
+  arrivalPathLength: number;
+  mobile: boolean;
   progress: MotionValue<number>;
   range: StepRange;
   reducedMotion: boolean;
   step: (typeof processSectionContent.steps)[number];
 };
 
-function ProcessStep({ anchor, index, progress, range, reducedMotion, step }: ProcessStepProps) {
+function ProcessStep({ anchor, index, lineProgress, arrivalPathLength, mobile, progress, range, reducedMotion, step }: ProcessStepProps) {
+  const arrivalThreshold = Math.max(0, arrivalPathLength - PATH_ARRIVAL_EPSILON);
+  const reached = useTransform(lineProgress, (value) => Number(value >= arrivalThreshold));
+  const mobileActivationProgress = useSpring(reached, {
+    stiffness: 450,
+    damping: 35,
+    mass: 0.18,
+  });
+  const visualProgress = mobile ? mobileActivationProgress : progress;
+  const visualRange = mobile ? [0, 1] as StepRange : range;
   const opacity = useTransform(
-    progress,
-    range,
+    visualProgress,
+    visualRange,
     [homepageTokens.process.stepInactiveOpacity, 1],
   );
-  const y = useTransform(progress, range, [homepageTokens.process.stepRevealDistance, 0]);
-  const markerSettledAt = Math.min(range[1] + 0.035, 1);
-  const markerScale = useTransform(progress, [range[0], range[1], markerSettledAt], [0.84, 1.08, 1]);
-  const markerBackground = useTransform(progress, range, [colors.white, colors.highlight]);
+  const y = useTransform(visualProgress, visualRange, [homepageTokens.process.stepRevealDistance, 0]);
+  const markerSettledAt = mobile ? 1 : Math.min(range[1] + 0.035, 1);
+  const markerScale = useTransform(visualProgress, mobile ? [0, 0.55, 1] : [range[0], range[1], markerSettledAt], [0.84, 1.08, 1]);
+  const markerBackground = useTransform(visualProgress, visualRange, [colors.white, colors.highlight]);
   const markerBorderColor = useTransform(
-    progress,
-    range,
+    visualProgress,
+    visualRange,
     ['rgba(108, 99, 255, 0.34)', colors.highlight],
   );
-  const markerCoreOpacity = useTransform(progress, range, [0.28, 1]);
+  const markerCoreOpacity = useTransform(visualProgress, visualRange, [0.28, 1]);
   const markerHaloOpacity = useTransform(
-    progress,
-    [range[0], range[1], markerSettledAt],
+    visualProgress,
+    mobile ? [0, 0.55, 1] : [range[0], range[1], markerSettledAt],
     [0, 0.18, 0.055],
   );
   const markerHaloScale = useTransform(
-    progress,
-    [range[0], range[1], markerSettledAt],
+    visualProgress,
+    mobile ? [0, 0.55, 1] : [range[0], range[1], markerSettledAt],
     [0.72, homepageTokens.process.markerHaloCurrentScale, homepageTokens.process.markerHaloSettledScale],
   );
   const numberOpacity = useTransform(
-    progress,
-    [range[0], range[1], markerSettledAt],
+    visualProgress,
+    mobile ? [0, 0.55, 1] : [range[0], range[1], markerSettledAt],
     [0.74, 1, 0.86],
   );
   const stepStyle = {
@@ -296,26 +321,38 @@ export function ProcessSection() {
   const introDescriptionOpacity = useTransform(introProgress, [0.42, 0.64], [0, 1]);
   const introDescriptionX = useTransform(introProgress, [0.42, 0.64], [6, 0]);
   const trackRef = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({
+  const { scrollYProgress: desktopScrollYProgress } = useScroll({
     target: trackRef,
     offset: ['start 78%', 'end 22%'],
   });
-  const journeyProgress = useSpring(scrollYProgress, { stiffness: 120, damping: 30, mass: 0.28 });
-  const staticProgress = useMotionValue(1);
-  const activeProgress = prefersReducedMotion ? staticProgress : journeyProgress;
-  const pathLength = useTransform(
-    activeProgress,
-    [
-      homepageTokens.process.journeyProgressStart,
-      compactJourney ? mobileJourneyProgressEnd : homepageTokens.process.journeyProgressEnd,
-      compactJourney ? mobileJourneyTerminalHoldEnd : homepageTokens.process.journeyTerminalHoldEnd,
+  const { scrollYProgress: mobileScrollYProgress } = useScroll({
+    target: trackRef,
+    offset: [
+      `${mobilePathStart} 0.5`,
+      `${mobilePathEnd} 0.5`,
     ],
+  });
+  const journeyProgress = useSpring(desktopScrollYProgress, { stiffness: 120, damping: 30, mass: 0.28 });
+  const staticProgress = useMotionValue(1);
+  const activeProgress = prefersReducedMotion
+    ? staticProgress
+    : compactJourney
+      ? mobileScrollYProgress
+      : journeyProgress;
+  const desktopPathLength = useTransform(
+    prefersReducedMotion ? staticProgress : journeyProgress,
+    [homepageTokens.process.journeyProgressStart, homepageTokens.process.journeyProgressEnd, homepageTokens.process.journeyTerminalHoldEnd],
     [0, 1, 1],
   );
+  const mobilePathLength = prefersReducedMotion
+    ? staticProgress
+    : useTransform(mobileScrollYProgress, mobileMarkerArrivalProgress, mobileGeometry.anchorOffsets);
   const activeGeometry = compactJourney ? mobileGeometry : desktopGeometry;
   const stepRanges = createStepRanges(
-    activeGeometry.anchorOffsets,
-    compactJourney ? mobileJourneyProgressEnd : homepageTokens.process.journeyProgressEnd,
+    compactJourney ? mobileMarkerArrivalProgress : activeGeometry.anchorOffsets,
+    compactJourney ? 0 : homepageTokens.process.journeyProgressStart,
+    compactJourney ? 1 : homepageTokens.process.journeyProgressEnd,
+    compactJourney,
   );
   const titleSecondLineStart = processSectionContent.title.indexOf('à publicação');
   const titleLines = [
@@ -377,7 +414,7 @@ export function ProcessSection() {
               aria-hidden="true"
             >
               <S.BasePath d={desktopGeometry.path} />
-              <S.ProgressPath d={desktopGeometry.path} style={{ pathLength }} />
+              <S.ProgressPath d={desktopGeometry.path} style={{ pathLength: desktopPathLength }} />
             </S.DesktopTrajectory>
             <S.MobileTrajectory
               viewBox={`0 0 ${mobileViewBox.width} ${mobileViewBox.height}`}
@@ -387,7 +424,7 @@ export function ProcessSection() {
               <S.BasePath d={mobileGeometry.path} />
               <S.ProgressPath
                 d={mobileGeometry.path}
-                style={{ pathLength }}
+                style={{ pathLength: mobilePathLength }}
               />
             </S.MobileTrajectory>
 
@@ -397,6 +434,9 @@ export function ProcessSection() {
                   key={step.title}
                   anchor={journeyAnchors[index]}
                   index={index}
+                  lineProgress={compactJourney ? mobilePathLength : desktopPathLength}
+                  arrivalPathLength={activeGeometry.anchorOffsets[index]}
+                  mobile={compactJourney}
                   progress={activeProgress}
                   range={stepRanges[index]}
                   reducedMotion={prefersReducedMotion}

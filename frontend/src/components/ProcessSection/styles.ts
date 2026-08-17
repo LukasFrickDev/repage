@@ -12,6 +12,10 @@ export const Section = styled.section`
   padding: clamp(7rem, 12vw, 12rem) ${homepageTokens.sectionPaddingInline};
   background: ${colors.white};
   color: ${colors.background};
+
+  @media (max-width: ${breakpoints.mobileMax}) {
+    padding-bottom: clamp(2.5rem, 8vw, 4rem);
+  }
 `;
 
 export const Container = styled.div`
@@ -120,6 +124,7 @@ export const ProcessJourneyStage = styled.div`
     width: min(100%, ${homepageTokens.process.mobileJourneyWidth});
     height: ${homepageTokens.process.mobileJourneyHeight};
   }
+
 `;
 
 export const DesktopTrajectory = styled.svg`
