@@ -6,7 +6,7 @@ import {
   useSpring,
   useTransform,
 } from 'framer-motion';
-import { type CSSProperties, useRef } from 'react';
+import { type CSSProperties, useEffect, useRef, useState } from 'react';
 import { processSectionContent } from '../../content/repageContent';
 import { breakpoints, colors, homepageTokens } from '../../styles/theme';
 import * as S from './styles';
@@ -37,33 +37,46 @@ type CurveHandles = {
 type StepRange = [number, number];
 
 const desktopViewBox = { width: 1200, height: 620 };
-const mobileViewBox = { width: 100, height: 1080 };
-const phoneMarkerOffset = 50;
+const mobileViewBox = { width: 100, height: 1280 };
+const mobileBaseX = 16;
+const mobileWaveAmplitude = 5;
+const mobileFirstMarkerY = 56;
+const mobileStepPitch = 205;
+const mobileJourneyProgressEnd = 0.56;
+const mobileJourneyTerminalHoldEnd = 0.66;
+
+function mobileMarkerY(index: number) {
+  return mobileFirstMarkerY + index * mobileStepPitch;
+}
+
+function mobileMarkerX(index: number) {
+  return mobileBaseX + (index % 2 === 0 ? -mobileWaveAmplitude : mobileWaveAmplitude);
+}
 
 const journeyAnchors: JourneyAnchor[] = [
   {
     desktop: { x: 570, y: 48, align: 'end', contentOffsetY: -38 },
-    mobile: { x: 12, y: 54 },
+    mobile: { x: mobileMarkerX(0), y: mobileMarkerY(0) },
   },
   {
     desktop: { x: 635, y: 146, align: 'start', contentOffsetY: -70 },
-    mobile: { x: 20, y: 220 },
+    mobile: { x: mobileMarkerX(1), y: mobileMarkerY(1) },
   },
   {
     desktop: { x: 560, y: 306, align: 'end', contentOffsetY: -88 },
-    mobile: { x: 13, y: 386 },
+    mobile: { x: mobileMarkerX(2), y: mobileMarkerY(2) },
   },
   {
     desktop: { x: 640, y: 352, align: 'start', contentOffsetY: -68 },
-    mobile: { x: 22, y: 552 },
+    mobile: { x: mobileMarkerX(3), y: mobileMarkerY(3) },
   },
   {
     desktop: { x: 565, y: 468, align: 'end', contentOffsetY: -55 },
-    mobile: { x: 12, y: 718 },
+    mobile: { x: mobileMarkerX(4), y: mobileMarkerY(4) },
   },
   {
     desktop: { x: 632, y: 605, align: 'start', contentOffsetY: -128 },
-    mobile: { x: 20, y: 900 },
+    mobile: { x: mobileMarkerX(5), y: mobileMarkerY(5) },
   },
 ];
 
@@ -160,13 +173,9 @@ const desktopGeometry = createJourneyGeometry(
   desktopCurveHandles,
 );
 const mobileGeometry = createJourneyGeometry(journeyAnchors.map(({ mobile }) => mobile));
-const phoneGeometry = createJourneyGeometry(
-  journeyAnchors.map(({ mobile }) => ({ x: mobile.x, y: mobile.y + phoneMarkerOffset })),
-);
 
-function createStepRanges(anchorOffsets: number[]): StepRange[] {
+function createStepRanges(anchorOffsets: number[], progressEnd: number): StepRange[] {
   const progressStart = homepageTokens.process.journeyProgressStart;
-  const progressEnd = homepageTokens.process.journeyProgressEnd;
 
   return anchorOffsets.map((offset, index) => {
     const arrival = progressStart + offset * (progressEnd - progressStart);
@@ -223,6 +232,7 @@ function ProcessStep({ anchor, index, progress, range, reducedMotion, step }: Pr
     '--desktop-content-offset-y': `${anchor.desktop.contentOffsetY}px`,
     '--mobile-anchor-x': `${anchor.mobile.x}%`,
     '--mobile-anchor-y': `${(anchor.mobile.y / mobileViewBox.height) * 100}%`,
+    '--mobile-content-x': `${anchor.mobile.x}%`,
   } as CSSProperties;
 
   return (
@@ -262,10 +272,12 @@ function ProcessStep({ anchor, index, progress, range, reducedMotion, step }: Pr
 
 export function ProcessSection() {
   const prefersReducedMotion = useHydrationSafeReducedMotion();
-  const compactJourney = typeof window !== 'undefined'
-    && window.matchMedia(`(max-width: ${breakpoints.contentMax})`).matches;
-  const phoneJourney = typeof window !== 'undefined'
-    && window.matchMedia(`(max-width: ${breakpoints.mobileMax})`).matches;
+  const [compactJourney, setCompactJourney] = useState(false);
+
+  useEffect(() => {
+    setCompactJourney(window.matchMedia(`(max-width: ${breakpoints.contentMax})`).matches);
+  }, []);
+
   const introRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress: introScrollProgress } = useScroll({
     target: introRef,
@@ -295,17 +307,16 @@ export function ProcessSection() {
     activeProgress,
     [
       homepageTokens.process.journeyProgressStart,
-      homepageTokens.process.journeyProgressEnd,
-      homepageTokens.process.journeyTerminalHoldEnd,
+      compactJourney ? mobileJourneyProgressEnd : homepageTokens.process.journeyProgressEnd,
+      compactJourney ? mobileJourneyTerminalHoldEnd : homepageTokens.process.journeyTerminalHoldEnd,
     ],
     [0, 1, 1],
   );
-  const activeGeometry = phoneJourney
-    ? phoneGeometry
-    : compactJourney
-      ? mobileGeometry
-      : desktopGeometry;
-  const stepRanges = createStepRanges(activeGeometry.anchorOffsets);
+  const activeGeometry = compactJourney ? mobileGeometry : desktopGeometry;
+  const stepRanges = createStepRanges(
+    activeGeometry.anchorOffsets,
+    compactJourney ? mobileJourneyProgressEnd : homepageTokens.process.journeyProgressEnd,
+  );
   const titleSecondLineStart = processSectionContent.title.indexOf('à publicação');
   const titleLines = [
     processSectionContent.title.slice(0, titleSecondLineStart).trim(),
@@ -373,9 +384,9 @@ export function ProcessSection() {
               preserveAspectRatio="none"
               aria-hidden="true"
             >
-              <S.BasePath d={phoneJourney ? phoneGeometry.path : mobileGeometry.path} />
+              <S.BasePath d={mobileGeometry.path} />
               <S.ProgressPath
-                d={phoneJourney ? phoneGeometry.path : mobileGeometry.path}
+                d={mobileGeometry.path}
                 style={{ pathLength }}
               />
             </S.MobileTrajectory>

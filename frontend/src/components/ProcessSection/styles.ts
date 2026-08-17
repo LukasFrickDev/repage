@@ -187,8 +187,8 @@ export const Step = styled.li<{ $align: AnchorAlignment }>`
 
   @media (max-width: ${breakpoints.contentMax}) {
     top: var(--mobile-anchor-y);
-    left: var(--mobile-anchor-x);
-    width: calc(100% - var(--mobile-anchor-x));
+    left: 0;
+    width: 100%;
   }
 `;
 
@@ -201,8 +201,8 @@ export const MarkerAnchor = styled.span`
   aspect-ratio: 1;
   transform: translate(-50%, -50%);
 
-  @media (max-width: ${breakpoints.mobileMax}) {
-    top: clamp(2.9625rem, 12.5vw, 3.240625rem);
+  @media (max-width: ${breakpoints.contentMax}) {
+    left: var(--mobile-anchor-x);
   }
 `;
 
@@ -249,9 +249,9 @@ export const StepDetails = styled(motion.div)`
   }
 
   @media (max-width: ${breakpoints.contentMax}) {
-    top: ${homepageTokens.process.markerContentGap};
-    left: 2rem !important;
-    width: calc(100% - 2rem);
+    top: 0;
+    left: calc(var(--mobile-content-x) + ${homepageTokens.process.markerSize} + 2rem) !important;
+    width: calc(100% - var(--mobile-content-x) - ${homepageTokens.process.markerSize} - 2rem);
   }
 `;
 
@@ -264,6 +264,10 @@ export const Number = styled(motion.span)`
   font-weight: 620;
   letter-spacing: -0.08em;
   line-height: 0.82;
+
+  @media (max-width: ${breakpoints.contentMax}) {
+    transform: translateY(-50%);
+  }
 `;
 
 export const StepContent = styled.div`

@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import styled, { keyframes } from 'styled-components';
+import styled, { css, keyframes } from 'styled-components';
 import { breakpoints, colors, fonts, homepageTokens, layout, motion as motionTokens } from '../../styles/theme';
 
 const entranceLift = keyframes`
@@ -56,7 +56,7 @@ export const Hero = styled.section`
   }
 `;
 
-export const BrandEntrance = styled.div`
+export const BrandEntrance = styled.div<{ $fontReady: boolean }>`
   position: absolute;
   z-index: 6;
   inset: 0;
@@ -65,7 +65,7 @@ export const BrandEntrance = styled.div`
   overflow: hidden;
   pointer-events: none;
   background: ${colors.backgroundSecondary};
-  animation: ${entranceLift} 1.48s cubic-bezier(0.76, 0, 0.24, 1) forwards;
+  animation: ${({ $fontReady }) => ($fontReady ? css`${entranceLift} 1.48s cubic-bezier(0.76, 0, 0.24, 1) forwards` : 'none')};
   will-change: transform;
 
   &::before {
@@ -78,14 +78,19 @@ export const BrandEntrance = styled.div`
   }
 
   @media (max-width: ${breakpoints.tabletMax}) {
+    position: fixed;
+    width: 100%;
+    height: 100svh;
     animation-duration: 1.18s;
   }
 `;
 
-export const BrandEntranceIdentity = styled.div`
+export const BrandEntranceIdentity = styled.div<{ $fontReady: boolean }>`
   position: relative;
   z-index: 1;
   display: inline-flex;
+  justify-self: center;
+  margin-inline: auto;
   align-items: center;
   gap: clamp(0.75rem, 1.8vw, 1.35rem);
   color: ${colors.white};
@@ -94,13 +99,14 @@ export const BrandEntranceIdentity = styled.div`
   font-weight: 620;
   letter-spacing: -0.07em;
   line-height: 0.9;
+  visibility: ${({ $fontReady }) => ($fontReady ? 'visible' : 'hidden')};
 
   img {
     width: clamp(3.8rem, 7.6vw, 7.8rem);
     height: clamp(3.8rem, 7.6vw, 7.8rem);
   }
 
-  animation: ${identityLift} 1.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation: ${({ $fontReady }) => ($fontReady ? css`${identityLift} 1.2s cubic-bezier(0.22, 1, 0.36, 1) forwards` : 'none')};
 
   @media (max-width: ${breakpoints.tabletMax}) {
     font-size: clamp(2.8rem, 13vw, 4.8rem);
@@ -113,7 +119,7 @@ export const BrandEntranceIdentity = styled.div`
   }
 `;
 
-export const BrandEntranceLine = styled.span`
+export const BrandEntranceLine = styled.span<{ $fontReady: boolean }>`
   position: absolute;
   right: 0;
   bottom: clamp(3rem, 9vw, 8rem);
@@ -121,7 +127,7 @@ export const BrandEntranceLine = styled.span`
   height: 2px;
   background: linear-gradient(90deg, transparent, ${colors.highlight}, ${colors.neonBlue});
   transform-origin: right center;
-  animation: ${entranceLineLift} 1.18s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation: ${({ $fontReady }) => ($fontReady ? css`${entranceLineLift} 1.18s cubic-bezier(0.22, 1, 0.36, 1) forwards` : 'none')};
 
   @media (max-width: ${breakpoints.tabletMax}) {
     width: 72vw;

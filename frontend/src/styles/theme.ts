@@ -246,7 +246,7 @@ export const homepageTokens = {
     journeyProgressEnd: 0.67,
     journeyTerminalHoldEnd: 0.76,
     mobileJourneyWidth: '34rem',
-    mobileJourneyHeight: 'clamp(64rem, 270vw, 70rem)',
+    mobileJourneyHeight: 'clamp(76rem, 330vw, 88rem)',
     stepWidth: 'clamp(15rem, 20vw, 19rem)',
     stepCopyMaxWidth: '19rem',
     stepInactiveOpacity: 0.34,

@@ -23,6 +23,8 @@ export function FinalCtaSection() {
   const titleMaskPosition = useTransform(progress, [0.17, 0.46], ['0 100%', '0 0%']);
   const descriptionOpacity = useTransform(progress, [0.38, 0.62], [0, 1]);
   const descriptionY = useTransform(progress, [0.38, 0.62], [8, 0]);
+  const formOpacity = useTransform(progress, [0.62, 0.8], [0, 1]);
+  const formY = useTransform(progress, [0.62, 0.8], [8, 0]);
 
   return (
     <S.Section
@@ -67,7 +69,11 @@ export function FinalCtaSection() {
         >
           {finalCtaSectionContent.description}
         </S.Description>
-        <LeadForm onInteractionStart={() => { setFormInteracted(true); trackEvent(ANALYTICS_EVENT_NAMES.leadFormStart); }} />
+        <S.FormReveal
+          style={prefersReducedMotion || formInteracted ? { opacity: 1, y: 0 } : { opacity: formOpacity, y: formY }}
+        >
+          <LeadForm onInteractionStart={() => { setFormInteracted(true); trackEvent(ANALYTICS_EVENT_NAMES.leadFormStart); }} />
+        </S.FormReveal>
       </S.Content>
     </S.Section>
   );

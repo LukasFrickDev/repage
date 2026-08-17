@@ -143,3 +143,7 @@ export const Description = styled(motion.p)`
     line-height: 1.64;
   }
 `;
+
+export const FormReveal = styled(motion.div)`
+  display: flow-root;
+`;
