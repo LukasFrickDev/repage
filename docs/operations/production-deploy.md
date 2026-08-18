@@ -90,7 +90,8 @@ segredos no shell SSH.
    `docker-compose.yml` ou arquivos locais.
 8. A private key é escrita somente em arquivo temporário com permissão restrita.
 9. SSH/SCP usa o `DEPLOY_SSH_KNOWN_HOSTS` pinado e
-   `StrictHostKeyChecking=yes`.
+   `StrictHostKeyChecking=yes`, `BatchMode=yes`, timeout de conexão de 15
+   segundos e keepalive para sessões longas.
 10. O archive e o manifesto de rollback do estado gerenciado anterior são
     preservados em `tmp/repage-rollback-frontend.tar.gz`,
     `tmp/repage-rollback-backend.tar.gz`,
@@ -113,6 +114,13 @@ touch /home/re190924/repage_backend/tmp/restart.txt
 
 17. O workflow verifica health, readiness, homepage, uma rota prerenderizada
     e uma rota inexistente com status HTTP exatamente `404`.
+
+O job de deploy possui timeout de 20 minutos. Esse limite é deliberadamente
+superior à duração observada para a transferência do frontend de produção e
+interrompe somente travamentos prolongados do runner ou da sessão remota.
+Quando existe o SHA da última publicação bem-sucedida, o deploy compara esse
+estado com o SHA atual e transfere/muta somente os componentes alterados; na
+ausência ou invalidez do estado, usa o fluxo completo como fallback seguro.
 
 ## Falhas conhecidas
 

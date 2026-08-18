@@ -23,6 +23,7 @@ jobs:
       (github.event.workflow_run.event == 'push' ||
        github.event.workflow_run.event == 'workflow_dispatch')
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     environment: production
     env:
       DEPLOY_SSH_HOST: ${{ vars.DEPLOY_SSH_HOST }}

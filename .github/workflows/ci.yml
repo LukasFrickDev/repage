@@ -29,6 +29,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7
 
+      - name: Validate operational shell scripts
+        working-directory: ${{ github.workspace }}
+        run: bash -n .github/scripts/deploy-production.sh .github/scripts/detect-deploy-components.sh
+
       - name: Setup Node
         uses: actions/setup-node@v7
         with:
