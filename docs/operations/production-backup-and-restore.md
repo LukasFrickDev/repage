@@ -189,13 +189,29 @@ umask 077
 remote_dir='/home/re190924/backups/repage/postgresql'
 external_dir="$REPAGE_BACKUP_EXTERNAL_DIR"
 mkdir -p "$external_dir"
-ssh_options=(-p "$REPAGE_BACKUP_REMOTE_PORT" -i "$REPAGE_BACKUP_SSH_KEY" -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$REPAGE_BACKUP_KNOWN_HOSTS")
+ssh_options=(
+  -p "$REPAGE_BACKUP_REMOTE_PORT"
+  -i "$REPAGE_BACKUP_SSH_KEY"
+  -o BatchMode=yes
+  -o IdentitiesOnly=yes
+  -o StrictHostKeyChecking=yes
+  -o UserKnownHostsFile="$REPAGE_BACKUP_KNOWN_HOSTS"
+)
+scp_options=(
+  -P "$REPAGE_BACKUP_REMOTE_PORT"
+  -i "$REPAGE_BACKUP_SSH_KEY"
+  -o BatchMode=yes
+  -o IdentitiesOnly=yes
+  -o StrictHostKeyChecking=yes
+  -o UserKnownHostsFile="$REPAGE_BACKUP_KNOWN_HOSTS"
+)
 remote_target="$REPAGE_BACKUP_REMOTE_USER@$REPAGE_BACKUP_REMOTE_HOST"
 ~~~
 
-Use SSH com BatchMode=yes, IdentitiesOnly=yes, StrictHostKeyChecking=yes,
+Use SSH com `-p`, BatchMode=yes, IdentitiesOnly=yes, StrictHostKeyChecking=yes,
 UserKnownHostsFile apontando para o known_hosts previamente validado e a
-chave indicada por REPAGE_BACKUP_SSH_KEY. Não use ssh-keyscan dinâmico.
+chave indicada por REPAGE_BACKUP_SSH_KEY. As transferências usam `scp -P` com a
+mesma porta parametrizada. Não use ssh-keyscan dinâmico.
 
 O archive selecionado no servidor deve ser o daily completo mais recente:
 
@@ -225,8 +241,8 @@ cleanup() {
   rm -f -- "$partial_archive" "$partial_sidecar"
 }
 trap cleanup EXIT
-scp "${ssh_options[@]}" "$remote_target:$remote_dir/$latest_archive" "$partial_archive"
-scp "${ssh_options[@]}" "$remote_target:$remote_dir/$latest_archive.sha256" "$partial_sidecar"
+scp "${scp_options[@]}" "$remote_target:$remote_dir/$latest_archive" "$partial_archive"
+scp "${scp_options[@]}" "$remote_target:$remote_dir/$latest_archive.sha256" "$partial_sidecar"
 ~~~
 
 Valide o filename e o digest do sidecar, depois calcule o digest do archive
