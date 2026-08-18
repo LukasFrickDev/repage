@@ -204,6 +204,10 @@ def test_create_restore_validate_drop_use_safe_arguments_and_environment(tmp_pat
     assert restore_args[-1] == str(archive)
     assert '--create' not in restore_args
     assert validate_args[validate_args.index('--dbname') + 1] == target
+    assert '--tuples-only' in validate_args
+    assert '--no-align' in validate_args
+    assert validate_args.index('--tuples-only') < validate_args.index('--command')
+    assert validate_args.index('--no-align') < validate_args.index('--command')
     assert postgres_restore_check.STRUCTURAL_QUERY in validate_args
     assert 'Lead' not in ' '.join(validate_args)
     assert drop_args[drop_args.index('--dbname') + 1] == 'repage_test'

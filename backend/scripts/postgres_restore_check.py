@@ -204,8 +204,11 @@ def _validate_structure(
     runner: Runner,
 ) -> None:
     _validate_temporary_database(target_database, config.database)
+    validation_arguments = _psql_arguments(config, target_database, STRUCTURAL_QUERY)
+    command_index = validation_arguments.index('--command')
+    validation_arguments[command_index:command_index] = ['--tuples-only', '--no-align']
     result = _run_command(
-        _psql_arguments(config, target_database, STRUCTURAL_QUERY),
+        validation_arguments,
         environment=environment,
         runner=runner,
     )
