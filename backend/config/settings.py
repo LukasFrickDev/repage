@@ -134,10 +134,6 @@ CACHES = {
         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
         'LOCATION': 'repage-default-cache',
     },
-    'lead_protection': {
-        'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
-        'LOCATION': 'repage_lead_protection_cache',
-    },
 }
 
 LANGUAGE_CODE = 'pt-br'
@@ -206,6 +202,7 @@ EMAIL_FROM_ADDRESS = (
     if ENVIRONMENT == 'production'
     else os.getenv('EMAIL_FROM_ADDRESS', '').strip()
 )
+EMAIL_FROM_NAME = os.getenv('EMAIL_FROM_NAME', 'Repage').strip() or 'Repage'
 EMAIL_INTERNAL_RECIPIENT = (
     required_env('EMAIL_INTERNAL_RECIPIENT')
     if ENVIRONMENT == 'production'

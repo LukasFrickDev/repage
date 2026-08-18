@@ -93,6 +93,7 @@ class EmailDeliveryInline(admin.TabularInline):
         'last_attempt_at',
         'last_error_code',
         'sent_at',
+        'created_at',
     )
     readonly_fields = fields
     extra = 0

@@ -2,9 +2,10 @@ import logging
 import smtplib
 import socket
 from datetime import timedelta
+from email.utils import formataddr
 
 from django.conf import settings
-from django.core.mail import EmailMessage
+from django.core.mail import EmailMessage, get_connection
 from django.db import DatabaseError, transaction
 from django.db.models import Q
 from django.utils import timezone
@@ -72,7 +73,7 @@ def build_message(delivery):
         return EmailMessage(
             subject=INTERNAL_SUBJECT,
             body=_internal_body(lead),
-            from_email=settings.EMAIL_FROM_ADDRESS,
+            from_email=formataddr((settings.EMAIL_FROM_NAME, settings.EMAIL_FROM_ADDRESS)),
             to=[settings.EMAIL_INTERNAL_RECIPIENT],
             reply_to=[lead.email],
         )
@@ -80,7 +81,7 @@ def build_message(delivery):
         return EmailMessage(
             subject=VISITOR_SUBJECT,
             body=VISITOR_BODY.format(name=lead.name),
-            from_email=settings.EMAIL_FROM_ADDRESS,
+            from_email=formataddr((settings.EMAIL_FROM_NAME, settings.EMAIL_FROM_ADDRESS)),
             to=[lead.email],
         )
     raise ValueError('unsupported email delivery kind')
@@ -136,12 +137,13 @@ def _persist_result(delivery_id, *, success, error_code=None, manual=False):
         return delivery
 
 
-def process_delivery(delivery_id, *, manual=False):
+def process_delivery(delivery_id, *, manual=False, connection=None):
     delivery = claim_delivery(delivery_id, manual=manual)
     if delivery is None:
         return None
     try:
         message = build_message(delivery)
+        message.connection = connection
         sent = message.send(fail_silently=False)
         if sent != 1:
             raise RuntimeError('email backend did not accept exactly one message')
@@ -183,10 +185,15 @@ def process_due_deliveries(limit):
         ).order_by('next_attempt_at').values_list('id', flat=True)[:limit]
     )
     processed = 0
-    for delivery_id in due_ids:
-        try:
-            if process_delivery(delivery_id) is not None:
-                processed += 1
-        except DatabaseError:
-            logger.error('email_delivery_database_error', extra={'delivery_id': str(delivery_id)})
+    connection = get_connection(fail_silently=False)
+    try:
+        connection.open()
+        for delivery_id in due_ids:
+            try:
+                if process_delivery(delivery_id, connection=connection) is not None:
+                    processed += 1
+            except DatabaseError:
+                logger.error('email_delivery_database_error', extra={'delivery_id': str(delivery_id)})
+    finally:
+        connection.close()
     return processed
