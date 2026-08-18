@@ -719,7 +719,11 @@ Cenários E2E:
 ## 49. Qualidade visual
 Validar desktop amplo, notebook, tablet, mobile, viewport baixa, movimento reduzido, foco, teclado, rede, console, overflow e mídia indisponível.
 ## 50. CI
-GitHub Actions valida pull requests e `main`.
+Pull requests para `main` executam CI component-aware. O `CI Gate` é o check
+agregado exigido pela proteção de `main`; `workflow_dispatch` permite executar
+manualmente a suíte completa. Não existe um segundo CI automático em `push`
+para `main`: a `main` protegida é o gate de integração, e o merge/push aprovado
+dispara o deploy.
 Frontend:
 - instalação reproduzível;
 - lint;
@@ -751,7 +755,8 @@ feat/consent-analytics
 feat/seo-prerender
 chore/production-deploy
 ```
-`main` representa produção. Deploy ocorre após CI, revisão, merge e validação do ambiente.
+`main` representa produção. Deploy ocorre após CI da PR, revisão, proteção/gate,
+merge e validação do ambiente.
 ## 52. Deploy do frontend
 Invariantes:
 1. build;

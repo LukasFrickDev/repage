@@ -1,10 +1,9 @@
 name: Deploy production
 
 on:
-  workflow_run:
-    workflows: [CI]
-    types: [completed]
+  push:
     branches: [main]
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -17,12 +16,10 @@ jobs:
   deploy:
     name: Deploy production
     if: >-
-      github.event_name == 'workflow_run' &&
-      github.event.workflow_run.conclusion == 'success' &&
-      github.event.workflow_run.head_branch == 'main' &&
-      (github.event.workflow_run.event == 'push' ||
-       github.event.workflow_run.event == 'workflow_dispatch')
+      (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
+      (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main')
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     environment: production
     env:
       DEPLOY_SSH_HOST: ${{ vars.DEPLOY_SSH_HOST }}
@@ -34,12 +31,12 @@ jobs:
       VITE_API_BASE_URL: ${{ vars.VITE_API_BASE_URL }}
       VITE_SITE_INDEXING_ENABLED: ${{ vars.VITE_SITE_INDEXING_ENABLED }}
       VITE_PRIVACY_POLICY_VERSION: ${{ vars.VITE_PRIVACY_POLICY_VERSION }}
-      DEPLOY_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+      DEPLOY_SHA: ${{ github.sha }}
     steps:
       - name: Checkout deploy SHA
         uses: actions/checkout@v7
         with:
-          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+          ref: ${{ github.sha }}
 
       - name: Validate production build inputs
         run: |
@@ -59,7 +56,17 @@ jobs:
             exit 1
           fi
 
+      - name: Plan production deploy
+        id: deploy_plan
+        env:
+          DEPLOY_SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
+        run: |
+          set -Eeuo pipefail
+          bash .github/scripts/deploy-production.sh plan > "$RUNNER_TEMP/deploy-plan.out"
+          cat "$RUNNER_TEMP/deploy-plan.out" >> "$GITHUB_OUTPUT"
+
       - name: Setup Node
+        if: steps.deploy_plan.outputs.deploy_frontend == '1'
         uses: actions/setup-node@v7
         with:
           node-version: 24
@@ -67,6 +74,7 @@ jobs:
           cache-dependency-path: frontend/package-lock.json
 
       - name: Build frontend SAFE
+        if: steps.deploy_plan.outputs.deploy_frontend == '1'
         working-directory: frontend
         run: |
           set -Eeuo pipefail
@@ -82,28 +90,34 @@ jobs:
           test -f dist/.htaccess
 
       - name: Package deploy artifacts
+        if: steps.deploy_plan.outputs.deploy_frontend == '1' || steps.deploy_plan.outputs.deploy_backend == '1'
         run: |
           set -Eeuo pipefail
-          (cd frontend/dist && find . -type f -print | sed 's#^./##' | sort) > "$RUNNER_TEMP/frontend.manifest"
-          tar -czf "$RUNNER_TEMP/frontend.tar.gz" -C frontend/dist .
-          tar -czf "$RUNNER_TEMP/backend.tar.gz" \
-            --exclude='./.env' \
-            --exclude='./.env.*' \
-            --exclude='./.venv' \
-            --exclude='./.pytest_cache' \
-            --exclude='./.ruff_cache' \
-            --exclude='./__pycache__' \
-            --exclude='*/__pycache__' \
-            --exclude='./tmp' \
-            --exclude='./tests' \
-            --exclude='./docker-compose.yml' \
-            --exclude='./env.txt' \
-            --exclude='*.log' \
-            -C backend .
-          tar -tzf "$RUNNER_TEMP/backend.tar.gz" \
-            | sed 's#^\./##' \
-            | awk 'NF && $0 !~ /\/$/' \
-            | sort > "$RUNNER_TEMP/backend.manifest"
+          if [ "${{ steps.deploy_plan.outputs.deploy_frontend }}" = '1' ]; then
+            (cd frontend/dist && find . -type f -print | sed 's#^./##' | sort) > "$RUNNER_TEMP/frontend.manifest"
+            tar -czf "$RUNNER_TEMP/frontend.tar.gz" -C frontend/dist .
+          fi
+          if [ "${{ steps.deploy_plan.outputs.deploy_backend }}" = '1' ]; then
+            tar -czf "$RUNNER_TEMP/backend.tar.gz" \
+              --exclude='./.env' \
+              --exclude='./.env.*' \
+              --exclude='./.venv' \
+              --exclude='./.pytest_cache' \
+              --exclude='./.ruff_cache' \
+              --exclude='./requirements-dev.txt' \
+              --exclude='./__pycache__' \
+              --exclude='*/__pycache__' \
+              --exclude='./tmp' \
+              --exclude='./tests' \
+              --exclude='./docker-compose.yml' \
+              --exclude='./env.txt' \
+              --exclude='*.log' \
+              -C backend .
+            tar -tzf "$RUNNER_TEMP/backend.tar.gz" \
+              | sed 's#^\./##' \
+              | awk 'NF && $0 !~ /\/$/' \
+              | sort > "$RUNNER_TEMP/backend.manifest"
+          fi
 
       - name: Deploy over pinned SSH
         env:
@@ -112,9 +126,15 @@ jobs:
           BACKEND_ARCHIVE: ${{ runner.temp }}/backend.tar.gz
           FRONTEND_MANIFEST: ${{ runner.temp }}/frontend.manifest
           BACKEND_MANIFEST: ${{ runner.temp }}/backend.manifest
+          DEPLOY_PLAN_FRONTEND: ${{ steps.deploy_plan.outputs.deploy_frontend }}
+          DEPLOY_PLAN_BACKEND: ${{ steps.deploy_plan.outputs.deploy_backend }}
+          DEPLOY_PLAN_FINALIZE_ONLY: ${{ steps.deploy_plan.outputs.finalize_only }}
+          DEPLOY_PLAN_RECOVERY_FULL: ${{ steps.deploy_plan.outputs.recovery_full }}
+        if: steps.deploy_plan.outputs.deploy_frontend == '1' || steps.deploy_plan.outputs.deploy_backend == '1'
         run: bash .github/scripts/deploy-production.sh
 
       - name: Smoke production endpoints
+        if: steps.deploy_plan.outputs.deploy_frontend == '1' || steps.deploy_plan.outputs.deploy_backend == '1' || steps.deploy_plan.outputs.finalize_only == '1'
         run: |
           set -Eeuo pipefail
           smoke_tmp="$(mktemp -d)"
@@ -156,3 +176,11 @@ jobs:
           PY
           status_code="$(curl --silent --show-error --location --max-time 15 --retry 3 --retry-delay 2 --output /dev/null --write-out '%{http_code}' https://repage.com.br/route-that-does-not-exist-for-smoke)"
           test "$status_code" = "404"
+
+      - name: Finalize production deploy after smoke
+        if: steps.deploy_plan.outputs.deploy_frontend == '1' || steps.deploy_plan.outputs.deploy_backend == '1' || steps.deploy_plan.outputs.finalize_only == '1'
+        env:
+          DEPLOY_SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
+          DEPLOY_PLAN_FRONTEND: ${{ steps.deploy_plan.outputs.deploy_frontend }}
+          DEPLOY_PLAN_BACKEND: ${{ steps.deploy_plan.outputs.deploy_backend }}
+        run: bash .github/scripts/deploy-production.sh finalize

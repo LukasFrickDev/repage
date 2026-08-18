@@ -3,8 +3,6 @@ name: CI
 on:
   pull_request:
     branches: [main]
-  push:
-    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -15,8 +13,37 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  detect:
+    name: Detect CI components
+    runs-on: ubuntu-latest
+    outputs:
+      frontend_changed: ${{ steps.components.outputs.frontend_changed }}
+      backend_changed: ${{ steps.components.outputs.backend_changed }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 2
+      - name: Detect components
+        id: components
+        env:
+          CI_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          CI_COMPARE_SHA: ${{ github.sha }}
+        run: |
+          set -Eeuo pipefail
+          if [ "$GITHUB_EVENT_NAME" = 'workflow_dispatch' ]; then
+            selection="$(bash .github/scripts/detect-ci-components.sh --full)"
+          else
+            selection="$(bash .github/scripts/detect-ci-components.sh "$CI_BASE_SHA" "$CI_COMPARE_SHA")"
+          fi
+          read -r frontend_changed backend_changed <<< "$selection"
+          printf 'frontend_changed=%s\n' "$frontend_changed" >> "$GITHUB_OUTPUT"
+          printf 'backend_changed=%s\n' "$backend_changed" >> "$GITHUB_OUTPUT"
+
   frontend:
     name: Frontend
+    needs: detect
+    if: needs.detect.outputs.frontend_changed == '1'
     timeout-minutes: 15
     runs-on: ubuntu-latest
     defaults:
@@ -60,6 +87,8 @@ jobs:
 
   backend:
     name: Backend
+    needs: detect
+    if: needs.detect.outputs.backend_changed == '1'
     timeout-minutes: 15
     runs-on: ubuntu-latest
     services:
@@ -96,10 +125,16 @@ jobs:
         with:
           python-version: '3.12'
           cache: pip
-          cache-dependency-path: backend/requirements.txt
+          cache-dependency-path: |
+            backend/requirements.txt
+            backend/requirements-dev.txt
 
       - name: Install dependencies
-        run: python -m pip install -r requirements.txt
+        run: python -m pip install -r requirements-dev.txt
+
+      - name: Validate operational shell scripts
+        working-directory: ${{ github.workspace }}
+        run: bash -n .github/scripts/deploy-production.sh .github/scripts/detect-deploy-components.sh .github/scripts/detect-ci-components.sh .github/scripts/resolve-deploy-plan.sh .github/scripts/finalize-deploy.sh
 
       - name: Django checks
         run: python manage.py check
@@ -112,3 +147,30 @@ jobs:
 
       - name: Tests
         run: pytest
+
+  ci-gate:
+    name: CI Gate
+    needs: [detect, frontend, backend]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate selected checks
+        env:
+          DETECT_RESULT: ${{ needs.detect.result }}
+          FRONTEND_RESULT: ${{ needs.frontend.result }}
+          BACKEND_RESULT: ${{ needs.backend.result }}
+          FRONTEND_CHANGED: ${{ needs.detect.outputs.frontend_changed }}
+          BACKEND_CHANGED: ${{ needs.detect.outputs.backend_changed }}
+        run: |
+          set -Eeuo pipefail
+          test "$DETECT_RESULT" = success
+          if [ "$FRONTEND_CHANGED" = '1' ]; then
+            test "$FRONTEND_RESULT" = success
+          else
+            test "$FRONTEND_RESULT" = skipped
+          fi
+          if [ "$BACKEND_CHANGED" = '1' ]; then
+            test "$BACKEND_RESULT" = success
+          else
+            test "$BACKEND_RESULT" = skipped
+          fi
