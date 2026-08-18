@@ -80,6 +80,16 @@ conexão persistente curta em produção, com `CONN_MAX_AGE=30` e
 `CONN_HEALTH_CHECKS=True`. A validação pós-deploy e qualquer ganho de
 performance permanecem pendentes de medição real.
 
+Na implementação anterior, a estimativa estrutural do happy path do POST era
+de aproximadamente 20 statements SQL. Medição local posterior, com
+`CaptureQueriesContext`, registrou **12 statements** no happy path atual:
+quatro correspondentes aos rate limits atômicos e oito restantes à leitura,
+duplicidade, persistência do Lead, deliveries e idempotência, incluindo dois
+statements de controle transacional. O SMTP não faz parte do caminho crítico do
+request; o envio ocorre posteriormente pelo processamento de deliveries. Esse
+resultado é local e não declara ganho em produção: readiness, Admin e POST
+deverão ser medidos novamente após o próximo deploy.
+
 Verificar, sem criar Lead:
 
 ```text
