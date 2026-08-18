@@ -2,7 +2,7 @@ import logging
 import uuid
 from concurrent.futures import ThreadPoolExecutor
 from datetime import timedelta
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 from django.contrib import admin
@@ -10,7 +10,6 @@ from django.contrib.admin.models import LogEntry
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Permission
 from django.conf import settings
-from django.core.cache import caches
 from django.core import mail
 from django.db import IntegrityError, connections
 from django.core.management import call_command
@@ -21,8 +20,8 @@ from django.urls import reverse
 from rest_framework.test import APIClient
 
 from apps.leads.admin import EmailDeliveryAdmin, EmailDeliveryInline, LeadAdmin, LeadAdminForm
-from apps.leads.email_service import build_message, claim_delivery, process_delivery
-from apps.leads.models import EmailDelivery, IdempotencyRecord, Lead
+from apps.leads.email_service import build_message, claim_delivery, process_delivery, process_due_deliveries
+from apps.leads.models import EmailDelivery, IdempotencyRecord, Lead, RateLimitCounter
 from apps.leads.serializers import LeadSerializer
 from apps.leads.security import canonicalize, protected_cache_key, protected_fingerprint
 
@@ -49,7 +48,7 @@ def api_headers(key='00000000-0000-4000-8000-000000000001'):
 
 
 def clear_protection_cache():
-    caches['lead_protection'].clear()
+    RateLimitCounter.objects.all().delete()
 
 
 def test_serializer_normalizes_lead_values():
@@ -356,7 +355,8 @@ def test_api_creates_lead_and_returns_safe_response():
     assert lead.acquisition_source == ''
     assert Lead.objects.count() == 1
     assert EmailDelivery.objects.filter(lead=lead).count() == 2
-    assert set(EmailDelivery.objects.values_list('status', flat=True)) == {EmailDelivery.Status.SENT}
+    assert set(EmailDelivery.objects.values_list('status', flat=True)) == {EmailDelivery.Status.PENDING}
+    assert mail.outbox == []
 
 
 def test_api_requires_a_valid_idempotency_key():
@@ -537,11 +537,19 @@ def test_cleanup_idempotency_removes_only_expired_records():
         key=uuid.uuid4(), fingerprint='b' * 64, lead=lead, response_status=201,
         response_payload={'status': 'received'}, expires_at=timezone.now() + timedelta(hours=1),
     )
+    RateLimitCounter.objects.create(
+        key='a' * 64, count=1, expires_at=timezone.now() - timedelta(seconds=1),
+    )
+    active_counter = RateLimitCounter.objects.create(
+        key='b' * 64, count=1, expires_at=timezone.now() + timedelta(hours=1),
+    )
 
     call_command('cleanup_idempotency')
 
     assert IdempotencyRecord.objects.count() == 1
     assert IdempotencyRecord.objects.get(pk=active.pk).expires_at > timezone.now()
+    assert RateLimitCounter.objects.count() == 1
+    assert RateLimitCounter.objects.get(pk=active_counter.pk).expires_at > timezone.now()
 
 
 def email_lead():
@@ -564,7 +572,7 @@ def test_email_service_builds_plain_text_internal_and_visitor_messages():
     visitor_message = build_message(visitor)
 
     assert internal_message.subject == '[Repage] Nova solicitação de orçamento'
-    assert internal_message.from_email == 'from@example.com'
+    assert internal_message.from_email == 'Repage <from@example.com>'
     assert internal_message.to == ['internal@example.com']
     assert internal_message.reply_to == [lead.email]
     assert internal_message.content_subtype == 'plain'
@@ -642,6 +650,42 @@ def test_email_deliveries_are_processed_independently():
 
 
 @pytest.mark.django_db
+@override_settings(EMAIL_FROM_ADDRESS='from@example.com', EMAIL_INTERNAL_RECIPIENT='internal@example.com')
+def test_due_email_batch_reuses_one_connection_and_isolates_failures():
+    lead = email_lead()
+    first = EmailDelivery.objects.create(lead=lead, kind=EmailDelivery.Kind.INTERNAL_NOTIFICATION)
+    second = EmailDelivery.objects.create(lead=lead, kind=EmailDelivery.Kind.VISITOR_CONFIRMATION)
+
+    class Connection:
+        def __init__(self):
+            self.open_calls = 0
+            self.close_calls = 0
+
+        def open(self):
+            self.open_calls += 1
+
+        def close(self):
+            self.close_calls += 1
+
+    connection = Connection()
+    messages = [MagicMock(), MagicMock()]
+    messages[0].send.side_effect = TimeoutError('secret')
+    messages[1].send.return_value = 1
+    with patch('apps.leads.email_service.get_connection', return_value=connection), patch(
+        'apps.leads.email_service.build_message', side_effect=messages
+    ):
+        assert process_due_deliveries(limit=2) == 2
+
+    assert [message.connection for message in messages] == [connection, connection]
+    assert connection.open_calls == 1
+    assert connection.close_calls == 1
+    first.refresh_from_db()
+    second.refresh_from_db()
+    assert first.status == EmailDelivery.Status.FAILED
+    assert second.status == EmailDelivery.Status.SENT
+
+
+@pytest.mark.django_db
 @override_settings(
     EMAIL_FROM_ADDRESS='from@example.com',
     EMAIL_INTERNAL_RECIPIENT='internal@example.com',
@@ -695,6 +739,7 @@ def test_api_invalid_payload_does_not_persist():
     assert Lead.objects.count() == 0
 
 
+@pytest.mark.django_db
 def test_api_rejects_policy_version_without_persisting():
     response = APIClient().post(
         '/api/v1/leads/',
@@ -708,6 +753,7 @@ def test_api_rejects_policy_version_without_persisting():
     assert response.data['request_id']
 
 
+@pytest.mark.django_db
 def test_public_api_rejects_manual_source():
     response = APIClient().post('/api/v1/leads/', payload(source='manual'), format='json', **api_headers())
 
@@ -908,6 +954,7 @@ def test_email_delivery_admin_is_readonly_and_lead_inline_is_readonly():
     assert model_admin.has_change_permission(None) is False
     assert model_admin.has_delete_permission(None) is False
     assert inline is EmailDeliveryInline
+    assert 'created_at' in inline.fields
     assert inline.extra == 0
     assert inline.max_num == 0
     inline_instance = inline(Lead, admin.site)

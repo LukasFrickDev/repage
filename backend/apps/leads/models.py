@@ -98,3 +98,14 @@ class IdempotencyRecord(models.Model):
             models.Index(fields=('expires_at',), name='idempotency_expiry_idx'),
             models.Index(fields=('fingerprint', 'created_at'), name='idempotency_fingerprint_idx'),
         ]
+
+
+class RateLimitCounter(models.Model):
+    key = models.CharField(max_length=128, primary_key=True)
+    count = models.PositiveIntegerField()
+    expires_at = models.DateTimeField()
+
+    class Meta:
+        indexes = [
+            models.Index(fields=('expires_at',), name='rate_counter_expiry_idx'),
+        ]

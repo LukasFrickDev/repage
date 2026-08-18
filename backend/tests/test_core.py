@@ -13,6 +13,7 @@ from django.http import HttpResponse
 from django.test import Client, RequestFactory, override_settings
 
 from apps.core.middleware import RequestIDMiddleware
+from apps.leads.models import RateLimitCounter
 from apps.leads.protection import ProtectionUnavailable
 from apps.core.logging import StructuredFormatter, request_id_context
 from config import settings as project_settings
@@ -331,11 +332,7 @@ print(settings.EMAIL_TIMEOUT)
 def test_phase_one_cache_and_protection_settings():
     assert settings.IDEMPOTENCY_TTL_SECONDS == 86400
     assert settings.LEAD_DUPLICATE_WINDOW_SECONDS == 300
-    assert project_settings.CACHES['lead_protection'] == {
-        'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
-        'LOCATION': 'repage_lead_protection_cache',
-    }
-    assert settings.CACHES['lead_protection']['BACKEND'] == 'django.core.cache.backends.locmem.LocMemCache'
+    assert RateLimitCounter._meta.db_table == 'leads_ratelimitcounter'
     assert settings.EMAIL_BACKEND == 'django.core.mail.backends.locmem.EmailBackend'
     assert settings.EMAIL_TIMEOUT == 5
     assert settings.EMAIL_DELIVERY_LEASE_SECONDS == 300
