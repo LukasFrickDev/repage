@@ -107,6 +107,8 @@ if ENVIRONMENT == 'production':
         'PASSWORD': required_env('POSTGRES_PASSWORD'),
         'HOST': required_env('POSTGRES_HOST'),
         'PORT': required_env('POSTGRES_PORT'),
+        'CONN_MAX_AGE': 30,
+        'CONN_HEALTH_CHECKS': True,
     }
     postgres_sslmode = 'require'
 else:

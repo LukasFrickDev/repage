@@ -975,6 +975,8 @@ Continuam pendentes de prova operacional real:
 - primeira cópia externa semanal;
 - retenção externa real de quatro gerações;
 - execução do restore check com backup real em produção;
+- medição pós-deploy da correção conservadora de conexões persistentes
+  PostgreSQL (`CONN_MAX_AGE=30`, `CONN_HEALTH_CHECKS=True`);
 - evidência final de produção e fechamento da Entrega 10.
 
 ## 47. Retenção de Leads e backups
