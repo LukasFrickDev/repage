@@ -64,6 +64,22 @@ ou o corpo do e-mail para issue, PR ou documento.
 
 ## Health e readiness
 
+### Latência observada e conexão PostgreSQL
+
+O baseline operacional observado antes desta correção foi:
+
+- `/health/`: aproximadamente 40–60 ms;
+- `/health/ready/`: aproximadamente 3–5 s;
+- Django Admin: aproximadamente 1,9–2,8 s por request;
+- `POST /api/v1/leads/`: aproximadamente 12,35 s.
+
+Como `/health/` não acessa PostgreSQL e readiness, Admin e Lead acessam banco
+ou sessão, a hipótese operacional sustentada é o custo de abrir/fechar a
+conexão PostgreSQL em cada request. A primeira correção conservadora é manter
+conexão persistente curta em produção, com `CONN_MAX_AGE=30` e
+`CONN_HEALTH_CHECKS=True`. A validação pós-deploy e qualquer ganho de
+performance permanecem pendentes de medição real.
+
 Verificar, sem criar Lead:
 
 ```text

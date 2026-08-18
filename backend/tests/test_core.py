@@ -237,6 +237,8 @@ def test_development_keeps_local_configuration_defaults():
 def test_development_uses_local_static_root_and_postgres_ssl_default():
     assert project_settings.STATIC_ROOT == BACKEND_DIR / 'staticfiles'
     assert project_settings.DATABASES['default']['OPTIONS'] == {'sslmode': 'prefer'}
+    assert project_settings.DATABASES['default']['CONN_MAX_AGE'] == 0
+    assert project_settings.DATABASES['default']['CONN_HEALTH_CHECKS'] is False
 
 
 def test_development_allows_configuring_postgres_sslmode():
@@ -257,6 +259,8 @@ from config import settings
 print(settings.STATIC_ROOT)
 print(settings.DATABASES['default']['ENGINE'])
 print(settings.DATABASES['default']['OPTIONS'])
+print(settings.DATABASES['default']['CONN_MAX_AGE'])
+print(settings.DATABASES['default']['CONN_HEALTH_CHECKS'])
 print(settings.SESSION_COOKIE_SECURE)
 print(settings.CSRF_COOKIE_SECURE)
 print(settings.SESSION_COOKIE_HTTPONLY)
@@ -304,6 +308,8 @@ print(settings.EMAIL_TIMEOUT)
         '/srv/repage/static',
         'django.db.backends.postgresql',
         "{'sslmode': 'require'}",
+        '30',
+        'True',
         'True',
         'True',
         'True',
