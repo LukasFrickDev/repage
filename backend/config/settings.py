@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 
+from corsheaders.defaults import default_headers
 from django.core.exceptions import ImproperlyConfigured
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -172,6 +173,7 @@ else:
         'DJANGO_CORS_ALLOWED_ORIGINS',
         'http://localhost:5173,http://127.0.0.1:5173',
     )
+CORS_ALLOW_HEADERS = (*default_headers, 'idempotency-key')
 CSRF_TRUSTED_ORIGINS = env_list('DJANGO_CSRF_TRUSTED_ORIGINS')
 PRIVACY_POLICY_VERSION = (
     required_env('PRIVACY_POLICY_VERSION')
