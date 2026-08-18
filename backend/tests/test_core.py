@@ -12,7 +12,7 @@ from django.db import OperationalError
 from django.http import HttpResponse
 from django.test import Client, RequestFactory, override_settings
 
-from apps.core.middleware import RequestIDMiddleware
+from apps.core.middleware import DatabaseQueryTimer, RequestIDMiddleware
 from apps.leads.models import RateLimitCounter
 from apps.leads.protection import ProtectionUnavailable
 from apps.core.logging import StructuredFormatter, request_id_context
@@ -76,13 +76,37 @@ def test_request_logging_is_correlated_and_sanitized(client, caplog):
 def test_structured_formatter_emits_only_allowlisted_fields():
     record = logging.LogRecord('test', logging.INFO, __file__, 1, 'test_event', (), None)
     record.method = 'GET'
+    record.db_query_count = 3
+    record.db_duration_ms = 12.5
     record.arbitrary_secret = 'must-not-be-serialized'
 
     payload = json.loads(StructuredFormatter().format(record))
 
     assert payload['event'] == 'test_event'
     assert payload['method'] == 'GET'
+    assert payload['db_query_count'] == 3
+    assert payload['db_duration_ms'] == 12.5
     assert 'arbitrary_secret' not in payload
+
+
+def test_database_query_timer_records_only_aggregate_timing():
+    timer = DatabaseQueryTimer()
+
+    assert timer(lambda *args: 'result', 'SELECT 1', (), False, {}) == 'result'
+    assert timer.count == 1
+    assert timer.duration_ms >= 0
+
+
+@override_settings(DJANGO_DB_TIMING_ENABLED=True)
+def test_request_logging_includes_aggregate_database_timing_when_enabled(caplog):
+    middleware = RequestIDMiddleware(lambda request: HttpResponse())
+
+    with caplog.at_level(logging.INFO):
+        middleware(RequestFactory().get('/health/'))
+
+    event = [record for record in caplog.records if record.msg == 'request_completed'][-1]
+    assert event.db_query_count == 0
+    assert event.db_duration_ms >= 0
 
 
 def test_structured_formatter_does_not_interpolate_arbitrary_message_args():
@@ -185,6 +209,7 @@ def load_settings_with_environment(code='import config.settings', **overrides):
         'DJANGO_SECRET_KEY',
         'DJANGO_DEBUG',
         'DJANGO_LOG_LEVEL',
+        'DJANGO_DB_TIMING_ENABLED',
         'DJANGO_ALLOWED_HOSTS',
         'DJANGO_STATIC_ROOT',
         'DJANGO_CORS_ALLOWED_ORIGINS',
@@ -194,6 +219,9 @@ def load_settings_with_environment(code='import config.settings', **overrides):
         'POSTGRES_PASSWORD',
         'POSTGRES_HOST',
         'POSTGRES_PORT',
+        'POSTGRES_CONNECTION_ROLE',
+        'POSTGRES_DIRECT_HOST',
+        'POSTGRES_DIRECT_PORT',
         'POSTGRES_SSLMODE',
         'EMAIL_FROM_ADDRESS',
         'EMAIL_INTERNAL_RECIPIENT',
@@ -327,6 +355,41 @@ print(settings.EMAIL_TIMEOUT)
         'False',
         '5',
     ]
+
+
+def test_production_admin_connection_uses_direct_postgres_endpoint():
+    result = load_settings_with_environment(
+        "from config import settings; print(settings.DATABASES['default']['HOST']); print(settings.DATABASES['default']['PORT'])",
+        DJANGO_ENVIRONMENT='production',
+        DJANGO_SECRET_KEY='x' * 64,
+        DJANGO_DEBUG='False',
+        DJANGO_ALLOWED_HOSTS='api.example.com',
+        DJANGO_LOG_LEVEL='INFO',
+        DJANGO_STATIC_ROOT='/srv/repage/static',
+        DJANGO_CORS_ALLOWED_ORIGINS='https://repage.com.br',
+        DJANGO_CSRF_TRUSTED_ORIGINS='https://repage.com.br',
+        PRIVACY_POLICY_VERSION='pre-launch-v1',
+        POSTGRES_DB='repage',
+        POSTGRES_USER='repage',
+        POSTGRES_PASSWORD='dummy-password',
+        POSTGRES_HOST='pooled.example.internal',
+        POSTGRES_PORT='6543',
+        POSTGRES_CONNECTION_ROLE='admin',
+        POSTGRES_DIRECT_HOST='direct.example.internal',
+        POSTGRES_DIRECT_PORT='5432',
+        EMAIL_FROM_ADDRESS='notifications@example.com',
+        EMAIL_INTERNAL_RECIPIENT='contact@example.com',
+        EMAIL_HOST='smtp.example.internal',
+        EMAIL_PORT='465',
+        EMAIL_HOST_USER='smtp-user',
+        EMAIL_HOST_PASSWORD='dummy-password',
+        EMAIL_USE_TLS='False',
+        EMAIL_USE_SSL='True',
+        EMAIL_TIMEOUT='5',
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert result.stdout.splitlines() == ['direct.example.internal', '5432']
 
 
 def test_phase_one_cache_and_protection_settings():

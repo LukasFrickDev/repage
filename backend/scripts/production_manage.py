@@ -8,6 +8,7 @@ if str(APP_ROOT) not in sys.path:
     sys.path.insert(0, str(APP_ROOT))
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
+os.environ['POSTGRES_CONNECTION_ROLE'] = 'admin'
 
 import django  # noqa: E402
 from django.core.management import call_command  # noqa: E402

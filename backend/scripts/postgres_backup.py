@@ -23,6 +23,7 @@ REQUIRED_ENVIRONMENT = (
     'POSTGRES_HOST',
     'POSTGRES_PORT',
 )
+DIRECT_ENVIRONMENT = ('POSTGRES_DIRECT_HOST', 'POSTGRES_DIRECT_PORT')
 SAFE_CHILD_ENVIRONMENT = ('PATH', 'HOME', 'LANG', 'LC_ALL', 'LD_LIBRARY_PATH')
 Runner = Callable[..., subprocess.CompletedProcess[str]]
 
@@ -48,12 +49,19 @@ def load_postgres_config(environ: Mapping[str, str] | None = None) -> PostgresCo
         if not value:
             raise BackupError(f'{name} is required.')
         values[name] = value
+    direct_values = {
+        name: source.get(name, '').strip()
+        for name in DIRECT_ENVIRONMENT
+    }
+    if source.get('DJANGO_ENVIRONMENT', '').strip().lower() == 'production' and not all(direct_values.values()):
+        missing_name = next(name for name in DIRECT_ENVIRONMENT if not direct_values[name])
+        raise BackupError(f'{missing_name} is required.')
     return PostgresConfig(
         database=values['POSTGRES_DB'],
         user=values['POSTGRES_USER'],
         password=values['POSTGRES_PASSWORD'],
-        host=values['POSTGRES_HOST'],
-        port=values['POSTGRES_PORT'],
+        host=direct_values['POSTGRES_DIRECT_HOST'] or values['POSTGRES_HOST'],
+        port=direct_values['POSTGRES_DIRECT_PORT'] or values['POSTGRES_PORT'],
     )
 
 

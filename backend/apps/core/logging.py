@@ -13,6 +13,8 @@ ALLOWED_FIELDS = (
     'path',
     'status_code',
     'duration_ms',
+    'db_query_count',
+    'db_duration_ms',
     'lead_id',
     'delivery_id',
     'kind',
