@@ -117,9 +117,42 @@ jobs:
       - name: Smoke production endpoints
         run: |
           set -Eeuo pipefail
+          smoke_tmp="$(mktemp -d)"
+          trap 'rm -rf "$smoke_tmp"' EXIT
           curl --fail --silent --show-error --location --max-time 15 --retry 3 --retry-delay 2 https://api.repage.com.br/health/ >/dev/null
           curl --fail --silent --show-error --location --max-time 15 --retry 3 --retry-delay 2 https://api.repage.com.br/health/ready/ >/dev/null
-          curl --fail --silent --show-error --location --max-time 15 --retry 3 --retry-delay 2 https://repage.com.br/ >/dev/null
+          curl --fail --silent --show-error --location --max-time 15 --retry 3 --retry-delay 2 https://repage.com.br/ --output "$smoke_tmp/homepage.html"
+          curl --fail --silent --show-error --location --max-time 15 --retry 3 --retry-delay 2 https://repage.com.br/portfolio/ >/dev/null
           curl --fail --silent --show-error --location --max-time 15 --retry 3 --retry-delay 2 https://repage.com.br/portfolio/axium/ >/dev/null
+          curl --fail --silent --show-error --location --max-time 15 --retry 3 --retry-delay 2 https://repage.com.br/privacidade/ >/dev/null
+          curl --fail --silent --show-error --location --max-time 15 --retry 3 --retry-delay 2 https://repage.com.br/cookies/ >/dev/null
+          curl --fail --silent --show-error --location --max-time 15 --retry 3 --retry-delay 2 https://repage.com.br/sitemap.xml >/dev/null
+          curl --fail --silent --show-error --location --max-time 15 --retry 3 --retry-delay 2 https://repage.com.br/robots.txt --output "$smoke_tmp/robots.txt"
+          curl --fail --silent --show-error --location --max-time 15 --retry 3 --retry-delay 2 https://api.repage.com.br/admin/ >/dev/null
+          grep -Eq '^[[:space:]]*Disallow:[[:space:]]*/[[:space:]]*$' "$smoke_tmp/robots.txt"
+          python - "$smoke_tmp/homepage.html" <<'PY'
+          from html.parser import HTMLParser
+          from pathlib import Path
+          import sys
+
+          class RobotsMetaParser(HTMLParser):
+              def __init__(self):
+                  super().__init__()
+                  self.valid = False
+
+              def handle_starttag(self, tag, attrs):
+                  if tag.lower() != "meta":
+                      return
+                  attributes = {key.lower(): value or "" for key, value in attrs}
+                  name = " ".join(attributes.get("name", "").split()).lower()
+                  content = " ".join(attributes.get("content", "").split()).lower()
+                  if name == "robots" and content == "noindex, nofollow":
+                      self.valid = True
+
+          parser = RobotsMetaParser()
+          parser.feed(Path(sys.argv[1]).read_text(encoding="utf-8"))
+          if not parser.valid:
+              raise SystemExit("Homepage robots meta policy check failed.")
+          PY
           status_code="$(curl --silent --show-error --location --max-time 15 --retry 3 --retry-delay 2 --output /dev/null --write-out '%{http_code}' https://repage.com.br/route-that-does-not-exist-for-smoke)"
           test "$status_code" = "404"
