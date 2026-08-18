@@ -10,9 +10,14 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   frontend:
     name: Frontend
+    timeout-minutes: 15
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -47,13 +52,15 @@ jobs:
         run: npm run build
 
       - name: Install Chromium
-        run: npx playwright install --with-deps chromium
+        timeout-minutes: 5
+        run: npx playwright install --with-deps --only-shell chromium
 
       - name: End-to-end tests
         run: npm run test:e2e
 
   backend:
     name: Backend
+    timeout-minutes: 15
     runs-on: ubuntu-latest
     services:
       postgres:
