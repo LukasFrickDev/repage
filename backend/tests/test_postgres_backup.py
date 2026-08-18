@@ -239,6 +239,26 @@ def test_daily_rotation_keeps_seven_recent_daily_and_unknown_files(tmp_path: Pat
     assert unknown.exists()
 
 
+def test_daily_rotation_counts_only_complete_pairs(tmp_path: Path):
+    complete_archives = []
+    for day in range(10, 17):
+        archive = tmp_path / f'repage-daily-202608{day:02d}T235959Z.dump'
+        archive.write_bytes(f'daily-{day}'.encode())
+        Path(f'{archive}.sha256').write_text('digest  archive\n', encoding='ascii')
+        complete_archives.append(archive)
+
+    orphan_archive = tmp_path / 'repage-daily-20260817T235959Z.dump'
+    orphan_archive.write_bytes(b'orphan archive')
+    orphan_sidecar = tmp_path / 'repage-daily-20260818T235959Z.dump.sha256'
+    orphan_sidecar.write_text('orphan  sidecar\n', encoding='ascii')
+
+    postgres_backup.rotate_daily_backups(tmp_path, keep=7)
+
+    assert all(archive.exists() for archive in complete_archives)
+    assert orphan_archive.exists()
+    assert orphan_sidecar.exists()
+
+
 def test_pre_migration_does_not_rotate_or_remove_other_pre_migrations(tmp_path: Path, monkeypatch):
     previous = tmp_path / 'repage-pre-migration-20260816T235959Z.dump'
     previous.write_bytes(b'previous pre-migration')

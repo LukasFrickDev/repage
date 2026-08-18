@@ -165,7 +165,9 @@ def rotate_daily_backups(backup_dir: Path = BACKUP_DIR, *, keep: int = 7) -> Non
         daily_archives = sorted(
             path
             for path in backup_dir.iterdir()
-            if path.is_file() and DAILY_ARCHIVE_PATTERN.fullmatch(path.name)
+            if path.is_file()
+            and DAILY_ARCHIVE_PATTERN.fullmatch(path.name)
+            and Path(f'{path}.sha256').is_file()
         )
     except OSError as exc:
         raise BackupError('Could not inspect daily PostgreSQL backups.') from exc
@@ -174,8 +176,7 @@ def rotate_daily_backups(backup_dir: Path = BACKUP_DIR, *, keep: int = 7) -> Non
         sidecar = Path(f'{archive}.sha256')
         try:
             archive.unlink()
-            if sidecar.exists():
-                sidecar.unlink()
+            sidecar.unlink()
         except OSError as exc:
             raise BackupError('Could not rotate daily PostgreSQL backups.') from exc
 
@@ -202,7 +203,7 @@ def create_backup(
     promoted = False
 
     try:
-        backup_dir.mkdir(parents=True, exist_ok=True)
+        backup_dir.mkdir(mode=0o700, parents=True, exist_ok=True)
         os.chmod(backup_dir, 0o700)
         if final_path.exists() or sidecar_path.exists():
             raise BackupError('PostgreSQL backup target already exists.')
