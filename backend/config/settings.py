@@ -39,6 +39,11 @@ ENVIRONMENT = os.getenv('DJANGO_ENVIRONMENT', 'development').strip().lower()
 configured_secret_key = os.getenv('DJANGO_SECRET_KEY', '').strip()
 SECRET_KEY = configured_secret_key or 'dev-only-change-me'
 DEBUG = env_bool('DJANGO_DEBUG', True)
+DJANGO_LOG_LEVEL = os.getenv('DJANGO_LOG_LEVEL', 'INFO').strip().upper()
+if DJANGO_LOG_LEVEL not in {'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'}:
+    raise ImproperlyConfigured(
+        'DJANGO_LOG_LEVEL deve ser DEBUG, INFO, WARNING, ERROR ou CRITICAL.'
+    )
 
 if ENVIRONMENT == 'production':
     if not configured_secret_key or configured_secret_key == 'dev-only-change-me':
@@ -102,6 +107,7 @@ if ENVIRONMENT == 'production':
         'HOST': required_env('POSTGRES_HOST'),
         'PORT': required_env('POSTGRES_PORT'),
     }
+    postgres_sslmode = 'require'
 else:
     postgres_config = {
         'NAME': os.getenv('POSTGRES_DB', 'repage'),
@@ -110,8 +116,15 @@ else:
         'HOST': os.getenv('POSTGRES_HOST', '127.0.0.1'),
         'PORT': os.getenv('POSTGRES_PORT', '5432'),
     }
+    postgres_sslmode = os.getenv('POSTGRES_SSLMODE', 'prefer').strip()
 
-DATABASES = {'default': {'ENGINE': 'django.db.backends.postgresql', **postgres_config}}
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        **postgres_config,
+        'OPTIONS': {'sslmode': postgres_sslmode},
+    }
+}
 
 CACHES = {
     'default': {
@@ -131,7 +144,22 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
+STATIC_ROOT = (
+    Path(required_env('DJANGO_STATIC_ROOT'))
+    if ENVIRONMENT == 'production'
+    else Path(os.getenv('DJANGO_STATIC_ROOT', BASE_DIR / 'staticfiles'))
+)
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+if ENVIRONMENT == 'production':
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SESSION_COOKIE_HTTPONLY = True
+    SESSION_COOKIE_SAMESITE = 'Lax'
+    SECURE_SSL_REDIRECT = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    SECURE_REFERRER_POLICY = 'same-origin'
+    X_FRAME_OPTIONS = 'DENY'
 
 if ENVIRONMENT == 'production':
     CORS_ALLOWED_ORIGINS = env_list('DJANGO_CORS_ALLOWED_ORIGINS')
@@ -187,7 +215,7 @@ if ENVIRONMENT == 'production':
     if EMAIL_BACKEND != 'django.core.mail.backends.smtp.EmailBackend':
         raise ImproperlyConfigured('EMAIL_BACKEND deve usar o backend SMTP nativo em produção.')
     EMAIL_HOST = required_env('EMAIL_HOST')
-    EMAIL_PORT = env_int('EMAIL_PORT', 587, minimum=1)
+    EMAIL_PORT = env_int('EMAIL_PORT', 465, minimum=1)
     EMAIL_HOST_USER = required_env('EMAIL_HOST_USER')
     EMAIL_HOST_PASSWORD = required_env('EMAIL_HOST_PASSWORD')
 else:
@@ -203,8 +231,33 @@ EMAIL_USE_TLS = env_bool('EMAIL_USE_TLS', False)
 EMAIL_USE_SSL = env_bool('EMAIL_USE_SSL', False)
 if EMAIL_USE_TLS and EMAIL_USE_SSL:
     raise ImproperlyConfigured('EMAIL_USE_TLS e EMAIL_USE_SSL não podem estar ativos simultaneamente.')
+if ENVIRONMENT == 'production' and (EMAIL_PORT != 465 or EMAIL_USE_TLS or not EMAIL_USE_SSL):
+    raise ImproperlyConfigured(
+        'Produção exige SMTP SSL implícito na porta 465, com EMAIL_USE_SSL=True e EMAIL_USE_TLS=False.'
+    )
 EMAIL_TIMEOUT = env_int('EMAIL_TIMEOUT', 5, minimum=1)
 DEFAULT_FROM_EMAIL = EMAIL_FROM_ADDRESS
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'structured': {
+            '()': 'apps.core.logging.StructuredFormatter',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'structured',
+            'stream': 'ext://sys.stdout',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': DJANGO_LOG_LEVEL,
+    },
+}
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [],

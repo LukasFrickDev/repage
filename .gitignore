@@ -3,6 +3,7 @@
 .env.*
 !.env.example
 !.env.*.example
+env.txt
 
 # Secrets and local credentials
 *.pem

@@ -89,27 +89,20 @@ Direção aprovada:
 - GitHub Actions para CI e deploy.
 Direção de hospedagem:
 - HomeHost Python Start;
-- condicionada à validação operacional.
-Alternativa:
-- Neon somente se o PostgreSQL da hospedagem não atender.
+- frontend estático e backend Django via Passenger/WSGI na conta validada.
+- Python `3.12.13`;
+- app root `/home/re190924/repage_backend`;
+- virtualenv `/home/re190924/virtualenv/repage_backend/3.12/`.
+Banco de produção:
+- PostgreSQL permanece a engine estrutural;
+- Neon é o provedor atual, por incompatibilidade do PostgreSQL 13.23 nativo da HomeHost com Django 5.2;
+- topologia: `Django/HomeHost → PostgreSQL/Neon`.
 A arquitetura não depende do registrador de domínio escolhido.
 ## 6. Condicionantes da hospedagem
-Confirmar antes da produção:
-- Python 3.11 ou 3.12;
-- versão e limites do PostgreSQL;
-- SSH por chave;
-- restart do Passenger;
-- cron;
-- limites de SMTP;
-- autenticação e TLS;
-- SPF, DKIM e DMARC;
-- política de backup e restauração;
-- limites de CPU, memória e processos;
-- deploy por GitHub Actions;
-- permissões;
-- acesso a logs;
-- SSL.
-Enquanto não confirmados, são pendências, não garantias.
+Validações operacionais já realizadas incluem Python `3.12.13`, SSH/SFTP por
+chave, restart do Passenger, HTTPS da API, conexão TLS ao Neon, SMTP real,
+cron de teste, acesso a logs e diretório local de backup. Workflows, deploy
+automatizado, retenção e runbooks continuam pertencendo à Entrega 10.
 ## 7. Frontend
 Stack aprovada:
 - React;
@@ -336,6 +329,9 @@ backend/
 Não criar apps separados para `emails`, `notifications`, `api` ou `admin` na V1.
 ## 23. Banco
 PostgreSQL é o banco principal em desenvolvimento e produção.
+Em produção, o banco é PostgreSQL 18 no Neon; a HomeHost hospeda a aplicação e
+conecta ao Neon por TLS. A engine permanece portável para outro PostgreSQL
+compatível.
 Docker Compose pode fornecer PostgreSQL local. Django e Vite permanecem fora de containers.
 SQLite não é banco principal.
 Dados reais de produção não são copiados para desenvolvimento.
@@ -860,8 +856,9 @@ Prazo final de retenção permanece pendente.
 - produção.
 As etapas representam dependências técnicas, não roadmap comercial. Specs devem delimitar cada entrega.
 ## 57. Riscos
-### Hospedagem não validada
-Mitigar confirmando recursos, mantendo portabilidade e evitando acoplamento ao cPanel.
+### Limites da hospedagem e do provedor
+Mitigar mantendo portabilidade, evitando acoplamento ao cPanel/Neon e
+registrando as capacidades ainda não implementadas em workflows e runbooks.
 ### SMTP inadequado
 Mitigar com abstração, registros persistidos, retentativas e possibilidade de troca.
 ### Falha após persistência
@@ -881,7 +878,7 @@ Mitigar com validação, autorização e bloqueio de publicação.
 ### Retenção indefinida
 Mitigar definindo antes da produção e alinhando exclusão e backups.
 ## 58. Decisões adiadas
-- provedor final de banco se a hospedagem falhar;
+- migração futura para outro provedor PostgreSQL compatível;
 - provedor alternativo de e-mail;
 - prazo de retenção de leads;
 - prazo de retenção de backups;
@@ -909,14 +906,10 @@ Criar ADR futuro para:
 - mudança da persistência antes do e-mail.
 Não criar ADR retroativo para cada decisão já consolidada.
 ## 60. Pendências técnicas
-- Validar HomeHost.
-- Confirmar registrador.
-- Confirmar Python e PostgreSQL.
-- Confirmar SSH, cron e Passenger.
-- Confirmar SMTP, SPF, DKIM e DMARC.
+- Implementar e validar workflows e runbooks de produção na HomeHost/Neon.
 - Confirmar limites da hospedagem.
 - Definir retenção de leads e backups.
 - Revisar políticas.
 - Aprovar conteúdo dos e-mails.
 - Concluir mídias dos cases.
-- Criar runbooks somente após ambiente validado.
+- Materializar os runbooks da Entrega 10 com as evidências já coletadas.

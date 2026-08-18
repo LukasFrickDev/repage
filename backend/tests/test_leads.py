@@ -1,3 +1,4 @@
+import logging
 import uuid
 from concurrent.futures import ThreadPoolExecutor
 from datetime import timedelta
@@ -596,11 +597,13 @@ def test_email_service_success_updates_delivery_once():
 
 @pytest.mark.django_db
 @override_settings(EMAIL_FROM_ADDRESS='from@example.com', EMAIL_INTERNAL_RECIPIENT='internal@example.com')
-def test_email_service_sanitizes_failure_and_schedules_retry():
+def test_email_service_sanitizes_failure_and_schedules_retry(caplog):
     lead = email_lead()
     delivery = EmailDelivery.objects.create(lead=lead, kind=EmailDelivery.Kind.INTERNAL_NOTIFICATION)
 
-    with patch('django.core.mail.EmailMessage.send', side_effect=TimeoutError('secret raw error')):
+    with caplog.at_level(logging.INFO), patch(
+        'django.core.mail.EmailMessage.send', side_effect=TimeoutError('secret raw error')
+    ):
         process_delivery(delivery.id)
     delivery.refresh_from_db()
 
@@ -610,6 +613,8 @@ def test_email_service_sanitizes_failure_and_schedules_retry():
     assert 'secret raw error' not in delivery.last_error_code
     assert delivery.next_attempt_at is not None
     assert delivery.sent_at is None
+    assert any(record.msg == 'email_delivery_failed' for record in caplog.records)
+    assert 'secret raw error' not in caplog.text
 
 
 @pytest.mark.django_db
