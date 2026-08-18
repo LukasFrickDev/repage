@@ -17,7 +17,18 @@
   };
 
   applyTheme(initialTheme);
-  window.addEventListener('DOMContentLoaded', () => applyTheme(initialTheme));
+  window.addEventListener('DOMContentLoaded', () => {
+    const selected = document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light';
+    const toggle = document.querySelector('[data-theme-toggle]');
+    if (toggle) {
+      const nextTheme = selected === 'dark' ? 'light' : 'dark';
+      const label = `Ativar tema ${nextTheme === 'dark' ? 'escuro' : 'claro'}`;
+      toggle.setAttribute('aria-label', label);
+      toggle.setAttribute('title', label);
+    }
+    const siteLink = document.querySelector('#user-tools a[href="https://repage.com.br"]');
+    siteLink?.setAttribute('target', '_blank');
+  });
   window.addEventListener('click', (event) => {
     const target = event.target instanceof Element ? event.target.closest('[data-theme-toggle]') : null;
     if (!target) return;

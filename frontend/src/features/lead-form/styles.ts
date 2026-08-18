@@ -295,26 +295,13 @@ export const Submit = styled.button`
   }
 `;
 
-export const Status = styled.p`
+export const Status = styled.p<{ $success?: boolean }>`
+  flex: 1 1 18rem;
+  min-width: 0;
   margin: 0;
-  color: rgba(245, 242, 236, 0.78);
+  color: ${({ $success }) => ($success ? 'rgba(201, 222, 255, 0.92)' : 'rgba(245, 242, 236, 0.78)')};
   font-family: ${fonts.primary};
   font-size: 0.92rem;
   line-height: 1.45;
-`;
-
-export const Success = styled.div`
-  margin-top: clamp(2.5rem, 5vw, 4rem);
-  padding: clamp(1.25rem, 3vw, 2rem);
-  border: 1px solid rgba(145, 168, 255, 0.35);
-  border-radius: ${layout.radii.action};
-  background: rgba(145, 168, 255, 0.08);
-  color: ${colors.white};
-  text-align: left;
-
-  p {
-    margin: 0;
-    color: rgba(245, 242, 236, 0.8);
-    font: 500 1rem/1.6 ${fonts.primary};
-  }
+  overflow-wrap: anywhere;
 `;

@@ -174,6 +174,20 @@ input[type="submit"],
   padding-top: 8px;
 }
 
+.object-tools a.historylink,
+.submit-row a.closelink {
+  align-items: center;
+  box-sizing: border-box;
+  display: inline-flex;
+  height: 32px;
+  justify-content: center;
+  line-height: 1;
+  min-height: 32px;
+  padding: 0 10px;
+  font-size: 12px;
+  vertical-align: middle;
+}
+
 #header {
   background: var(--repage-ink);
   min-height: 78px;
@@ -578,6 +592,53 @@ body.login {
   box-sizing: border-box;
   max-width: 100%;
   width: 100%;
+}
+
+.repage-password-field {
+  position: relative;
+}
+
+.repage-password-field input {
+  padding-right: 44px !important;
+  width: 100%;
+}
+
+.repage-password-toggle {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  color: var(--body-quiet-color);
+  display: inline-flex;
+  height: 36px;
+  justify-content: center;
+  min-height: 36px;
+  padding: 7px;
+  position: absolute;
+  right: 3px;
+  top: 2px;
+  width: 36px;
+}
+
+.repage-password-toggle svg {
+  fill: none;
+  height: 18px;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.7;
+  width: 18px;
+}
+
+.repage-password-toggle__hide {
+  display: none;
+}
+
+.repage-password-toggle[data-visible="true"] .repage-password-toggle__show {
+  display: none;
+}
+
+.repage-password-toggle[data-visible="true"] .repage-password-toggle__hide {
+  display: block;
 }
 
 .login .submit-row input {
