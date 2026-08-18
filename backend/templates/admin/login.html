@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="{% static 'admin/css/login.css' %}">
   <link rel="stylesheet" href="{% static 'repage-admin/admin.css' %}?v=system-font-20260815">
   {{ form.media }}
+  <script src="{% static 'repage-admin/login.js' %}" defer></script>
 {% endblock %}
 
 {% block repage_admin_styles %}{% endblock %}
@@ -49,14 +50,21 @@
       </div>
       <div class="form-row">
         {{ form.password.errors }}
-        {{ form.password.label_tag }} {{ form.password }}
+        {{ form.password.label_tag }}
+        <div class="repage-password-field">
+          {{ form.password }}
+          <button type="button" class="repage-password-toggle" data-password-toggle aria-controls="id_password" aria-label="Mostrar senha" title="Mostrar senha">
+            <svg class="repage-password-toggle__show" aria-hidden="true" viewBox="0 0 24 24" focusable="false"><path d="M2.5 12s3.5-5 9.5-5 9.5 5 9.5 5-3.5 5-9.5 5-9.5-5-9.5-5Z"></path><circle cx="12" cy="12" r="2.5"></circle></svg>
+            <svg class="repage-password-toggle__hide" aria-hidden="true" viewBox="0 0 24 24" focusable="false"><path d="m3 3 18 18M10.6 6.2A10.7 10.7 0 0 1 12 6c6 0 9.5 6 9.5 6a16.6 16.6 0 0 1-3 3.7M6.2 6.7C3.8 8.3 2.5 12 2.5 12s3.5 6 9.5 6c1.3 0 2.5-.3 3.5-.7"></path></svg>
+          </button>
+        </div>
         <input type="hidden" name="next" value="{{ next }}">
       </div>
       {% url 'admin_password_reset' as password_reset_url %}
       {% if password_reset_url %}
         <div class="password-reset-link"><a href="{{ password_reset_url }}">{% translate 'Esqueceu suas credenciais?' %}</a></div>
       {% endif %}
-      <div class="submit-row"><input type="submit" value="{% translate 'Entrar' %}"></div>
+      <div class="submit-row"><input type="submit" value="{% translate 'Entrar' %}" data-login-submit></div>
     </form>
   </div>
 {% endblock %}

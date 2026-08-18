@@ -7,6 +7,7 @@ class RepageAdminSite(admin.AdminSite):
     site_header = 'Repage'
     site_title = 'Repage Admin'
     index_title = 'Administração'
+    site_url = 'https://repage.com.br'
     login_template = 'admin/login.html'
 
     def index(self, request, extra_context=None):

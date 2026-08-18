@@ -178,6 +178,7 @@ export function LeadForm({ onInteractionStart }: LeadFormProps) {
   };
 
   const onInvalid = (fieldErrors: typeof errors) => {
+    setSucceeded(false);
     setSubmitted(true);
     setGeneralError('Revise os campos destacados antes de enviar.');
     trackEvent(ANALYTICS_EVENT_NAMES.leadFormError, { category: 'validation' });
@@ -186,6 +187,7 @@ export function LeadForm({ onInteractionStart }: LeadFormProps) {
 
   const onSubmit = async (values: LeadFormValues) => {
     setGeneralError('');
+    setSucceeded(false);
     setSubmitted(true);
     const attemptKey = idempotencyKey.current ?? createIdempotencyKey();
     idempotencyKey.current = attemptKey;
@@ -366,6 +368,11 @@ export function LeadForm({ onInteractionStart }: LeadFormProps) {
             {isSubmitting ? 'Enviando…' : 'Solicitar orçamento'}
           </S.Submit>
           {generalError && <S.Status role="alert" aria-live="assertive">{generalError}</S.Status>}
+          {succeeded && !generalError && (
+            <S.Status $success role="status" aria-live="polite">
+              Solicitação recebida. Obrigado por entrar em contato com a Repage. Você deve receber uma confirmação por e-mail nos próximos minutos. Se não encontrar, confira também a pasta de Spam ou Lixo eletrônico.
+            </S.Status>
+          )}
         </S.Actions>
         <S.DirectContact>
           <span>Prefere falar diretamente?</span>
@@ -379,11 +386,6 @@ export function LeadForm({ onInteractionStart }: LeadFormProps) {
           </S.WhatsAppLink>
         </S.DirectContact>
       </S.Form>
-      {succeeded && (
-        <S.Success role="status" aria-live="polite">
-          <p>Solicitação recebida. Obrigado por entrar em contato com a Repage.</p>
-        </S.Success>
-      )}
     </>
   );
 }

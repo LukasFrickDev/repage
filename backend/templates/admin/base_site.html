@@ -4,12 +4,12 @@
 {% block title %}Administração Repage{% endblock %}
 
 {% block dark-mode-vars %}
+  <script src="{% static 'repage-admin/theme.js' %}"></script>
   <link rel="stylesheet" href="{% static 'admin/css/dark_mode.css' %}">
 {% endblock %}
 
 {% block extrahead %}
   {{ block.super }}
-  <script src="{% static 'repage-admin/theme.js' %}"></script>
 {% endblock %}
 
 {% block extrastyle %}
