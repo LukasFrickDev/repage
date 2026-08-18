@@ -24,7 +24,7 @@ A baseline atual possui:
 - PostgreSQL como banco aprovado;
 - Django Admin Repage;
 - Lead público persistente;
-- idempotência, proteção e DatabaseCache/PostgreSQL;
+- idempotência, proteção e `RateLimitCounter`/PostgreSQL;
 - e-mails persistidos e retentativas executáveis;
 - `process_email_retries`;
 - `cleanup_idempotency`;
@@ -285,21 +285,12 @@ Configuração continua por:
 Não introduzir `DATABASE_URL` apenas por preferência e não versionar a
 connection string.
 
-## 14. DatabaseCache
+## 14. Store de proteção
 
-Produção deve criar e validar:
-
-```text
-repage_lead_protection_cache
-```
-
-Usar o comando oficial existente do Django:
-
-```bash
-python manage.py createcachetable
-```
-
-Readiness deve continuar verificando PostgreSQL e o cache de proteção.
+Produção deve aplicar a migration do `RateLimitCounter`, que mantém os
+contadores de proteção com chave HMAC, expiração e incremento atômico no
+PostgreSQL. Readiness deve continuar verificando PostgreSQL e esse store
+compartilhado.
 
 ## 15. Static files do Django Admin
 
@@ -748,7 +739,7 @@ Executar `process_email_retries` em frequência compatível com a política de r
 Referência:
 
 ```text
-a cada 15 minutos
+a cada minuto
 ```
 
 Se a conta impor frequência mínima diferente, usar a menor frequência permitida que preserve comportamento aceitável e documentar.
@@ -766,7 +757,7 @@ uma vez ao dia.
 Na Fase 4, os dois jobs foram materializados em wrappers versionados e
 allowlisted que chamam `cloudlinux-selector`, validam o `returncode` interno
 com o parser existente e não imprimem stdout/stderr bruto. Os horários finais
-documentados são `*/15 * * * *` para retry e `17 3 * * *` para cleanup, na hora
+documentados são `* * * * *` para retry e `17 3 * * *` para cleanup, na hora
 local do servidor (`America/Sao_Paulo`, UTC-03:00). A ativação no cPanel ainda
 depende de implantação real.
 
@@ -1431,7 +1422,7 @@ Não implementar:
 - [ ] restart do Passenger validado.
 - [ ] Django 5.2 atualizado para patch de segurança vigente aprovado.
 - [ ] regressão backend do patch aprovada.
-- [ ] DatabaseCache criado.
+- [ ] migration do `RateLimitCounter` aplicada.
 - [ ] `STATIC_ROOT`/collectstatic funcionando.
 - [ ] settings de segurança de produção materializados.
 - [ ] `check --deploy` executado e warnings revisados.

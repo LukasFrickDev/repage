@@ -4,7 +4,7 @@
 - **Ambiente:** HomeHost Python App + SMTP operacional da Repage
 - **Responsável:** Lukas Frick
 - **Última validação:** SMTP real validado externamente; fluxo cPanel Cron → `cloudlinux-selector` → Python App validado com probe temporário
-- **Frequência:** retry a cada 15 minutos; cleanup diariamente às 03:17
+- **Frequência:** retry a cada minuto; cleanup diariamente às 03:17
 
 ## Objetivo
 
@@ -46,6 +46,11 @@ O transporte de produção usa o backend SMTP nativo do Django:
 TLS e SSL não podem estar ativos simultaneamente. A senha permanece somente
 no ambiente da Python App.
 
+O POST do formulário persiste o `Lead` e as duas `EmailDelivery` como
+pendentes antes de responder. O envio ocorre pelo job `process_email_retries`;
+as entregas do lote reutilizam uma conexão SMTP e falhas individuais permanecem
+isoladas para retry.
+
 ## Cron versionado
 
 O wrapper `scripts/run_production_cron.sh` aceita somente duas tarefas
@@ -58,7 +63,7 @@ Os comandos finais a configurar no cPanel depois de o código estar realmente
 presente na produção são:
 
 ```cron
-*/15 * * * * /bin/bash /home/re190924/repage_backend/scripts/run_production_cron.sh process_email_retries
+* * * * * /bin/bash /home/re190924/repage_backend/scripts/run_production_cron.sh process_email_retries
 17 3 * * * /bin/bash /home/re190924/repage_backend/scripts/run_production_cron.sh cleanup_idempotency
 ```
 

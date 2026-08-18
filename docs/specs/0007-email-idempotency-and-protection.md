@@ -314,17 +314,13 @@ Resposta:
 - mensagem segura;
 - `Retry-After` quando possível.
 
-## 19. Cache de proteção
+## 19. Store de proteção
 
 Não adicionar Redis/Memcached.
 
-Usar Django Cache Framework com PostgreSQL:
-
-`django.core.cache.backends.db.DatabaseCache`
-
-Alias dedicado, por exemplo `lead_protection`, com tabela própria, por exemplo `repage_lead_protection_cache`.
-
-Criar pelo mecanismo oficial `python manage.py createcachetable`.
+Usar o model PostgreSQL dedicado `RateLimitCounter`, com chave HMAC
+purpose-separated, contador e expiração. A operação de incremento em produção
+usa upsert atômico; a limpeza ocorre junto do comando diário de idempotência.
 
 Não usar `LocMemCache` como mecanismo de proteção de produção.
 
@@ -741,15 +737,14 @@ Endereços:
 
 O `.env` real é o ponto operacional local para os valores e permanece fora do Git. Não deve conter credenciais versionadas. O `.env.example` documenta as variáveis com valores seguros ou exemplos adequados.
 
-## 45. Migrations e cache table
+## 45. Migrations e store de proteção
 
 Criar migrations para os dois novos models/constraints/indexes.
 
 Não editar migrations da 0005.
 
-DatabaseCache usa tabela criada pelo mecanismo oficial `createcachetable`, não por alteração manual.
-
-Documentar esse passo para ambientes aplicáveis.
+O model `RateLimitCounter` é criado pela migration versionada; não há tabela de
+cache separada.
 
 ## 46. Segurança/privacidade
 
@@ -815,18 +810,17 @@ Playwright:
 
 ## 50. Smoke real
 
-Com PostgreSQL real e cache table real:
+Com PostgreSQL real e o store de proteção migrado:
 
-1. migrations;
-2. createcachetable;
-3. POST público;
-4. Lead criado;
-5. duas EmailDelivery;
-6. IdempotencyRecord;
-7. replay sem duplicação;
-8. falha de email simulada com backend seguro;
-9. management command de retry;
-10. inspeção pelo Admin.
+1. aplicar as migrations;
+2. POST público;
+3. Lead criado;
+4. duas EmailDelivery;
+5. IdempotencyRecord;
+6. replay sem duplicação;
+7. falha de email simulada com backend seguro;
+8. management command de retry;
+9. inspeção pelo Admin.
 
 Dados fictícios apenas.
 
@@ -839,7 +833,7 @@ SMTP real não é obrigatório para fechar a 0007 se credenciais/provedor ainda 
 - migrations;
 - constraints/indexes;
 - settings;
-- DatabaseCache;
+- `RateLimitCounter`;
 - env example;
 - fingerprint primitives;
 - testes focados.
@@ -893,10 +887,9 @@ python manage.py check
 python manage.py makemigrations --check --dry-run
 ruff check .
 pytest
-python manage.py createcachetable --dry-run
 ```
 
-Validar também a cache table real no PostgreSQL local.
+Validar também o `RateLimitCounter` real no PostgreSQL local.
 
 Frontend:
 
@@ -955,9 +948,9 @@ Não afirmar que esses itens foram validados durante 0007.
 - [x] Throttling IP burst/daily funciona.
 - [x] Throttling e-mail/telefone funciona.
 - [x] `429` recuperável.
-- [x] DatabaseCache compartilhado usado para produção.
+- [x] `RateLimitCounter` compartilhado usado para produção.
 - [x] IP/contatos não aparecem em cache keys em claro.
-- [x] Readiness verifica cache.
+- [x] Readiness verifica o store de proteção (`RateLimitCounter`).
 - [x] SMTP não derruba readiness.
 - [x] Lead + deliveries + idempotency são atômicos.
 - [x] SMTP ocorre depois do commit.
@@ -999,6 +992,6 @@ Ao concluir:
 
 A 0007 está pronta quando o fluxo público comprova:
 
-`formulário → proteção → idempotência → Lead + deliveries + record → commit → e-mails → retry/recovery → 201 seguro`
+`formulário → proteção → idempotência → Lead + deliveries + record → commit → 201 seguro → processamento posterior de e-mails → retry/recovery`
 
 e quando retry legítimo não duplica Lead, conflito é previsível, repetição acidental é reduzida, novo contato legítimo continua possível, abuso básico é limitado, Lead sobrevive à falha SMTP, retries são executáveis sem Celery/Redis, Admin permite recuperação explícita, Entregas 5/6 permanecem estáveis e nenhuma entrega futura foi antecipada.
