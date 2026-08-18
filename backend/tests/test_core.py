@@ -10,7 +10,7 @@ import pytest
 from django.conf import settings
 from django.db import OperationalError
 from django.http import HttpResponse
-from django.test import Client, RequestFactory
+from django.test import Client, RequestFactory, override_settings
 
 from apps.core.middleware import RequestIDMiddleware
 from apps.leads.protection import ProtectionUnavailable
@@ -32,6 +32,22 @@ def test_health_returns_simple_success_and_request_id(client):
     assert response.status_code == 200
     assert response.json() == {'status': 'ok'}
     assert response['X-Request-ID']
+
+
+@override_settings(CORS_ALLOWED_ORIGINS=['https://repage.com.br'])
+def test_lead_preflight_allows_configured_origin_method_and_idempotency_header(client):
+    response = client.options(
+        '/api/v1/leads/',
+        HTTP_ORIGIN='https://repage.com.br',
+        HTTP_ACCESS_CONTROL_REQUEST_METHOD='POST',
+        HTTP_ACCESS_CONTROL_REQUEST_HEADERS='content-type,idempotency-key',
+    )
+
+    assert response.status_code == 200
+    assert response['Access-Control-Allow-Origin'] == 'https://repage.com.br'
+    assert 'POST' in {method.strip() for method in response['Access-Control-Allow-Methods'].split(',')}
+    allowed_headers = {header.strip().lower() for header in response['Access-Control-Allow-Headers'].split(',')}
+    assert {'content-type', 'idempotency-key'} <= allowed_headers
 
 
 def test_request_logging_is_correlated_and_sanitized(client, caplog):
