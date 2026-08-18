@@ -1,9 +1,9 @@
 # Deploy de produção
 
-- **Status:** draft — preparado, ainda não executado end-to-end após merge em `main`
+- **Status:** draft — um deploy completo anterior e seu smoke foram comprovados; a implementação resiliente desta branch ainda não foi validada em produção
 - **Ambiente:** produção HomeHost + Neon
 - **Responsável:** Lukas Frick
-- **Última validação:** componentes SSH, host key, Passenger e CloudLinux foram validados operacionalmente; o workflow completo ainda está pendente
+- **Última validação:** deploy completo `4b94c1ff3a069206777a07d6c183feb0cc56e56d` e smoke comprovados; a implementação nova permanece pendente de validação real
 - **Frequência:** a cada deploy aprovado pela `main`
 
 ## Objetivo
@@ -13,9 +13,9 @@ o Environment `production`, sem copiar segredos da aplicação para o workflow.
 
 ## Pré-condições
 
-- CI concluído com sucesso para o mesmo SHA em `main`;
-- redeploy manual iniciado pelo `workflow_dispatch` do workflow `CI` na
-  `main`, seguido de `workflow_run` bem-sucedido;
+- CI concluído com sucesso na PR que protegeu a integração na `main`;
+- para validação manual, `CI` pode ser executado por `workflow_dispatch` na
+  `main`;
 - Environment `production` restrito à `main`;
 - `VITE_SITE_INDEXING_ENABLED` igual a `false`;
 - private key exclusiva e host key ED25519 já cadastradas no Environment;
@@ -77,56 +77,87 @@ segredos no shell SSH.
 
 ## Deploy automatizado
 
-1. O workflow `CI` valida o commit.
-2. Redeploy manual significa executar `CI` por `workflow_dispatch` na `main`;
-   `Deploy production` não possui caminho manual direto.
-3. Após CI concluir com sucesso, `Deploy production` é acionado por
-   `workflow_run` para push ou dispatch na `main`.
-4. O deploy confirma que o SHA aprovado ainda é o HEAD atual de `origin/main`.
-5. O mesmo SHA é usado para checkout, build e empacotamento.
-6. O frontend é construído com `VITE_SITE_INDEXING_ENABLED=false` e os
+1. O workflow `CI` valida a PR com os componentes afetados; `CI Gate` é o
+   check obrigatório da proteção de `main`.
+2. Depois do merge permitido pela `main` protegida, `Deploy production` reage
+   diretamente ao `push` em `main`; `workflow_dispatch` do deploy só é aceito
+   quando a referência é `main`.
+3. O deploy confirma que o SHA disparador ainda é o HEAD atual de
+   `origin/main`.
+4. O mesmo SHA é usado para checkout, build e empacotamento.
+5. O frontend é construído com `VITE_SITE_INDEXING_ENABLED=false` e os
    arquivos prerenderizados obrigatórios são verificados.
-7. O backend é empacotado sem `.env`, `.venv`, testes, caches, logs,
+6. O backend é empacotado sem `.env`, `.venv`, `requirements-dev.txt`, testes, caches, logs,
    `docker-compose.yml` ou arquivos locais.
-8. A private key é escrita somente em arquivo temporário com permissão restrita.
-9. SSH/SCP usa o `DEPLOY_SSH_KNOWN_HOSTS` pinado e
+7. A private key é escrita somente em arquivo temporário com permissão restrita.
+8. SSH/SCP usa o `DEPLOY_SSH_KNOWN_HOSTS` pinado e
    `StrictHostKeyChecking=yes`, `BatchMode=yes`, timeout de conexão de 15
    segundos e keepalive para sessões longas.
-10. O archive e o manifesto de rollback do estado gerenciado anterior são
+9. O archive e o manifesto de rollback do estado gerenciado anterior são
     preservados em `tmp/repage-rollback-frontend.tar.gz`,
     `tmp/repage-rollback-backend.tar.gz`,
     `tmp/repage-rollback-frontend.manifest` e
     `tmp/repage-rollback-backend.manifest`.
-11. Assets frontend são publicados antes dos HTMLs; o `.htaccess` e o
+10. Assets frontend são publicados antes dos HTMLs; o `.htaccess` e o
    `404.html` fazem parte do artefato validado.
-12. Arquivos gerenciados removidos pelo novo SHA são removidos apenas a partir
+11. Arquivos gerenciados removidos pelo novo SHA são removidos apenas a partir
     do manifesto anterior; arquivos externos desconhecidos permanecem.
-13. Backend é atualizado sem substituir o `.env` externo nem o `tmp/` do
+12. Backend é atualizado sem substituir o `.env` externo nem o `tmp/` do
     Passenger.
-14. Requirements são instalados no virtualenv existente.
-15. O executor Django roda via `cloudlinux-selector`; o JSON retornado é
+13. Somente `requirements.txt` runtime é instalado no virtualenv existente.
+14. O executor Django roda via `cloudlinux-selector`; o JSON retornado é
     decodificado e o `returncode` interno precisa ser `0`.
-16. O Passenger é reiniciado com:
+15. O Passenger é reiniciado com:
 
 ```bash
 touch /home/re190924/repage_backend/tmp/restart.txt
 ```
 
-17. O workflow verifica health, readiness, homepage, uma rota prerenderizada
-    e uma rota inexistente com status HTTP exatamente `404`.
+16. O workflow executa o smoke completo de health, readiness, homepage,
+    portfolio, case, páginas legais, sitemap, robots, Admin, meta robots e
+    rota inexistente com status HTTP exatamente `404`.
 
 O job de deploy possui timeout de 20 minutos. Esse limite é deliberadamente
 superior à duração observada para a transferência do frontend de produção e
 interrompe somente travamentos prolongados do runner ou da sessão remota.
-Quando existe o SHA da última publicação bem-sucedida, o deploy compara esse
-estado com o SHA atual e transfere/muta somente os componentes alterados; na
-ausência ou invalidez do estado, usa o fluxo completo como fallback seguro.
+Quando existe o SHA da última publicação bem-sucedida e não há marker, o deploy
+compara esse estado com o SHA atual e transfere/muta somente os componentes
+alterados; na ausência ou invalidez do estado, usa o fluxo completo como
+fallback seguro. Com marker, state válido igual ao alvo significa
+`finalize-only`; qualquer state diferente, ausente ou inválido força
+`recovery-full` de frontend e backend, preservando os rollbacks existentes.
+
+O protocolo operacional é `plan -> apply -> smoke -> finalize`. O state fica em
+`/home/re190924/repage_backend/tmp/repage-last-successful-sha`, contém somente
+um SHA hexadecimal de 40 caracteres e é gravado atomicamente com arquivo
+temporário, `chmod 600` e `mv`. State ausente ou conteúdo inválido resulta em
+full deploy; não é obrigatório pré-popular o arquivo manualmente: o `finalize`
+do primeiro deploy aprovado o cria. Com marker, state ausente, inválido ou
+diferente do alvo resulta em `recovery-full`; falha SSH durante a leitura
+aborta o deploy.
+
+Alterações somente em testes/dev comprovadamente excluídos do artefato, ou em
+documentação, podem resultar em ordinary no-op. Nesse caso o último SHA da
+aplicação permanece no state e o workflow não executa build, empacotamento,
+apply, smoke ou finalize.
+
+Para mutações de aplicação, o SHA só avança depois do smoke verde. Um
+ordinary no-op não executa build, package, apply, smoke ou finalize e não altera
+o state. Se o state já contém o SHA atual e o marker ainda existe, a próxima
+execução trata isso como finalização pendente, sem republicar a aplicação.
+Marker com state diferente sempre entra em recovery-full.
+
+No `push` normal e no `workflow_dispatch`, o planejamento é automático e
+seletivo. A execução manual controlada na `main` pode resultar em
+frontend-only, backend-only, full por fallback/recovery, finalize-only ou
+ordinary no-op. Não existe nesta V1 um mecanismo de republicação forçada do
+mesmo SHA.
 
 ## Falhas conhecidas
 
 - O workflow não deve prosseguir se CI falhar.
-- Redeploy manual significa executar `CI` por `workflow_dispatch` na `main`;
-  `Deploy production` só reage ao `workflow_run` concluído com sucesso.
+- `CI` pode ser executado integralmente por `workflow_dispatch`; o deploy
+  manual só é aceito na referência `main`.
 - O deploy aborta se o SHA aprovado não for o HEAD atual de `origin/main`.
 - Falhas de `check --deploy`, migration, `createcachetable`, `collectstatic`,
   restart ou smoke encerram o deploy com erro.
@@ -137,8 +168,15 @@ ausência ou invalidez do estado, usa o fluxo completo como fallback seguro.
 - A regra manual atual de Force HTTPS/hostname pode causar redirect duplicado
   até ser reconciliada com o `.htaccess` versionado.
 - A presença do arquivo de rollback não constitui backup PostgreSQL.
-- O smoke HTTP real da rota inexistente permanece pendente até execução após
-  merge em `main`.
+- A implementação resiliente/seletiva desta branch ainda não possui validação
+  real em produção.
+
+Antes do merge que ativa o trigger direto de deploy, `main` deve estar protegida
+com pull request obrigatório, o status `CI Gate` como required check, exigência
+de branch atualizada/strict checks, force push e delete bloqueados e, quando
+disponível, bypass administrativo impedido. A V1 solo não exige aprovação de
+terceiro apenas para satisfazer o processo. Essa configuração será feita pelo
+operador antes do merge; este repositório não a configura via API.
 
 ## Rollback inicial
 
@@ -185,7 +223,13 @@ check desse runbook não restaura a base ativa.
 
 ## Evidências
 
-Já comprovado antes do workflow:
+Já comprovado anteriormente:
+
+- deploy completo do SHA `4b94c1ff3a069206777a07d6c183feb0cc56e56d` com smoke
+  pós-deploy aprovado;
+- a tentativa do SHA `c053b2378c51d97b98e639f43ede2ad9bd600c9c` chegou à
+  publicação parcial do frontend e falhou com `Broken pipe` antes de
+  requirements, CloudLinux, Passenger e promoção final;
 
 - autenticação SSH/SFTP por chave;
 - host key ED25519 validada e pinada;
@@ -196,11 +240,10 @@ Já comprovado antes do workflow:
 
 Ainda pendente:
 
-- execução end-to-end do deploy após merge em `main`;
-- smoke pós-deploy executado pelo workflow;
+- validação real da implementação seletiva/resiliente desta branch;
 - rollback automatizado comprovado;
 - reconciliação final do redirect manual do cPanel com o `.htaccess`.
-- validação HTTP end-to-end da rota inexistente após merge em `main`.
+- validação HTTP end-to-end da nova implementação resiliente desta branch.
 
 ## Segurança e privacidade
 

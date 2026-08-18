@@ -21,7 +21,7 @@ fi
 
 changed_files="$(mktemp)"
 trap 'rm -f -- "$changed_files"' EXIT
-if ! git diff --name-only -z "$last_success_sha" "$deploy_sha" -- frontend backend > "$changed_files"; then
+if ! git diff --no-renames --name-only -z "$last_success_sha" "$deploy_sha" -- frontend backend > "$changed_files"; then
   full_deploy
   exit 0
 fi
@@ -30,7 +30,13 @@ frontend_changed=0
 backend_changed=0
 while IFS= read -r -d '' path; do
   case "$path" in
+    AGENTS.md|frontend/AGENTS.md|backend/AGENTS.md|docs/*)
+      ;;
+    frontend/e2e/*|frontend/playwright.config.ts)
+      ;;
     frontend/*) frontend_changed=1 ;;
+    backend/tests/*|backend/requirements-dev.txt|backend/docker-compose.yml|backend/env.txt|backend/pytest.ini)
+      ;;
     backend/*) backend_changed=1 ;;
   esac
 done < "$changed_files"

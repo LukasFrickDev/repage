@@ -33,7 +33,9 @@ A baseline atual possui:
 - consentimento e Analytics condicionado;
 - CI versionado em `.github/workflows/ci.yml` e fundação de CD em
   `.github/workflows/deploy.yml`;
-- runbook de deploy materializado, sem execução end-to-end após merge em `main`.
+- runbook de deploy materializado; um deploy completo anterior e seu smoke já
+  foram comprovados, enquanto a implementação seletiva/resiliente atual ainda
+  aguarda validação real.
 
 A Entrega 10 transforma essa aplicação já pronta em uma operação de produção reproduzível, verificável e recuperável.
 
@@ -395,15 +397,26 @@ GitHub continua sendo fonte oficial de código e o mecanismo aprovado de CI/depl
 A Entrega 10 deve criar workflows versionados.
 
 O workflow de deploy foi materializado em `.github/workflows/deploy.yml` com
-`workflow_run` do CI bem-sucedido na `main`, aceitando eventos `push` e
-`workflow_dispatch` do próprio CI. Redeploy manual começa pelo
-`workflow_dispatch` do CI na `main`; `deploy.yml` não possui caminho manual
-direto. O deploy também confirma que o SHA aprovado continua sendo o HEAD de
-`origin/main`. A execução real end-to-end permanece pendente.
+`push` em `main` e `workflow_dispatch` controlado somente na `main`. O deploy
+confirma que o SHA disparador continua sendo o HEAD de `origin/main`. O CI de
+PR tornou-se component-aware, mantém jobs independentes e publica o check
+agregador obrigatório `CI Gate`; `workflow_dispatch` do CI continua forçando a
+suíte completa. Esta é uma revisão deliberada da regra anterior: a `main` deve
+estar protegida antes do merge, com pull request obrigatório, `CI Gate` como
+required check, strict checks/branch atualizada, force push e delete bloqueados
+e bypass administrativo impedido quando disponível. A V1 solo não exige
+aprovação de terceiro. O operador configura essa proteção antes do merge; a
+spec não afirma que ela já exista. Um deploy completo anterior e seu smoke já
+foram comprovados; a implementação seletiva/resiliente atual ainda permanece
+pendente de prova real, e a Entrega 10 continua aberta.
 
-O workflow `.github/workflows/ci.yml` foi materializado nesta Fase 2 com jobs
-independentes de frontend e backend. A validação definitiva ainda depende da
-execução real no GitHub.
+O state de deploy representa o último SHA que definiu com sucesso o estado da
+aplicação em produção. Docs-only/ordinary no-op não avançam esse state; deploy
+de aplicação só o avança após smoke verde; marker com state diferente força
+recovery-full de frontend e backend. Tanto o `push` quanto o
+`workflow_dispatch` do deploy usam o mesmo planejamento automático/seletivo; a
+execução manual controlada na `main` também pode resultar em ordinary no-op.
+Não existe nesta V1 mecanismo de republicação forçada do mesmo SHA.
 
 Usar actions oficiais sempre que possível e shell/OpenSSH para deploy.
 
@@ -465,10 +478,11 @@ A documentação HomeHost indica que SSH em hospedagem pode precisar de habilita
 Criar workflow para:
 
 - `pull_request` para `main`;
-- `push` em `main`;
 - `workflow_dispatch` quando útil.
 
-CI deve possuir pelo menos jobs independentes de frontend e backend.
+CI deve possuir pelo menos jobs independentes de frontend e backend, seleção
+conservadora por componente e um `CI Gate` sempre presente para a proteção da
+branch. O `workflow_dispatch` executa a suíte completa.
 
 Permissões padrão do workflow:
 
@@ -539,7 +553,9 @@ Não adicionar stack pesada de documentação só para esta checagem.
 
 ## 26. Deploy automático
 
-Após a infraestrutura estar validada, o deploy de produção deve ocorrer por GitHub Actions em `push` aprovado para `main`, depois dos jobs de CI.
+Após a infraestrutura estar validada, o deploy de produção deve ocorrer por
+GitHub Actions em `push` aprovado para `main`, protegido pelo `CI Gate` exigido
+antes do merge.
 
 Também permitir `workflow_dispatch` em `main` para redeploy controlado.
 
@@ -1266,8 +1282,13 @@ Antes de congelar a fase:
 
 Com infraestrutura pronta:
 
-- merge/push controlado em `main` dispara CI;
-- deploy só inicia depois dos jobs necessários;
+- uma pull request para `main` dispara CI component-aware e o `CI Gate`
+  obrigatório protege a integração;
+- a branch protection exige `CI Gate`, strict checks e branch atualizada antes
+  do merge; o merge/push integrado em `main` dispara o deploy;
+- não existe segundo CI automático redundante em `push` para `main`; o
+  `workflow_dispatch` do CI executa a suíte completa manualmente e o
+  `workflow_dispatch` do deploy permite redeploy controlado somente da `main`;
 - Environment `production` é usado;
 - SHA implantado é observável;
 - SHA aprovado é confirmado contra o HEAD atual de `origin/main`;
