@@ -90,6 +90,18 @@ request; o envio ocorre posteriormente pelo processamento de deliveries. Esse
 resultado é local e não declara ganho em produção: readiness, Admin e POST
 deverão ser medidos novamente após o próximo deploy.
 
+Uma medição local adicional registrou 1 statement no readiness e 5 statements
+em cada uma das páginas changelist e detalhe do Admin, com tempos SQL locais
+de 3–14 ms. Ela não reproduz a latência HomeHost/Neon e, portanto, não atribui
+os picos observados a uma query específica.
+
+Para uma amostra controlada após o próximo deploy, definir temporariamente
+`DJANGO_DB_TIMING_ENABLED=True` no Setup Python App e reiniciar o Passenger.
+Os eventos `request_completed` passam a registrar somente
+`db_query_count` e `db_duration_ms`, sem SQL, PII ou secrets. Coletar uma
+sequência de readiness, login/Admin, changelist, detalhe e POST controlado;
+depois restaurar `DJANGO_DB_TIMING_ENABLED=False` e reiniciar o Passenger.
+
 Verificar, sem criar Lead:
 
 ```text

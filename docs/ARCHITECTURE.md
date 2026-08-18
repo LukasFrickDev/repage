@@ -96,7 +96,8 @@ Direção de hospedagem:
 Banco de produção:
 - PostgreSQL permanece a engine estrutural;
 - Neon é o provedor atual, por incompatibilidade do PostgreSQL 13.23 nativo da HomeHost com Django 5.2;
-- topologia: `Django/HomeHost → PostgreSQL/Neon`.
+- topologia: runtime Django/HomeHost → endpoint pooled Neon; migrations, backup
+  e restore → endpoint direto Neon, ambos por TLS.
 A arquitetura não depende do registrador de domínio escolhido.
 ## 6. Condicionantes da hospedagem
 Validações operacionais já realizadas incluem Python `3.12.13`, SSH/SFTP por

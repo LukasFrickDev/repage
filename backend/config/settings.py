@@ -41,6 +41,7 @@ configured_secret_key = os.getenv('DJANGO_SECRET_KEY', '').strip()
 SECRET_KEY = configured_secret_key or 'dev-only-change-me'
 DEBUG = env_bool('DJANGO_DEBUG', True)
 DJANGO_LOG_LEVEL = os.getenv('DJANGO_LOG_LEVEL', 'INFO').strip().upper()
+DJANGO_DB_TIMING_ENABLED = env_bool('DJANGO_DB_TIMING_ENABLED', False)
 if DJANGO_LOG_LEVEL not in {'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'}:
     raise ImproperlyConfigured(
         'DJANGO_LOG_LEVEL deve ser DEBUG, INFO, WARNING, ERROR ou CRITICAL.'
@@ -73,13 +74,13 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    'apps.core.middleware.RequestIDMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'apps.core.middleware.RequestIDMiddleware',
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -101,12 +102,17 @@ TEMPLATES = [
 ]
 
 if ENVIRONMENT == 'production':
+    postgres_connection_role = os.getenv('POSTGRES_CONNECTION_ROLE', 'runtime').strip().lower()
+    if postgres_connection_role not in {'runtime', 'admin'}:
+        raise ImproperlyConfigured('POSTGRES_CONNECTION_ROLE deve ser runtime ou admin.')
+    postgres_host_name = 'POSTGRES_DIRECT_HOST' if postgres_connection_role == 'admin' else 'POSTGRES_HOST'
+    postgres_port_name = 'POSTGRES_DIRECT_PORT' if postgres_connection_role == 'admin' else 'POSTGRES_PORT'
     postgres_config = {
         'NAME': required_env('POSTGRES_DB'),
         'USER': required_env('POSTGRES_USER'),
         'PASSWORD': required_env('POSTGRES_PASSWORD'),
-        'HOST': required_env('POSTGRES_HOST'),
-        'PORT': required_env('POSTGRES_PORT'),
+        'HOST': required_env(postgres_host_name),
+        'PORT': required_env(postgres_port_name),
         'CONN_MAX_AGE': 30,
         'CONN_HEALTH_CHECKS': True,
     }

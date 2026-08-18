@@ -282,6 +282,12 @@ Configuração continua por:
 - `POSTGRES_HOST`;
 - `POSTGRES_PORT`.
 
+Em produção, o runtime pode usar `POSTGRES_HOST`/`POSTGRES_PORT` para o
+endpoint pooled, enquanto migrations, backup e restore usam
+`POSTGRES_DIRECT_HOST`/`POSTGRES_DIRECT_PORT` para o endpoint direto. Os dois
+percursos preservam TLS e os valores permanecem apenas no ambiente da Python
+App.
+
 Não introduzir `DATABASE_URL` apenas por preferência e não versionar a
 connection string.
 

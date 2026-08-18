@@ -21,6 +21,7 @@ Este documento não ativa cron, executa cópia externa ou restaura dados reais.
 - acesso ao cPanel para configurar ou inspecionar o cron, quando aplicável;
 - Python App de produção configurada;
 - variáveis PostgreSQL presentes no ambiente da aplicação;
+- endpoint direto PostgreSQL configurado para backup e restore;
 - toolchain PostgreSQL 18 disponível nos paths documentados;
 - diretório local fora do webroot;
 - para cópia externa, estação do operador com SSH/SFTP por chave e destino protegido/criptografado;
@@ -48,7 +49,7 @@ em evidências ou chamados.
 HomeHost
 ├── app root: /home/re190924/repage_backend
 ├── backups:  /home/re190924/backups/repage/postgresql
-└── PostgreSQL/Neon por TLS
+└── PostgreSQL/Neon direto por TLS para backup/restore
         │
         └── pull semanal por SSH/SFTP
             armazenamento externo protegido pelo operador
@@ -57,6 +58,11 @@ HomeHost
 O diretório local de backup fica fora do webroot e deve permanecer com
 permissão 0700. O destino externo não é GitHub, GitHub Actions, bucket,
 SaaS ou caminho privado hardcoded neste repositório.
+
+O runtime Django pode usar um endpoint pooled separado, mas backup e restore
+usam `POSTGRES_DIRECT_HOST` e `POSTGRES_DIRECT_PORT`. Isso mantém `pg_dump`,
+`pg_restore` e o `CREATE/DROP DATABASE` do restore check fora de um pool de
+transações. As credenciais continuam nas variáveis da Python App.
 
 ## Backup diário
 

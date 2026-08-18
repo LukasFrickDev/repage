@@ -48,6 +48,12 @@ Secret do Environment `production`:
 Segredos Django, Neon, SMTP e static root permanecem exclusivamente no Setup
 Python App e não são lidos pelo workflow.
 
+No Setup Python App, `POSTGRES_HOST`/`POSTGRES_PORT` identificam o endpoint
+pooled do runtime. `POSTGRES_DIRECT_HOST`/`POSTGRES_DIRECT_PORT` identificam o
+endpoint direto, usado somente por operações administrativas. Os valores não
+devem ser copiados para este documento. O `production_manage.py` seleciona
+explicitamente a conexão administrativa antes de executar migrations.
+
 ## Primeiro bootstrap
 
 Antes do primeiro deploy automatizado, o app root deve conter o layout do

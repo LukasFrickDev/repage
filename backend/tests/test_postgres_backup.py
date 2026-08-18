@@ -47,6 +47,33 @@ def test_missing_required_configuration_does_not_expose_password():
     assert environment['POSTGRES_PASSWORD'] not in str(error.value)
 
 
+def test_production_backup_requires_and_uses_direct_endpoint():
+    environment = {
+        **postgres_environment(),
+        'DJANGO_ENVIRONMENT': 'production',
+        'POSTGRES_DIRECT_HOST': 'direct.example.test',
+        'POSTGRES_DIRECT_PORT': '5432',
+    }
+
+    config = postgres_backup.load_postgres_config(environment)
+
+    assert config.host == 'direct.example.test'
+    assert config.port == '5432'
+
+
+def test_production_backup_rejects_missing_direct_endpoint_without_exposing_password():
+    environment = {
+        **postgres_environment(),
+        'DJANGO_ENVIRONMENT': 'production',
+    }
+
+    with pytest.raises(postgres_backup.BackupError) as error:
+        postgres_backup.load_postgres_config(environment)
+
+    assert 'POSTGRES_DIRECT_HOST' in str(error.value)
+    assert environment['POSTGRES_PASSWORD'] not in str(error.value)
+
+
 def test_backup_api_accepts_only_declared_backup_prefixes(tmp_path: Path):
     with pytest.raises(postgres_backup.BackupError, match='prefix is invalid'):
         postgres_backup.create_backup(
