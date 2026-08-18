@@ -19,6 +19,7 @@ production-deploy.md
 production-rollback.md
 postgres-backup.md
 postgres-restore.md
+production-backup-and-restore.md
 production-migrations.md
 ```
 
@@ -66,3 +67,4 @@ Não criar arquivos vazios antecipadamente.
 | [`production-deploy.md`](production-deploy.md) | HomeHost + Neon | Componentes operacionais validados; deploy end-to-end pendente |
 | [`production-smtp-and-cron.md`](production-smtp-and-cron.md) | HomeHost Python App + SMTP | SMTP e mecanismo de cron validados; ativação final pendente |
 | [`production-observability.md`](production-observability.md) | HomeHost + GitHub Actions | Componentes versionados; evidência de produção pendente |
+| [`production-backup-and-restore.md`](production-backup-and-restore.md) | HomeHost + Neon + armazenamento externo do operador | Mecanismo versionado; validação operacional final pendente |

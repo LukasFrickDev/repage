@@ -939,6 +939,28 @@ teste de restauração trimestral
 
 ou antes de mudança de infraestrutura relevante.
 
+### Estado da implementação da Fase 5C
+
+A Fase 5C está materializada no repositório, sem alterar o status geral desta
+spec para `implemented`:
+
+- engine diária de backup e rotação local implementadas nas Fases 5A/5B;
+- backup pré-migration implementado;
+- restore check seguro em database temporário implementado;
+- runbook de backup e restauração materializado;
+- procedimento parametrizado de cópia externa PULL materializado;
+- retenções local e externa documentadas sem destino privado versionado.
+
+Continuam pendentes de prova operacional real:
+
+- cron diário definitivo ativo;
+- backup diário real produzido pelo cron definitivo;
+- retenção local observada ao longo do tempo;
+- primeira cópia externa semanal;
+- retenção externa real de quatro gerações;
+- execução do restore check com backup real em produção;
+- evidência final de produção e fechamento da Entrega 10.
+
 ## 47. Retenção de Leads e backups
 
 Preservar a decisão da Entrega 8:

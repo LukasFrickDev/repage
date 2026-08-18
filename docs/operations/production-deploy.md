@@ -171,7 +171,9 @@ repita os smoke tests. Não remover arquivos fora dos manifestos e archives
 conhecidos.
 
 Rollback de código não reverte migrations. Migration destrutiva exige
-procedimento específico e backup validado da Fase 5.
+procedimento específico e backup validado conforme o
+[runbook de backup e restauração](production-backup-and-restore.md); o restore
+check desse runbook não restaura a base ativa.
 
 ## Evidências
 
