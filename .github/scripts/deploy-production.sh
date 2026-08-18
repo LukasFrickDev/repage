@@ -65,12 +65,13 @@ frontend_rollback_manifest="${backend_path}/tmp/repage-rollback-frontend.manifes
 backend_rollback_manifest="${backend_path}/tmp/repage-rollback-backend.manifest"
 frontend_current_manifest="${backend_path}/tmp/repage-manifest-frontend.txt"
 backend_current_manifest="${backend_path}/tmp/repage-manifest-backend.txt"
+deploy_in_progress="${backend_path}/tmp/repage-deploy-in-progress"
 
 test -f "$frontend_archive"
 test -f "$backend_archive"
 test -f "$frontend_manifest"
 test -f "$backend_manifest"
-mkdir -p "$frontend_path" "$backend_path"
+mkdir -p "$backend_path/tmp"
 mkdir -p "$frontend_stage" "$backend_stage"
 tar -xzf "$frontend_archive" -C "$frontend_stage"
 tar -xzf "$backend_archive" -C "$backend_stage"
@@ -110,7 +111,8 @@ remove_stale_managed_files() {
 validate_manifest "$frontend_manifest"
 validate_manifest "$backend_manifest"
 
-if test -d "$frontend_path"; then
+if test ! -f "$deploy_in_progress" && test -d "$frontend_path" \
+  && (test -f "$frontend_current_manifest" || ! test -f "$frontend_rollback" || ! test -f "$frontend_rollback_manifest"); then
   tar -czf "${stage}/previous-frontend.tar.gz" \
     --exclude='*.log' \
     -C "$frontend_path" .
@@ -126,7 +128,8 @@ if test -d "$frontend_path"; then
   fi
 fi
 
-if test -d "$backend_path"; then
+if test ! -f "$deploy_in_progress" && test -d "$backend_path" \
+  && (test -f "$backend_current_manifest" || ! test -f "$backend_rollback" || ! test -f "$backend_rollback_manifest"); then
   tar -czf "${stage}/previous-backend.tar.gz" \
     --exclude='.env' \
     --exclude='.env.*' \
@@ -147,17 +150,27 @@ if test -d "$backend_path"; then
   fi
 fi
 
+# Keep rollback artifacts stable across retries after production mutation starts.
+if test ! -f "$deploy_in_progress"; then
+  : > "$deploy_in_progress"
+  chmod 600 "$deploy_in_progress"
+fi
+
+mkdir -p "$frontend_path" "$backend_path"
+
 # Remove only files managed by the previous successful release.
 remove_stale_managed_files "$frontend_path" "$frontend_current_manifest" "$frontend_manifest"
 remove_stale_managed_files "$backend_path" "$backend_current_manifest" "$backend_manifest"
 
 # Publish non-HTML assets first, then replace prerendered HTML files.
 tar -cf - --exclude='*.html' -C "$frontend_stage" . | tar -xf - -C "$frontend_path"
+html_files="${stage}/frontend-html-files"
+find "$frontend_stage" -type f -name '*.html' -print0 > "$html_files"
 while IFS= read -r -d '' html_file; do
   relative_path="${html_file#"${frontend_stage}/"}"
   mkdir -p "${frontend_path}/$(dirname "$relative_path")"
   cp "$html_file" "${frontend_path}/${relative_path}"
-done < <(find "$frontend_stage" -type f -name '*.html' -print0)
+done < "$html_files"
 
 # Keep the cPanel/Passenger environment external to the deployed package.
 tar -xzf "$backend_archive" -C "$backend_path"
@@ -188,5 +201,6 @@ printf '%s\n' "$selector_report"
 touch "$backend_path/tmp/restart.txt"
 mv -f "$frontend_manifest" "$frontend_current_manifest"
 mv -f "$backend_manifest" "$backend_current_manifest"
+rm -f -- "$deploy_in_progress"
 rm -rf -- "$stage"
 REMOTE
