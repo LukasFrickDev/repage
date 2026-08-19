@@ -1,19 +1,15 @@
 # Backup e restauração PostgreSQL de produção
 
-- **Status:** mecanismo versionado e runbook materializado; validação operacional final pendente
+- **Status:** validado operacionalmente em produção
 - **Ambiente:** HomeHost Python App + Neon PostgreSQL 18
 - **Responsável:** Lukas Frick
-- **Última validação:** scripts 5A/5B e testes automatizados versionados; execução operacional definitiva ainda pendente
-- **Frequência:** backup diário às 02:17; cópia externa semanal; restore check periódico ou antes de mudança relevante de infraestrutura
+- **Última validação:** backup diário, checksum, rotação, cópia externa e restore check validados
+- **Frequência:** backup diário às 03:20; cleanup separado às 03:17; cópia externa semanal; restore check periódico ou antes de mudança relevante de infraestrutura
 
 ## Objetivo
 
 Definir o backup local do PostgreSQL, a cópia externa controlada pelo
-operador, a retenção e o restore check seguro. O procedimento protege o banco
-real contra restore ou DROP acidental e não transforma backup em evidência de
-produção antes da execução operacional correspondente.
-
-Este documento não ativa cron, executa cópia externa ou restaura dados reais.
+operador, a retenção e o restore check seguro. O procedimento protege o banco real contra restore ou DROP acidental e registra a operação validada sem incluir artefatos sensíveis.
 
 ## Pré-condições
 
@@ -59,17 +55,16 @@ O diretório local de backup fica fora do webroot e deve permanecer com
 permissão 0700. O destino externo não é GitHub, GitHub Actions, bucket,
 SaaS ou caminho privado hardcoded neste repositório.
 
-O runtime Django pode usar um endpoint pooled separado, mas backup e restore
-usam `POSTGRES_DIRECT_HOST` e `POSTGRES_DIRECT_PORT`. Isso mantém `pg_dump`,
+O runtime Django, migrations, backup e restore usam o endpoint direto Frankfurt configurado em `POSTGRES_DIRECT_HOST` e `POSTGRES_DIRECT_PORT`. Isso mantém `pg_dump`,
 `pg_restore` e o `CREATE/DROP DATABASE` do restore check fora de um pool de
 transações. As credenciais continuam nas variáveis da Python App.
 
 ## Backup diário
 
-O cron definitivo previsto, ainda não ativado nesta entrega, é:
+O cron definitivo ativo é:
 
 ~~~text
-17 2 * * * /bin/bash /home/re190924/repage_backend/scripts/run_production_backup.sh daily
+20 3 * * * /bin/bash /home/re190924/repage_backend/scripts/run_production_backup.sh daily >/dev/null
 ~~~
 
 O timezone de referência do servidor é America/Sao_Paulo (UTC-03:00).
@@ -79,7 +74,7 @@ produz um archive custom do PostgreSQL 18, valida a listagem com pg_restore,
 calcula checksum SHA-256, promove o arquivo somente depois da validação e
 aplica retenção local aos pares completos.
 
-Para configurar no cPanel:
+Para verificar ou recriar a configuração no cPanel:
 
 1. abrir **Cron Jobs** da conta de produção;
 2. inserir o horário acima;
@@ -178,10 +173,7 @@ segredos em documentação versionada. O path remoto conhecido é fixo:
 /home/re190924/backups/repage/postgresql
 ~~~
 
-O procedimento semanal deve ser executado em uma estação protegida, com
-permissões locais restritas e armazenamento externo criptografado pelo
-operador. O exemplo abaixo usa apenas ferramentas padrão e não foi executado
-nesta entrega:
+A primeira cópia externa real foi validada por SCP do HomeHost para armazenamento local controlado pelo operador, com archive e sidecar copiados, checksum recalculado no destino e arquivos mantidos com permissões restritas. O bloco detalhado abaixo é o procedimento operacional recomendado e reproduzível para a recorrência semanal; sua presença não afirma que cada comando ou etapa foi executado literalmente na primeira cópia:
 
 ~~~bash
 set -Eeuo pipefail
@@ -361,8 +353,8 @@ banco ou payload JSON/Base64 do CloudLinux.
 
 ## Falhas conhecidas
 
-- cron não ativado nesta entrega;
-- não existe ainda evidência de backup diário real produzido pelo cron definitivo;
+- o cron diário é mantido separado do retry automático;
+- falha de execução deve ser investigada pelo resultado sanitizado do wrapper;
 - ausência ou divergência de checksum interrompe o fluxo;
 - falha de rede durante cópia deixa somente partials removíveis no destino;
 - falha de promoção exige investigação antes de repetir;
@@ -394,17 +386,15 @@ Já comprovado:
 - scripts 5A/5B e seus testes automatizados;
 - wrapper allowlisted de produção versionado.
 
-Ainda pendente de validação operacional real:
+Confirmado operacionalmente:
 
-- cron diário definitivo ativo;
-- backup diário real produzido pelo cron definitivo;
-- observação da retenção local de sete gerações ao longo do tempo;
-- primeira cópia externa semanal;
-- retenção externa real de quatro gerações;
-- execução do wrapper restore_check com backup real em produção;
-- evidência final de produção.
-
-Testes locais ou mocks não substituem essas evidências.
+- cron diário definitivo ativo, com backup às 03:20 e cleanup separado às 03:17;
+- backup diário real fora do webroot, com permissões restritas e checksum válido;
+- rotação local testada para até 7 pares;
+- primeira cópia externa real via SCP para armazenamento controlado pelo operador, com archive, sidecar e checksum validados;
+- retenção externa testada para até 4 pares sintéticos;
+- restore check real em database temporário, com inspeção estrutural e remoção do database temporário;
+- nenhum dump, hash, PII ou caminho externo privado foi registrado na documentação.
 
 ## Segurança e privacidade
 

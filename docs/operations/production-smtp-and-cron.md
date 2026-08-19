@@ -1,15 +1,15 @@
 # SMTP e cron de produção
 
-- **Status:** preparado no repositório; ativação dos crons e validação Django ainda pendentes
+- **Status:** validado operacionalmente em produção
 - **Ambiente:** HomeHost Python App + SMTP operacional da Repage
 - **Responsável:** Lukas Frick
-- **Última validação:** SMTP real validado externamente; fluxo cPanel Cron → `cloudlinux-selector` → Python App validado com probe temporário
-- **Frequência:** retry a cada minuto; cleanup diariamente às 03:17
+- **Última validação:** SMTP real end-to-end, persistência antes do envio e cron diário validados; isolamento de falha coberto por testes automatizados
+- **Frequência:** cleanup diariamente às 03:17; backup diário separadamente às 03:20
 
 ## Objetivo
 
 Documentar o transporte SMTP de produção e a execução segura dos dois jobs
-operacionais já existentes, sem ativá-los automaticamente nesta entrega.
+operacionais já existentes, como são executados no ambiente validado.
 
 ## Pré-condições
 
@@ -46,10 +46,7 @@ O transporte de produção usa o backend SMTP nativo do Django:
 TLS e SSL não podem estar ativos simultaneamente. A senha permanece somente
 no ambiente da Python App.
 
-O POST do formulário persiste o `Lead` e as duas `EmailDelivery` como
-pendentes antes de responder. O envio ocorre pelo job `process_email_retries`;
-as entregas do lote reutilizam uma conexão SMTP e falhas individuais permanecem
-isoladas para retry.
+O POST válido valida proteção e idempotência, persiste o `Lead` e as duas `EmailDelivery`, conclui o commit e só então tenta imediatamente os dois envios SMTP. Cada entrega atualiza seu próprio status, tentativas, timestamps e erro sanitizado. A implementação preserva o Lead quando SMTP falha e mantém a delivery recuperável; esse comportamento é coberto pelos testes automatizados aprovados. O management command `process_email_retries` permanece somente como ferramenta manual; o reenvio protegido pelo Admin reutiliza a implementação existente.
 
 ## Cron versionado
 
@@ -59,12 +56,11 @@ captura a resposta em diretório temporário restrito, usa o parser versionado
 para validar o `returncode` interno e remove os temporários mesmo diante de
 falha. Nenhum stdout/stderr bruto do selector é impresso.
 
-Os comandos finais a configurar no cPanel depois de o código estar realmente
-presente na produção são:
+Os comandos ativos e reproduzíveis no cPanel são:
 
 ```cron
-* * * * * /bin/bash /home/re190924/repage_backend/scripts/run_production_cron.sh process_email_retries
-17 3 * * * /bin/bash /home/re190924/repage_backend/scripts/run_production_cron.sh cleanup_idempotency
+17 3 * * * /bin/bash /home/re190924/repage_backend/scripts/run_production_cron.sh cleanup_idempotency >/dev/null
+20 3 * * * /bin/bash /home/re190924/repage_backend/scripts/run_production_backup.sh daily >/dev/null
 ```
 
 Os horários usam a hora local observada no servidor, `America/Sao_Paulo`,
@@ -73,9 +69,8 @@ criar um cron paralelo com lógica diferente.
 
 ## Procedimento
 
-1. Após a implantação aprovada, confirmar que os três scripts de cron e o
-   parser estão no app root.
-2. No cPanel Cron Jobs, criar as duas tarefas exatamente como acima.
+1. Confirmar que os scripts e o parser estão no app root.
+2. No cPanel Cron Jobs, manter as duas tarefas exatamente como acima.
 3. Executar cada tarefa manualmente pela interface ou aguardar sua janela.
 4. Confirmar uma linha sanitizada de sucesso no resultado do cron.
 5. Conferir o efeito operacional no Django Admin e nos logs, sem copiar dados
@@ -84,42 +79,43 @@ criar um cron paralelo com lógica diferente.
 Para uma validação manual controlada, executar os mesmos comandos, um por vez:
 
 ```bash
-/bin/bash /home/re190924/repage_backend/scripts/run_production_cron.sh process_email_retries
-/bin/bash /home/re190924/repage_backend/scripts/run_production_cron.sh cleanup_idempotency
+/bin/bash /home/re190924/repage_backend/scripts/run_production_cron.sh cleanup_idempotency >/dev/null
+/bin/bash /home/re190924/repage_backend/scripts/run_production_backup.sh daily >/dev/null
 ```
 
 Sucesso significa exit code `0` e mensagem curta de sucesso. Falha significa
 exit code diferente de zero; investigar o log sanitizado e o estado do Admin,
 sem exibir o payload do selector.
 
-## Validação futura do SMTP pelo Django
+## Validação operacional do SMTP pelo Django
 
-Essa validação ainda não deve ser executada nesta fase. Quando o código estiver
-implantado, usar somente endereços autorizados e controlados para confirmar:
+### Happy path real validado em produção
+
+Com endereços autorizados e controlados, foram confirmados:
 
 - autenticação SSL na porta 465;
-- notificação interna para `contato@repage.com.br`;
-- confirmação para um endereço de teste autorizado;
-- `Reply-To` na notificação interna;
-- persistência do `Lead` antes do envio;
-- estados `EmailDelivery` e retry após falha controlada;
+- notificação interna enviada e recebida;
+- confirmação ao visitante enviada e recebida;
+- persistência do `Lead` e das duas `EmailDelivery` antes do envio;
+- estados de sucesso das `EmailDelivery`;
 - inspeção pelo Django Admin;
 - ausência de PII e credenciais nos logs.
 
-Não usar dados reais de terceiros nem criar um job permanente de teste de
-e-mail.
+### Falha SMTP e reenvio
+
+Não foi provocada falha SMTP controlada em produção. Os testes automatizados aprovados cobrem o isolamento da falha, a preservação do Lead, a recuperação da delivery e o reenvio manual; o reenvio manual também foi validado no Admin.
+
+Não usar dados reais de terceiros nem criar um job permanente de teste de e-mail.
 
 ## Falhas conhecidas
 
-- O cron real ainda não está ativado por esta entrega.
+- O retry automático não faz parte da operação permanente; somente cleanup e backup permanecem agendados.
 - O shell SSH comum não possui o ambiente da Python App; não chamar
   `manage.py` diretamente por SSH.
 - Um erro do comando Django deve aparecer como falha do `cloudlinux-selector`
   ou do `returncode` interno, sem depender apenas do exit code externo.
-- Falha SMTP não remove o Lead; a entrega permanece registrada para retry ou
-  ação administrativa.
-- A validação Django end-to-end e o recebimento real após implantação ainda
-  estão pendentes.
+- Falha SMTP não remove o Lead; a entrega permanece registrada para reenvio manual ou operação manual segura.
+- A validação Django end-to-end e o recebimento real foram confirmados.
 
 ## Recuperação
 
@@ -142,11 +138,16 @@ Já comprovado:
 - cron temporário cPanel → `cloudlinux-selector` → Python App;
 - timezone do servidor em UTC-03:00.
 
-Ainda pendente:
+Confirmado operacionalmente:
 
-- ativação dos dois crons finais após implantação;
-- envio controlado pelo Django;
-- confirmação de retry e inspeção pós-envio em produção.
+- cleanup às 03:17 e backup às 03:20, em tarefas separadas;
+- happy path real com envio imediato após commit e estado de cada `EmailDelivery`;
+- notificação interna e confirmação ao visitante enviadas e recebidas;
+- inspeção das deliveries no Admin;
+- reenvio manual protegido validado no Admin;
+- nenhum cron permanente de `process_email_retries`.
+
+O isolamento de falha SMTP sem rollback do Lead é coberto pelos testes automatizados aprovados; não foi executada falha SMTP controlada em produção.
 
 ## Segurança e privacidade
 

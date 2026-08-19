@@ -1,9 +1,9 @@
 # Deploy de produção
 
-- **Status:** draft — um deploy completo anterior e seu smoke foram comprovados; a implementação resiliente desta branch ainda não foi validada em produção
+- **Status:** validado operacionalmente em produção
 - **Ambiente:** produção HomeHost + Neon
 - **Responsável:** Lukas Frick
-- **Última validação:** deploy completo `4b94c1ff3a069206777a07d6c183feb0cc56e56d` e smoke comprovados; a implementação nova permanece pendente de validação real
+- **Última validação:** deploy a partir de `main`, execução seletiva/resiliente, health/readiness e smoke aprovados
 - **Frequência:** a cada deploy aprovado pela `main`
 
 ## Objetivo
@@ -48,9 +48,7 @@ Secret do Environment `production`:
 Segredos Django, Neon, SMTP e static root permanecem exclusivamente no Setup
 Python App e não são lidos pelo workflow.
 
-No Setup Python App, `POSTGRES_HOST`/`POSTGRES_PORT` identificam o endpoint
-pooled do runtime. `POSTGRES_DIRECT_HOST`/`POSTGRES_DIRECT_PORT` identificam o
-endpoint direto, usado somente por operações administrativas. Os valores não
+O runtime Django usa o endpoint direto Frankfurt configurado em `POSTGRES_DIRECT_HOST`/`POSTGRES_DIRECT_PORT`; o mesmo endpoint é usado por migrations, backup e restore. Os valores não
 devem ser copiados para este documento. O `production_manage.py` seleciona
 explicitamente a conexão administrativa antes de executar migrations.
 
@@ -92,7 +90,9 @@ segredos no shell SSH.
    `origin/main`.
 4. O mesmo SHA é usado para checkout, build e empacotamento.
 5. O frontend é construído com `VITE_SITE_INDEXING_ENABLED=false` e os
-   arquivos prerenderizados obrigatórios são verificados.
+   arquivos prerenderizados obrigatórios são verificados. Assets Vite usam nomes
+   com hash; HTML e recursos públicos estáveis têm revalidação normal, enquanto
+   `/assets/` recebe cache imutável.
 6. O backend é empacotado sem `.env`, `.venv`, `requirements-dev.txt`, testes, caches, logs,
    `docker-compose.yml` ou arquivos locais.
 7. A private key é escrita somente em arquivo temporário com permissão restrita.
@@ -171,18 +171,9 @@ mesmo SHA.
   `returncode` interno diferente de zero encerra o deploy antes do restart.
 - O shell SSH comum não possui as Environment Variables da Python App; não
   executar `manage.py` diretamente para operações de produção.
-- A regra manual atual de Force HTTPS/hostname pode causar redirect duplicado
-  até ser reconciliada com o `.htaccess` versionado.
 - A presença do arquivo de rollback não constitui backup PostgreSQL.
-- A implementação resiliente/seletiva desta branch ainda não possui validação
-  real em produção.
 
-Antes do merge que ativa o trigger direto de deploy, `main` deve estar protegida
-com pull request obrigatório, o status `CI Gate` como required check, exigência
-de branch atualizada/strict checks, force push e delete bloqueados e, quando
-disponível, bypass administrativo impedido. A V1 solo não exige aprovação de
-terceiro apenas para satisfazer o processo. Essa configuração será feita pelo
-operador antes do merge; este repositório não a configura via API.
+A proteção de `main`, o CI Gate e o fluxo de deploy a partir de `main` foram usados na validação real. A configuração de plataforma continua sendo responsabilidade do operador e não é alterada por este runbook.
 
 ## Rollback inicial
 
@@ -231,11 +222,8 @@ check desse runbook não restaura a base ativa.
 
 Já comprovado anteriormente:
 
-- deploy completo do SHA `4b94c1ff3a069206777a07d6c183feb0cc56e56d` com smoke
-  pós-deploy aprovado;
-- a tentativa do SHA `c053b2378c51d97b98e639f43ede2ad9bd600c9c` chegou à
-  publicação parcial do frontend e falhou com `Broken pipe` antes de
-  requirements, CloudLinux, Passenger e promoção final;
+- deploy completo anterior com smoke pós-deploy aprovado;
+- uma tentativa parcial anterior falhou antes da promoção final e foi tratada pelo fluxo de recuperação;
 
 - autenticação SSH/SFTP por chave;
 - host key ED25519 validada e pinada;
@@ -244,12 +232,7 @@ Já comprovado anteriormente:
 - `cloudlinux-selector run-script` recebendo o ambiente real da Python App;
 - CI da Fase 2 aprovado no GitHub.
 
-Ainda pendente:
-
-- validação real da implementação seletiva/resiliente desta branch;
-- rollback automatizado comprovado;
-- reconciliação final do redirect manual do cPanel com o `.htaccess`.
-- validação HTTP end-to-end da nova implementação resiliente desta branch.
+A validação operacional confirmou deploy a partir de `main`, publicação de frontend/backend, execução de management, restart, health/readiness e smoke. Rollback destrutivo ou restauração de banco não são inferidos a partir dessa validação; seguem os procedimentos específicos deste documento e do runbook de backup.
 
 ## Segurança e privacidade
 

@@ -64,7 +64,7 @@ Não criar arquivos vazios antecipadamente.
 
 | Procedimento | Ambiente | Última validação |
 |---|---|---|
-| [`production-deploy.md`](production-deploy.md) | HomeHost + Neon | Componentes operacionais validados; deploy end-to-end pendente |
-| [`production-smtp-and-cron.md`](production-smtp-and-cron.md) | HomeHost Python App + SMTP | SMTP e mecanismo de cron validados; ativação final pendente |
-| [`production-observability.md`](production-observability.md) | HomeHost + GitHub Actions | Componentes versionados; evidência de produção pendente |
-| [`production-backup-and-restore.md`](production-backup-and-restore.md) | HomeHost + Neon + armazenamento externo do operador | Mecanismo versionado; validação operacional final pendente |
+| [`production-deploy.md`](production-deploy.md) | HomeHost + Neon | Deploy seletivo/resiliente, smoke e produção validados; rollback manual documentado |
+| [`production-smtp-and-cron.md`](production-smtp-and-cron.md) | HomeHost Python App + SMTP | SMTP imediato, cron diário e reenvio manual validados |
+| [`production-observability.md`](production-observability.md) | HomeHost + GitHub Actions | Logs, health e uptime homepage + health validados em produção |
+| [`production-backup-and-restore.md`](production-backup-and-restore.md) | HomeHost + Neon + armazenamento externo do operador | Backup, cópia externa e restore check validados operacionalmente |

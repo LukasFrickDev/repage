@@ -24,7 +24,7 @@ A V1 deve servir como referência comercial da marca, apoiar prospecção e cond
 * A entrega 6 está concluída: o Django Admin existente recebeu a experiência administrativa Repage, com Leads como superfície operacional principal.
 * A entrega 7 está concluída: e-mails, idempotência, proteção, retries e recuperação administrativa foram implementados, validados e documentados.
 * A entrega 8 está concluída: consentimento, Analytics condicionado e páginas legais foram implementados e validados.
-* A entrega 9 está concluída: SEO, metadata, sitemap, robots, JSON-LD, prerender build-time, hydration e QA foram validados; a entrega 10 — CI/CD, deploy, backups e observabilidade — está aprovada e em execução.
+* A entrega 9 está concluída: SEO, metadata, sitemap, robots, JSON-LD, prerender build-time, hydration e QA foram validados; a entrega 10 — CI/CD, deploy, backups e observabilidade — está concluída operacionalmente, com a Entrega 11 como próxima e ainda não iniciada.
 
 ## Princípios de execução
 
@@ -200,10 +200,10 @@ A V1 deve servir como referência comercial da marca, apoiar prospecção e cond
 
 ## Entrega 10 — CI/CD, deploy, backups e observabilidade
 
-**Status:** aprovada; em execução.
+**Status:** concluída.
 
-**Objetivo:** criar processo reproduzível e verificável de entrega e operação.
-**Resultado esperado:** pull requests são validados, deploys são controlados e produção possui health, logs, backups externos e recuperação documentada.
+**Objetivo:** manter processo reproduzível e verificável de entrega e operação.
+**Resultado entregue:** pull requests são validados, deploys são controlados e produção possui health, logs, backups externos e recuperação documentada.
 **Escopo principal:**
 
 * Validar hospedagem, recursos, ambientes e segredos.
@@ -213,9 +213,11 @@ A V1 deve servir como referência comercial da marca, apoiar prospecção e cond
   **Dependências:** Entregas 5 a 9, hospedagem e provedores confirmados, acessos, retenções e GitHub Environments.
   **Validações:** CI, deploy, health, readiness, HTTPS, headers, logs, backup, restauração, rollback e ausência de segredos.
   **Critério de conclusão:** frontend e backend podem ser implantados, verificados e recuperados por procedimentos com evidência.
-  **Spec:** spec de infraestrutura ao iniciar; runbooks obrigatórios conforme o ambiente real.
+  **Spec:** [`0010-ci-cd-deploy-backups-observability.md`](specs/0010-ci-cd-deploy-backups-observability.md) — `implemented`; runbooks reconciliados com o ambiente real.
 
 ## Entrega 11 — QA final e lançamento
+
+**Status:** não iniciada.
 
 **Objetivo:** validar a V1 completa e liberar divulgação somente após evidências suficientes.
 **Resultado esperado:** Repage publicada no domínio definitivo, com conteúdo real, conversão funcional e riscos críticos resolvidos.
@@ -235,10 +237,10 @@ A V1 deve servir como referência comercial da marca, apoiar prospecção e cond
 * Conteúdo incompleto pode bloquear homepage, portfólio e lançamento.
 * Projetos pagos dependem de autorização aplicável.
 * Mídia pesada pode comprometer desempenho e responsividade.
-* HomeHost, Python, SSH/SFTP, Passenger, API HTTPS, SMTP, cron de teste, logs e diretório local de backup já possuem validações operacionais; a automação e os runbooks ainda precisam ser implementados.
+* HomeHost, Python, SSH/SFTP, Passenger, API HTTPS, SMTP, cron, logs, backup local, cópia externa e restore possuem validação operacional; a manutenção desses procedimentos permanece pós-Entrega 10.
 * PostgreSQL permanece a engine estrutural; a produção usa Neon porque o PostgreSQL 13.23 nativo da HomeHost é incompatível com Django 5.2.
 * SMTP depende de autenticação, TLS, SPF, DKIM, DMARC e entregabilidade.
-* Retenção de leads e backups deve ser definida antes de produção.
+* A política de backups já está definida e operacional: até 7 pares diários locais e até 4 pares semanais externos; eventual decisão ou revisão sobre retenção de Leads permanece separada.
 * Políticas exigem revisão jurídica antes da publicação.
 * O prerender build-time está decidido e validado; a Entrega 10 trata apenas da publicação e operação do artefato.
 * Domínio, DNS, SSL e Analytics dependem de acessos reais.

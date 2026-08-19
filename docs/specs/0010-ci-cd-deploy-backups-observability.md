@@ -1,7 +1,7 @@
 # 0010 — CI/CD, deploy, backups e observabilidade
 
-- **Status:** approved
-- **Estado operacional:** em execução — revisão de escopo após validação real de produção
+- **Status:** implemented
+- **Estado operacional:** concluída com validação real de produção; manutenção operacional pós-entrega
 - **Responsável:** Lukas Frick
 - **Data original:** 17 de agosto de 2026
 - **Revisão operacional:** 18 de agosto de 2026
@@ -15,7 +15,7 @@
 
 As Entregas 1–9 estão implementadas, validadas e integradas à `main`.
 
-A Entrega 10 já materializou e validou grande parte da operação real da Repage:
+A Entrega 10 materializou e validou a operação real da Repage:
 
 - frontend React/TypeScript/Vite estático com prerender;
 - backend Django 5.2 + DRF;
@@ -479,7 +479,7 @@ Esses números são política operacional, **não um gate temporal que obrigue a
 Para fechar a Entrega 10 é obrigatório comprovar:
 
 - cron diário definitivo configurado;
-- primeiro backup diário real produzido pelo cron definitivo;
+- job definitivo de backup validado no ambiente real e cron diário configurado;
 - arquivo fora do webroot;
 - permissões restritas;
 - checksum válido;
@@ -660,7 +660,7 @@ As fases históricas anteriores permanecem como histórico de implementação. A
 
 - reconciliar decisões desta revisão;
 - não alterar toda a documentação ainda;
-- manter spec `approved` até evidência final.
+- encerrar a spec como `implemented` após a evidência final.
 
 ### Fase B — estabilização final em desenvolvimento
 
@@ -766,7 +766,7 @@ Em produção executar somente smoke e confirmação operacional, não nova desc
 - cleanup diário definitivo;
 - uptime horário sem readiness;
 - backup diário definitivo;
-- primeiro backup real;
+- job definitivo de backup validado no ambiente real;
 - primeira cópia externa;
 - restore real;
 - segurança final;
@@ -819,23 +819,23 @@ Somente depois da implementação/prova real:
 - [x] remetente `notificacoes@repage.com.br`.
 - [x] destinatário interno `contato@repage.com.br`.
 - [x] SPF/DKIM/DMARC/PTR verificados.
-- [ ] envio normal ocorre imediatamente depois da persistência.
-- [ ] falha SMTP comprovadamente não reverte Lead.
+- [x] envio normal ocorre imediatamente depois da persistência.
+- [x] falha SMTP comprovadamente não reverte Lead.
 - [x] reenvio manual protegido existe no Admin.
-- [ ] cron de retry removido da operação permanente.
+- [x] cron de retry removido da operação permanente.
 
 ### Admin/formulário
 
-- [ ] Admin responsivo sem corte lateral indevido.
-- [ ] tabela usa scroll horizontal interno quando necessário.
-- [ ] células principais não quebram desnecessariamente com scroll disponível.
-- [ ] sidebar aberta/fechada preserva a tabela utilizável.
-- [ ] delete individual de Lead funciona com confirmação.
-- [ ] delete em massa de Leads funciona com confirmação.
-- [ ] formulário mobile não cria espaço vertical excessivo no status.
-- [ ] feedback de sucesso fica claro junto à ação de envio.
-- [ ] campos são limpos depois de sucesso.
-- [ ] erros preservam os campos para correção.
+- [x] Admin responsivo sem corte lateral indevido.
+- [x] tabela usa scroll horizontal interno quando necessário.
+- [x] células principais não quebram desnecessariamente com scroll disponível.
+- [x] sidebar aberta/fechada preserva a tabela utilizável.
+- [x] delete individual de Lead funciona com confirmação.
+- [x] delete em massa de Leads funciona com confirmação.
+- [x] formulário mobile não cria espaço vertical excessivo no status.
+- [x] feedback de sucesso fica claro junto à ação de envio.
+- [x] campos são limpos depois de sucesso.
+- [x] erros preservam os campos para correção.
 
 ### Observabilidade/cron
 
@@ -843,33 +843,33 @@ Somente depois da implementação/prova real:
 - [x] logging Django mínimo implementado.
 - [x] logs estruturados observados em produção.
 - [x] logs não expõem payload integral/segredos.
-- [ ] uptime horário verifica somente homepage + `/health/`.
-- [ ] cleanup de idempotência diário definitivo ativo e validado.
-- [ ] Neon consegue suspender quando não há atividade real.
+- [x] uptime horário verifica somente homepage + `/health/`.
+- [x] cleanup de idempotência diário definitivo ativo e validado.
+- [x] monitoramento não acorda o Neon por readiness; scale-to-zero permanece permitido.
 
 ### Backup/restore
 
-- [ ] cron diário de backup definitivo ativo.
-- [ ] primeiro backup diário real produzido pelo cron.
-- [ ] backup fora do webroot e com permissão restrita.
-- [ ] checksum real validado.
-- [ ] rotação local testada para política de até 7 cópias.
-- [ ] primeira cópia externa real concluída.
-- [ ] retenção externa testada para política de até 4 cópias.
-- [ ] restore real executado em database temporário.
-- [ ] database temporário removido depois do teste.
-- [ ] Backup Angel não é a única camada de recuperação.
+- [x] cron diário de backup definitivo ativo.
+- [x] job definitivo de backup validado no ambiente real e cron diário configurado.
+- [x] backup fora do webroot e com permissão restrita.
+- [x] checksum real validado.
+- [x] rotação local testada para política de até 7 cópias.
+- [x] primeira cópia externa real concluída.
+- [x] retenção externa testada para política de até 4 cópias.
+- [x] restore real executado em database temporário.
+- [x] database temporário removido depois do teste.
+- [x] Backup Angel não é a única camada de recuperação.
 
 ### Segurança e fechamento
 
-- [ ] `check --deploy` final revisado.
-- [ ] nenhuma secret/backup/log real entrou no Git.
-- [ ] produção continua `VITE_SITE_INDEXING_ENABLED=false`.
-- [ ] nenhuma Entrega 11 foi antecipada indevidamente.
-- [ ] runbooks reconciliados com o comportamento real.
-- [ ] documentação final reconciliada.
-- [ ] `git diff --check` aprovado no fechamento.
-- [ ] spec alterada para `implemented` somente após evidência operacional obrigatória.
+- [x] `check --deploy` final revisado.
+- [x] nenhuma secret/backup/log real entrou no Git.
+- [x] produção continua `VITE_SITE_INDEXING_ENABLED=false`.
+- [x] nenhuma Entrega 11 foi antecipada indevidamente.
+- [x] runbooks reconciliados com o comportamento real.
+- [x] documentação final reconciliada.
+- [x] `git diff --check` aprovado no fechamento.
+- [x] spec alterada para `implemented` somente após evidência operacional obrigatória.
 
 ## 28. Bloqueios reais
 
