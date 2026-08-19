@@ -154,6 +154,19 @@ STATIC_ROOT = (
     if ENVIRONMENT == 'production'
     else Path(os.getenv('DJANGO_STATIC_ROOT', BASE_DIR / 'staticfiles'))
 )
+STORAGES = {
+    'default': {
+        'BACKEND': 'django.core.files.storage.FileSystemStorage',
+    },
+    'staticfiles': {
+        'BACKEND': (
+            'django.contrib.staticfiles.storage.ManifestStaticFilesStorage'
+            if ENVIRONMENT == 'production'
+            else 'django.contrib.staticfiles.storage.StaticFilesStorage'
+        ),
+    },
+}
+
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 if ENVIRONMENT == 'production':

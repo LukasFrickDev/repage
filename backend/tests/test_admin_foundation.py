@@ -33,6 +33,7 @@ def test_admin_login_uses_repage_templates():
     assert 'Entrar na administração' in content
     assert 'repage-admin/brand/logo.svg' in content
     assert content.count('repage-admin/admin.css') == 1
+    assert '?v=' not in content
     assert content.index('admin/css/login.css') < content.index('repage-admin/admin.css')
     assert content.index('admin/css/responsive.css') < content.index('repage-admin/admin.css')
     assert content.index('repage-admin/theme.js') < content.index('admin/css/dark_mode.css')
