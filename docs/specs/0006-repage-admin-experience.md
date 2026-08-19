@@ -490,6 +490,10 @@ Não duplicar lógica de normalização em template ou JavaScript.
 
 É a experiência administrativa principal. Usar bem a largura disponível, manter densidade adequada e deixar tabela, filtros e ações facilmente alcançáveis.
 
+O contrato vigente considera `>=768px` desktop/notebook: a navegação lateral permanece na
+composição nativa docked/sticky do Django Admin e o conteúdo se adapta ao espaço restante.
+Drawer fixed sobre o conteúdo não é usado nessa faixa.
+
 ### Tablet
 
 Deve permanecer operacional para buscar, filtrar, abrir Lead, editar campos permitidos, salvar e criar Lead manual quando necessário.
@@ -497,6 +501,16 @@ Deve permanecer operacional para buscar, filtrar, abrir Lead, editar campos perm
 ### Mobile
 
 Deve permitir consultas e operações razoáveis. Não é necessário transformar o Admin em experiência mobile-first.
+
+Em `<768px`, a navegação lateral vira um drawer fixed sobreposto, com largura `min(85vw,
+20rem)`, altura da viewport e scroll próprio. Com a navegação fechada, o conteúdo ocupa
+100% da largura; aberta, a página não é comprimida. O drawer deixa de existir ao voltar
+para `>=768px`.
+
+O header mantém altura automática conforme o wrap das ações; os breadcrumbs seguem em
+bloco próprio, depois do header, em todas as superfícies do Admin. Com o drawer fechado,
+seu toggle permanece acessível no gutter lateral sem criar uma faixa de conteúdo ou cobrir
+campos e tabelas.
 
 Obrigatório:
 

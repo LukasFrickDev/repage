@@ -355,8 +355,81 @@ def test_api_creates_lead_and_returns_safe_response():
     assert lead.acquisition_source == ''
     assert Lead.objects.count() == 1
     assert EmailDelivery.objects.filter(lead=lead).count() == 2
-    assert set(EmailDelivery.objects.values_list('status', flat=True)) == {EmailDelivery.Status.PENDING}
-    assert mail.outbox == []
+    assert set(EmailDelivery.objects.values_list('status', flat=True)) == {EmailDelivery.Status.SENT}
+    assert len(mail.outbox) == 2
+
+
+@pytest.mark.django_db(transaction=True)
+def test_api_processes_deliveries_after_persistence_commit():
+    observed = []
+
+    def record_delivery(delivery_id):
+        observed.append((
+            connections["default"].in_atomic_block,
+            Lead.objects.exists(),
+            EmailDelivery.objects.filter(pk=delivery_id).exists(),
+        ))
+
+    with patch("apps.leads.views.process_delivery", side_effect=record_delivery) as process:
+        response = APIClient().post(
+            "/api/v1/leads/", payload(), format="json",
+            **api_headers("00000000-0000-4000-8000-000000000101"),
+        )
+
+    assert response.status_code == 201
+    assert process.call_count == 2
+    assert len(observed) == 2
+    assert all(not in_atomic and lead_exists and delivery_exists for in_atomic, lead_exists, delivery_exists in observed)
+    assert Lead.objects.count() == 1
+    assert EmailDelivery.objects.count() == 2
+
+
+@pytest.mark.django_db
+@override_settings(
+    EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
+    EMAIL_FROM_ADDRESS="from@example.com",
+    EMAIL_INTERNAL_RECIPIENT="internal@example.com",
+)
+def test_api_keeps_persistence_success_when_immediate_smtp_fails():
+    with patch("django.core.mail.EmailMessage.send", side_effect=TimeoutError("smtp secret")):
+        response = APIClient().post(
+            "/api/v1/leads/", payload(), format="json",
+            **api_headers("00000000-0000-4000-8000-000000000102"),
+        )
+
+    assert response.status_code == 201
+    assert "smtp secret" not in response.content.decode()
+    assert Lead.objects.count() == 1
+    deliveries = list(EmailDelivery.objects.all())
+    assert len(deliveries) == 2
+    assert all(delivery.status == EmailDelivery.Status.FAILED for delivery in deliveries)
+    assert all(delivery.attempts == 1 for delivery in deliveries)
+    assert all(delivery.last_error_code == "timeout" for delivery in deliveries)
+    assert all(delivery.next_attempt_at is not None for delivery in deliveries)
+
+
+@pytest.mark.django_db
+@override_settings(
+    EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
+    EMAIL_FROM_ADDRESS="from@example.com",
+    EMAIL_INTERNAL_RECIPIENT="internal@example.com",
+)
+def test_api_processes_multiple_deliveries_independently():
+    with patch("django.core.mail.EmailMessage.send", side_effect=[TimeoutError("smtp secret"), 1]):
+        response = APIClient().post(
+            "/api/v1/leads/", payload(), format="json",
+            **api_headers("00000000-0000-4000-8000-000000000103"),
+        )
+
+    assert response.status_code == 201
+    assert Lead.objects.count() == 1
+    internal = EmailDelivery.objects.get(kind=EmailDelivery.Kind.INTERNAL_NOTIFICATION)
+    visitor = EmailDelivery.objects.get(kind=EmailDelivery.Kind.VISITOR_CONFIRMATION)
+    assert internal.status == EmailDelivery.Status.FAILED
+    assert internal.attempts == 1
+    assert internal.last_error_code == "timeout"
+    assert visitor.status == EmailDelivery.Status.SENT
+    assert visitor.attempts == 1
 
 
 def test_api_requires_a_valid_idempotency_key():
@@ -790,7 +863,7 @@ def test_admin_registers_lead_with_search_filters_and_archive_action():
         'business_name',
         'acquisition_source',
     )
-    assert model_admin.has_delete_permission(None) is False
+    assert 'has_delete_permission' not in LeadAdmin.__dict__
     serializer = LeadSerializer(data=payload())
     assert serializer.is_valid(), serializer.errors
     lead = serializer.save()
@@ -821,6 +894,83 @@ def test_admin_registers_lead_with_search_filters_and_archive_action():
     )
     assert model_admin.form is LeadAdminForm
     assert model_admin.whatsapp_display(lead) == '(11) 99999-9999'
+
+
+@pytest.mark.django_db
+def test_admin_lead_delete_individual_uses_native_confirmation_and_cascade():
+    lead = email_lead()
+    EmailDelivery.objects.create(lead=lead, kind=EmailDelivery.Kind.INTERNAL_NOTIFICATION)
+    IdempotencyRecord.objects.create(
+        key=uuid.uuid4(),
+        fingerprint='a' * 64,
+        lead=lead,
+        response_status=201,
+        response_payload={'status': 'received'},
+        expires_at=timezone.now() + timedelta(hours=1),
+    )
+    client = Client()
+    client.force_login(admin_resend_user())
+    delete_url = reverse('admin:leads_lead_delete', args=[lead.pk])
+
+    confirmation = client.get(delete_url)
+    assert confirmation.status_code == 200
+    confirmation_content = confirmation.content.decode()
+    assert 'name="post" value="yes"' in confirmation_content
+    assert 'Tem certeza de que deseja remover este Lead?' in confirmation_content
+    assert 'delete-confirm-button' in confirmation_content
+    assert 'secondary-button' in confirmation_content
+
+    response = client.post(delete_url, {'post': 'yes'})
+    assert response.status_code == 302
+    assert not Lead.objects.filter(pk=lead.pk).exists()
+    assert not EmailDelivery.objects.filter(lead_id=lead.pk).exists()
+    assert not IdempotencyRecord.objects.filter(lead_id=lead.pk).exists()
+
+
+@pytest.mark.django_db
+def test_admin_lead_delete_selected_uses_native_confirmation_and_cascade():
+    leads = [email_lead(), email_lead()]
+    for lead in leads:
+        EmailDelivery.objects.create(lead=lead, kind=EmailDelivery.Kind.INTERNAL_NOTIFICATION)
+
+    client = Client()
+    client.force_login(admin_resend_user())
+    changelist_url = reverse('admin:leads_lead_changelist')
+    selected = [str(lead.pk) for lead in leads]
+    action_data = {
+        'action': 'delete_selected',
+        'index': '0',
+        '_selected_action': selected,
+    }
+
+    confirmation = client.post(changelist_url, action_data)
+    assert confirmation.status_code == 200
+    confirmation_content = confirmation.content.decode()
+    assert 'name="post" value="yes"' in confirmation_content
+    assert 'Tem certeza de que deseja remover os Leads selecionados?' in confirmation_content
+    assert 'delete-confirm-button' in confirmation_content
+    assert 'secondary-button' in confirmation_content
+
+    response = client.post(changelist_url, {**action_data, 'post': 'yes'})
+    assert response.status_code == 302
+    assert not Lead.objects.filter(pk__in=[lead.pk for lead in leads]).exists()
+    assert not EmailDelivery.objects.filter(lead_id__in=[lead.pk for lead in leads]).exists()
+
+
+@pytest.mark.django_db
+def test_admin_lead_changelist_exposes_explicit_delete_selected_action():
+    email_lead()
+    client = Client()
+    client.force_login(admin_resend_user())
+
+    response = client.get(reverse('admin:leads_lead_changelist'))
+
+    assert response.status_code == 200
+    content = response.content.decode()
+    assert 'Excluir selecionados' in content
+    assert 'data-delete-selected' in content
+    assert 'name="index" value="0"' in content
+    assert 'repage-admin/actions.js' in content
 
 
 def test_admin_lead_fieldsets_preserve_operational_and_historical_boundaries():
@@ -939,6 +1089,12 @@ def test_admin_edits_operational_fields_in_place_with_shared_normalization():
 def test_email_delivery_is_registered_but_idempotency_record_is_not():
     assert isinstance(admin.site._registry[EmailDelivery], EmailDeliveryAdmin)
     assert IdempotencyRecord not in admin.site._registry
+
+
+def test_email_delivery_has_a_human_safe_representation():
+    delivery = EmailDelivery(kind=EmailDelivery.Kind.VISITOR_CONFIRMATION)
+
+    assert str(delivery) == 'Confirmação ao visitante'
 
 
 def test_email_delivery_admin_is_readonly_and_lead_inline_is_readonly():

@@ -79,6 +79,9 @@ class EmailDelivery(models.Model):
             models.Index(fields=('status', 'next_attempt_at'), name='email_delivery_due_idx'),
         ]
 
+    def __str__(self) -> str:
+        return self.get_kind_display()
+
 
 class IdempotencyRecord(models.Model):
     key = models.UUIDField(unique=True)

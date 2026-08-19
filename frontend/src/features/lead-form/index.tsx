@@ -370,7 +370,7 @@ export function LeadForm({ onInteractionStart }: LeadFormProps) {
           {generalError && <S.Status role="alert" aria-live="assertive">{generalError}</S.Status>}
           {succeeded && !generalError && (
             <S.Status $success role="status" aria-live="polite">
-              Solicitação recebida. Obrigado por entrar em contato com a Repage. Você deve receber uma confirmação por e-mail nos próximos minutos. Se não encontrar, confira também a pasta de Spam ou Lixo eletrônico.
+              <strong>Solicitação recebida.</strong> Obrigado por entrar em contato com a Repage. Você deve receber uma confirmação por e-mail nos próximos minutos. Se não encontrar, confira também a pasta de <strong>Spam</strong> ou <strong>Lixo eletrônico</strong>.
             </S.Status>
           )}
         </S.Actions>

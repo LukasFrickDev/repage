@@ -6,15 +6,14 @@
 {% block extrastyle %}
   {{ block.super }}
   <link rel="stylesheet" href="{% static 'admin/css/login.css' %}">
-  <link rel="stylesheet" href="{% static 'repage-admin/admin.css' %}?v=system-font-20260815">
   {{ form.media }}
   <script src="{% static 'repage-admin/login.js' %}" defer></script>
 {% endblock %}
 
-{% block repage_admin_styles %}{% endblock %}
-
 {% block bodyclass %}{{ block.super }} login{% endblock %}
-{% block usertools %}{% include "admin/color_theme_toggle.html" %}{% endblock %}
+{% block usertools %}
+  <div class="repage-login-tools">{% include "admin/color_theme_toggle.html" %}</div>
+{% endblock %}
 {% block nav-global %}{% endblock %}
 {% block nav-sidebar %}{% endblock %}
 {% block content_title %}{% endblock %}

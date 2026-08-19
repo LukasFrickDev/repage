@@ -42,7 +42,9 @@ html[data-theme="light"] {
   --default-button-hover-bg: var(--repage-ink);
   --close-button-bg: var(--repage-muted);
   --delete-button-bg: var(--repage-ink);
+  --delete-button-hover-bg: var(--repage-violet);
   --object-tools-bg: var(--repage-ink);
+  --object-tools-fg: var(--repage-paper);
   --object-tools-hover-bg: var(--repage-violet);
   color-scheme: light;
 }
@@ -90,7 +92,9 @@ html[data-theme="dark"] {
   --default-button-hover-bg: var(--repage-violet);
   --close-button-bg: var(--repage-ink);
   --delete-button-bg: var(--repage-ink);
+  --delete-button-hover-bg: var(--repage-violet);
   --object-tools-bg: var(--repage-graphite);
+  --object-tools-fg: var(--repage-paper);
   --object-tools-hover-bg: var(--repage-violet);
   color-scheme: dark;
 }
@@ -167,6 +171,7 @@ input[type="submit"],
   align-items: center;
   box-sizing: border-box;
   display: inline-flex;
+  height: 40px;
   justify-content: center;
   line-height: 1.2;
   min-height: 40px;
@@ -190,8 +195,16 @@ input[type="submit"],
 
 #header {
   background: var(--repage-ink);
+  height: auto;
   min-height: 78px;
+  overflow: visible;
   padding: 0 36px;
+}
+
+#header + nav {
+  clear: both;
+  display: block;
+  position: static;
 }
 
 #branding {
@@ -233,6 +246,10 @@ input[type="submit"],
   line-height: 1.5;
 }
 
+.repage-user-actions {
+  display: contents;
+}
+
 #user-tools a,
 #user-tools button {
   text-decoration-thickness: 2px;
@@ -257,7 +274,6 @@ div.breadcrumbs a {
 #nav-sidebar {
   border-right-color: var(--hairline-color);
   padding-top: 18px;
-  width: 280px;
 }
 
 #nav-sidebar .module caption,
@@ -421,6 +437,7 @@ div.breadcrumbs a {
 #changelist table tbody th {
   font-size: 14px;
   padding: 15px 12px;
+  vertical-align: middle;
 }
 
 #changelist table tbody th a {
@@ -484,14 +501,6 @@ fieldset.repage-fieldset .fieldset-heading {
 
 fieldset.repage-fieldset .form-row {
   background: transparent;
-}
-
-.submit-row {
-  background: transparent;
-  border: 0;
-  border-top: 1px solid var(--hairline-color);
-  padding-left: 0;
-  padding-right: 0;
 }
 
 .aligned .form-row .readonly {
@@ -566,8 +575,32 @@ body.login {
 }
 
 .login #header {
+  align-items: center;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   min-height: 78px;
   padding: 0 36px;
+}
+
+.login #branding {
+  grid-column: 2;
+  grid-row: 1;
+  justify-self: center;
+  min-width: 0;
+}
+
+.login .repage-login-tools {
+  align-items: center;
+  display: flex;
+  grid-column: 3;
+  grid-row: 1;
+  justify-self: end;
+  margin: 0;
+  min-width: 38px;
+}
+
+.login .repage-login-tools .repage-theme-toggle {
+  margin: 0;
 }
 
 .login #content {
@@ -649,8 +682,17 @@ body.login {
   text-align: center;
 }
 
-/* Fase 3: manter a superfície nativa legível em telas menores. */
-#container {
+/* Responsive contract: the rules below are the single source of layout truth. */
+#container,
+#main,
+.main > .content,
+#content,
+#content-main,
+#changelist,
+#changelist .changelist-form-container,
+#changelist-form,
+#content-main > form,
+#content-main > form > div {
   min-width: 0;
 }
 
@@ -659,27 +701,16 @@ body.login {
   width: 100%;
 }
 
-#content-main {
-  min-width: 0;
-}
-
 body {
   overflow-x: clip;
 }
 
-#changelist {
-  min-width: 0;
-  overflow: hidden;
-}
-
-#changelist .changelist-form-container {
-  min-width: 0;
-}
-
 #changelist-form .results {
-  contain: paint;
+  border-bottom: 1px solid var(--hairline-color);
+  border-top: 1px solid var(--hairline-color);
   max-width: 100%;
   overflow-x: auto;
+  overflow-y: visible;
   overscroll-behavior-inline: contain;
 }
 
@@ -690,34 +721,165 @@ body {
 #changelist .paginator {
   border-bottom-color: var(--hairline-color);
   border-top-color: var(--hairline-color);
+  padding: 12px;
 }
 
-#changelist-search input[type="text"] {
-  min-height: 40px;
-}
-
+#changelist-search input[type="text"],
 #changelist-search input[type="submit"],
 #changelist .actions .button,
 .object-tools a,
 .submit-row input,
 .submit-row a {
+  box-sizing: border-box;
   min-height: 40px;
 }
 
-#changelist-filter {
-  min-width: 180px;
+#changelist .actions {
+  align-items: center;
+  background: var(--repage-surface);
+  border-bottom: 1px solid var(--hairline-color);
+  border-top: 1px solid var(--hairline-color);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 12px;
 }
 
-#changelist-filter a,
-#changelist-filter label,
-#changelist-filter input,
-#changelist-filter select {
-  line-height: 1.4;
+#changelist .actions > label {
+  align-items: center;
+  display: flex;
+  flex: 1 1 18rem;
+  gap: 8px;
+  min-width: 0;
+  margin: 0;
+}
+
+#changelist .actions > label select {
+  flex: 1 1 auto;
+  min-width: 0;
+  width: auto;
+}
+
+#changelist .actions .button {
+  margin: 0;
+}
+
+#changelist .actions .delete-selected-action,
+body.delete-confirmation #content-main > form input[type="submit"],
+.submit-row a.deletelink {
+  background: var(--delete-button-bg);
+}
+
+#changelist .actions .delete-selected-action:hover,
+#changelist .actions .delete-selected-action:focus,
+body.delete-confirmation #content-main > form input[type="submit"]:hover,
+body.delete-confirmation #content-main > form input[type="submit"]:focus,
+.submit-row a.deletelink:hover,
+.submit-row a.deletelink:focus {
+  background: var(--delete-button-hover-bg);
+}
+
+body.delete-confirmation .delete-confirm-button,
+body.delete-confirmation .secondary-button {
+  align-items: center;
+  box-sizing: border-box;
+  display: inline-flex;
+  height: 40px;
+  justify-content: center;
+  line-height: 1.2;
+  margin: 0;
+  min-height: 40px;
+  min-width: 13rem;
+  padding: 9px 14px;
+  text-align: center;
+  vertical-align: middle;
+}
+
+body.delete-confirmation .delete-confirm-button {
+  background: var(--delete-button-bg);
+  border: 1px solid transparent;
+  min-width: 13rem;
+}
+
+body.delete-confirmation .secondary-button {
+  background: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--body-fg);
+}
+
+body.delete-confirmation .secondary-button:hover,
+body.delete-confirmation .secondary-button:focus {
+  background: var(--repage-surface);
+  border-color: var(--repage-violet);
+  color: var(--body-fg);
+}
+
+#changelist .actions .action-counter {
+  flex: 0 1 auto;
+  margin-left: auto;
+}
+
+#changelist .field-name,
+#changelist .field-email,
+#changelist .field-whatsapp_display,
+#changelist .field-project_type,
+#changelist .field-status_display,
+#changelist .field-created_at,
+#changelist .field-lead_id,
+#changelist .field-kind,
+#changelist .field-status,
+#changelist .field-attempts,
+#changelist .field-next_attempt_at,
+#changelist .field-last_attempt_at,
+#changelist .field-last_error_code,
+#changelist .field-sent_at,
+#changelist .field-updated_at {
+  white-space: nowrap;
+}
+
+#changelist .field-message,
+#changelist .field-message .readonly {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+#content-main > .object-tools {
+  display: flex;
+  float: none;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+  margin: 0 0 18px;
+  padding: 0;
+}
+
+#content-main > .object-tools li,
+#content-main > .object-tools li + li {
+  float: none;
+  height: auto;
+  margin: 0;
+}
+
+#changelist-filter {
+  flex: 0 1 240px;
+  max-width: 260px;
+  min-width: 180px;
 }
 
 #content-main > form > .aligned,
 #content-main > form > fieldset {
+  box-sizing: border-box;
   max-width: 1080px;
+  min-width: 0;
+}
+
+.aligned .form-row,
+.aligned .form-row > div,
+.aligned .form-row .fieldBox,
+.flex-container {
+  box-sizing: border-box;
+  max-width: 100%;
+  min-width: 0;
 }
 
 .aligned .form-row input,
@@ -731,7 +893,99 @@ body {
   min-height: 9rem;
 }
 
+.aligned .form-row .readonly,
 .field-message .readonly {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
+.field-contact_actions .readonly {
+  min-width: 0;
+}
+
+.inline-group[data-inline-type="tabular"] {
+  border-bottom: 1px solid var(--hairline-color);
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-inline: contain;
+}
+
+.inline-group[data-inline-type="tabular"] .tabular.inline-related {
+  min-width: 0;
+  overflow: visible;
+}
+
+.inline-group[data-inline-type="tabular"] table {
+  min-width: 880px;
+  width: max-content;
+}
+
+.inline-group[data-inline-type="tabular"] th,
+.inline-group[data-inline-type="tabular"] td,
+.inline-group[data-inline-type="tabular"] td p {
+  white-space: nowrap;
+}
+
+.inline-group[data-inline-type="tabular"] td p {
+  margin: 0;
+}
+
+.submit-row {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  border-top: 1px solid var(--hairline-color);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.submit-row input,
+.submit-row a {
+  margin: 0;
+}
+
+.submit-row a.deletelink {
+  margin-left: auto;
+}
+
+body.delete-confirmation #content-main {
+  max-width: 760px;
+}
+
+body.delete-confirmation #deleted-objects {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  padding-left: 1.25rem;
+}
+
+body.delete-confirmation #content-main > form {
+  margin-top: 24px;
+}
+
+body.delete-confirmation #content-main > form > div {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+ul.messagelist {
+  box-sizing: border-box;
+  margin: 0 0 18px;
+  max-width: 100%;
+  padding: 0;
+}
+
+ul.messagelist li {
+  border: 1px solid var(--hairline-color);
+  border-radius: 6px;
+  box-sizing: border-box;
+  margin: 0 0 8px;
   overflow-wrap: anywhere;
 }
 
@@ -757,90 +1011,100 @@ textarea:focus {
   color: var(--repage-ink);
 }
 
-@media (max-width: 1024px) {
-  #container {
-    overflow-x: hidden;
-  }
-
-  .main > .content {
-    overflow-x: hidden;
-  }
-
-  #changelist-form,
-  #content-main > form {
-    overflow-x: hidden;
-  }
-
-  #content {
-    padding-left: 24px;
-    padding-right: 24px;
-  }
-
-  div.breadcrumbs {
-    padding-left: 24px;
-    padding-right: 24px;
-  }
-
+/* Desktop and notebook: keep Django's docked/sticky navigation contract. */
+@media (min-width: 768px) {
   #header {
+    align-items: center;
     flex-direction: row;
     flex-wrap: wrap;
-    gap: 8px 20px;
-    padding: 12px 24px;
   }
 
   #branding {
-    min-height: 48px;
+    flex: 0 1 auto;
+    min-width: 0;
   }
 
   #user-tools {
-    flex: 0 0 100%;
-    margin-left: 0;
-    max-width: none;
+    align-items: center;
+    display: flex;
+    flex: 1 1 auto;
+    flex-wrap: wrap;
+    gap: 8px 12px;
+    justify-content: flex-end;
+    margin-left: 20px;
+    max-width: 100%;
     min-width: 0;
-    text-align: left;
+    text-align: right;
+  }
+
+  #logout-form {
+    display: flex;
+    margin: 0;
+  }
+
+  #nav-sidebar {
+    max-height: 100vh;
+    position: sticky;
+    top: 0;
+  }
+
+  .main.shifted > #nav-sidebar,
+  html[data-nav-sidebar-state="open"] .main > #nav-sidebar {
+    left: auto;
+    margin-left: 0;
+    visibility: visible;
+  }
+
+  html[data-nav-sidebar-state="open"] .main > #nav-sidebar + .content {
+    max-width: calc(100% - 299px);
+  }
+
+}
+
+@media (min-width: 768px) and (max-width: 1024px) {
+  #header {
+    gap: 12px 20px;
+    padding: 12px 24px;
   }
 
   .repage-admin-label {
     display: none;
   }
 
-  #changelist-filter {
-    margin-left: 20px;
-  }
-
-  #nav-sidebar {
-    display: none;
-  }
-
-  #toggle-nav-sidebar {
-    display: block;
-  }
-
-  .main > #nav-sidebar + .content {
-    flex-basis: calc(100% - 23px);
-    max-width: calc(100% - 23px);
-  }
-
-  .main.shifted > #nav-sidebar {
-    display: block;
-    position: absolute;
-    z-index: 10;
-  }
-
-  .main.shifted > #nav-sidebar + .content {
-    flex-basis: calc(100% - 299px);
-    max-width: calc(100% - 299px);
+  #content,
+  div.breadcrumbs {
+    padding-left: 24px;
+    padding-right: 24px;
   }
 }
 
+/* Mobile: the sidebar is the only fixed layer and never reduces the content. */
 @media (max-width: 767px) {
   body.login {
     align-items: flex-start;
   }
 
   #header {
-    align-items: flex-start;
-    padding: 12px 16px;
+    align-items: stretch;
+    flex-direction: column;
+    position: relative;
+    z-index: 40;
+    gap: 12px;
+    padding: 12px 16px 24px;
+  }
+
+  .login #header {
+    align-items: center;
+    gap: 0;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    padding: 12px 16px 24px;
+  }
+
+  #branding,
+  .repage-brand,
+  .repage-brand a {
+    max-width: 100%;
+    min-width: 0;
   }
 
   #branding {
@@ -853,19 +1117,61 @@ textarea:focus {
 
   .repage-brand__context {
     font-size: 13px;
+    overflow-wrap: anywhere;
     padding-left: 10px;
   }
 
-  #user-tools {
-    flex: 0 0 100%;
-    margin-left: 0;
-    max-width: none;
-    width: 100%;
-    text-align: left;
+  .repage-admin-label {
+    display: none;
   }
 
-  .repage-theme-toggle {
-    margin-left: 0;
+  #user-tools {
+    align-items: stretch;
+    display: flex;
+    flex: 0 0 auto;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    gap: 10px;
+    margin: 0;
+    max-width: none;
+    min-width: 0;
+    text-align: left;
+    width: 100%;
+  }
+
+  #header > #user-tools {
+    height: auto;
+  }
+
+  .repage-user-actions {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 10px;
+    width: 100%;
+  }
+
+  #user-tools .repage-user-name {
+    flex: 0 0 auto;
+    max-width: 100%;
+    width: 100%;
+    overflow-wrap: anywhere;
+  }
+
+  #user-tools a,
+  #user-tools #logout-form,
+  #user-tools .repage-theme-toggle {
+    flex: 0 1 auto;
+    margin: 0;
+    max-width: 100%;
+  }
+
+  #logout-form {
+    display: flex;
+  }
+
+  #user-tools .repage-theme-toggle {
+    flex: 0 0 38px;
   }
 
   #content,
@@ -892,43 +1198,49 @@ textarea:focus {
   }
 
   #changelist .actions {
-    gap: 8px;
+    padding: 12px 0;
   }
 
-  #changelist .actions .button {
+  #changelist .actions > label {
+    flex: 1 1 100%;
+  }
+
+  #changelist .actions .action-counter {
+    flex: 1 1 100%;
     margin-left: 0;
-    margin-right: 0;
   }
 
   #changelist-filter {
-    border-left: 0;
-    border-top: 1px solid var(--hairline-color);
+    background: var(--repage-surface);
+    border: 1px solid var(--hairline-color);
+    border-radius: 6px;
+    flex: 0 0 auto;
     margin: 24px 0 0;
-    padding-top: 12px;
-    width: auto;
+    max-width: none;
+    min-width: 0;
+    padding: 12px 0;
+    width: 100%;
   }
 
   #changelist-filter h2 {
-    padding-left: 0;
-    padding-right: 0;
+    padding-left: 16px;
+    padding-right: 16px;
   }
 
-  #changelist-form .results {
-    margin-left: 0;
-    margin-right: 0;
-    padding-left: 0;
-    padding-right: 0;
+  #changelist-filter h3,
+  #changelist-filter ul {
+    margin-left: 16px;
+    margin-right: 16px;
   }
 
-  .object-tools {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
+  #content-main > .object-tools {
+    justify-content: flex-start;
+    margin-bottom: 16px;
   }
 
-  .object-tools li,
-  .object-tools li + li {
-    margin: 0;
+  #content-main > .object-tools li,
+  #content-main > .object-tools a {
+    max-width: 100%;
   }
 
   #content-main > form > .aligned,
@@ -939,6 +1251,16 @@ textarea:focus {
   fieldset.repage-fieldset {
     margin-top: 22px;
     padding-top: 14px;
+  }
+
+  .aligned .form-row {
+    overflow: visible;
+  }
+
+  .aligned .form-row > div,
+  .aligned .form-row .fieldBox {
+    flex: 1 1 100%;
+    width: 100%;
   }
 
   .aligned .form-row input,
@@ -954,24 +1276,80 @@ textarea:focus {
   }
 
   .submit-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
+    align-items: stretch;
+    flex-direction: column;
   }
 
   .submit-row input,
   .submit-row a {
     margin: 0;
+    width: 100%;
+  }
+
+  .submit-row a.deletelink {
+    margin-left: 0;
+  }
+
+  body.delete-confirmation #content-main > form > div {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  body.delete-confirmation .delete-confirm-button,
+  body.delete-confirmation .secondary-button {
+    min-width: 0;
+    width: 100%;
   }
 
   #toggle-nav-sidebar {
-    display: block;
+    background: var(--body-bg);
+    border: 1px solid var(--hairline-color);
+    display: flex;
+    align-self: flex-start;
+    flex: 0 0 16px;
+    height: 36px;
+    margin-left: -16px;
+    position: sticky;
+    top: 16px;
+    width: 16px;
+    z-index: 31;
   }
 
-  .main > #nav-sidebar + .content,
-  .main.shifted > #nav-sidebar + .content {
-    flex-basis: calc(100% - 23px);
-    max-width: calc(100% - 23px);
+  #nav-sidebar {
+    display: none;
+  }
+
+  .main.shifted > #nav-sidebar,
+  html[data-nav-sidebar-state="open"] .main > #nav-sidebar {
+    background: var(--body-bg);
+    bottom: 0;
+    box-shadow: 12px 0 28px rgba(16, 24, 39, 0.22);
+    display: block;
+    height: 100vh;
+    height: 100dvh;
+    left: 0;
+    margin-left: 0;
+    max-height: 100vh;
+    max-height: 100dvh;
+    max-width: min(85vw, 20rem);
+    overflow-x: hidden;
+    overflow-y: auto;
+    position: fixed;
+    top: 0;
+    visibility: visible;
+    width: min(85vw, 20rem);
+    z-index: 50;
+  }
+
+  .main.shifted > #toggle-nav-sidebar,
+  html[data-nav-sidebar-state="open"] .main > #toggle-nav-sidebar {
+    flex: 0 0 40px;
+    left: min(85vw, 20rem);
+    margin-left: 0;
+    position: fixed;
+    top: 0;
+    width: 40px;
+    z-index: 51;
   }
 }
 

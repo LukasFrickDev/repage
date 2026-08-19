@@ -1,0 +1,49 @@
+{% extends "admin/base_site.html" %}
+{% load i18n l10n admin_urls static %}
+
+{% block extrahead %}
+  {{ block.super }}
+  {{ media }}
+  <script src="{% static 'admin/js/cancel.js' %}" async></script>
+{% endblock %}
+
+{% block bodyclass %}{{ block.super }} app-{{ opts.app_label }} model-{{ opts.model_name }} delete-confirmation delete-selected-confirmation{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+  <a href="{% url 'admin:index' %}">{% translate 'Início' %}</a>
+  &rsaquo; <a href="{% url 'admin:app_list' app_label=opts.app_label %}">{{ opts.app_config.verbose_name }}</a>
+  &rsaquo; <a href="{% url opts|admin_urlname:'changelist' %}">{{ opts.verbose_name_plural|capfirst }}</a>
+  &rsaquo; {% translate 'Remover selecionados' %}
+</div>
+{% endblock %}
+
+{% block content %}
+<div id="content-main">
+  {% if perms_lacking %}
+    <p>Remover os registros selecionados também removeria itens relacionados, mas sua conta não tem permissão para remover os seguintes tipos:</p>
+    <ul id="deleted-objects">{{ perms_lacking|unordered_list }}</ul>
+  {% elif protected %}
+    <p>Remover os registros selecionados exige remover itens relacionados protegidos:</p>
+    <ul id="deleted-objects">{{ protected|unordered_list }}</ul>
+  {% else %}
+    <p>{% if opts.app_label == 'leads' and opts.model_name == 'lead' %}Tem certeza de que deseja remover os Leads selecionados?{% else %}Tem certeza de que deseja remover os registros selecionados?{% endif %} Todos os objetos e itens relacionados abaixo também serão removidos:</p>
+    {% include "admin/includes/object_delete_summary.html" %}
+    <h2>Objetos</h2>
+    {% for deletable_object in deletable_objects %}
+      <ul>{{ deletable_object|unordered_list }}</ul>
+    {% endfor %}
+    <form method="post">{% csrf_token %}
+      <div>
+        {% for obj in queryset %}
+          <input type="hidden" name="{{ action_checkbox_name }}" value="{{ obj.pk|unlocalize }}">
+        {% endfor %}
+        <input type="hidden" name="action" value="delete_selected">
+        <input type="hidden" name="post" value="yes">
+        <input class="button delete-confirm-button" type="submit" value="Sim, eu tenho certeza">
+        <a href="#" class="button cancel-link secondary-button">Não, me leve de volta</a>
+      </div>
+    </form>
+  {% endif %}
+</div>
+{% endblock %}
