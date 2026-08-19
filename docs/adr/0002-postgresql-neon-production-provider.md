@@ -49,7 +49,7 @@ atual é o Neon, com:
 
 - projeto Repage;
 - branch Neon `production`;
-- região AWS South America East 1 / São Paulo;
+- região AWS eu-central-1 / Frankfurt;
 - PostgreSQL 18;
 - database `repage`;
 - role/owner `repage_app`.
@@ -60,7 +60,7 @@ A topologia de produção é:
 Django/HomeHost → PostgreSQL/Neon
 ```
 
-Neon é uma escolha operacional atual, não uma dependência arquitetural
+Frankfurt substituiu a região inicial de São Paulo após medições reais de latência HomeHost → Neon. Neon é uma escolha operacional atual, não uma dependência arquitetural
 permanente. Uma futura migração para outro PostgreSQL compatível continua
 possível por backup e restauração validados.
 
@@ -89,9 +89,9 @@ toolchain PostgreSQL 18.4 para as rotinas de produção e testando restauração
 ## Impacto de implementação
 
 Configuração de produção, workflows, cron, backups, smoke tests e runbooks
-devem apontar para o PostgreSQL/Neon sem incluir segredos ou connection strings
-no repositório. A implementação da Entrega 10 permanece responsável por
-automatizar esses procedimentos.
+apontam para o PostgreSQL/Neon sem incluir segredos ou connection strings no
+repositório. A Entrega 10 operacionalizou esses procedimentos; Neon continua
+sendo substituível por outro PostgreSQL compatível mediante backup e restore.
 
 ## Referências
 

@@ -1,6 +1,6 @@
 # Repage — Arquitetura
 ## Status
-- **Status:** aprovado para implementação.
+- **Status:** operacional na Entrega 10; manutenção e evolução seguem o roadmap.
 - **Última consolidação:** 14 de agosto de 2026.
 - **Baseline documental:** `main`.
 - **Responsabilidade:** stack, rotas, dados, backend, segurança, testes, ambientes, CI/CD, deploy e backups.
@@ -23,7 +23,7 @@ Código, migrations, mídia estática e documentação vivem no GitHub. Hospedag
 ### 1.7 Operação verificável
 Deploy, backup, restauração e health checks exigem evidência.
 ## 2. Arquitetura atual
-Estado atual ao concluir a Entrega 9:
+Estado atual ao concluir a Entrega 10:
 - React;
 - TypeScript;
 - Vite;
@@ -96,9 +96,11 @@ Direção de hospedagem:
 Banco de produção:
 - PostgreSQL permanece a engine estrutural;
 - Neon é o provedor atual, por incompatibilidade do PostgreSQL 13.23 nativo da HomeHost com Django 5.2;
-- topologia: runtime Django/HomeHost → endpoint pooled Neon; migrations, backup
-  e restore → endpoint direto Neon, ambos por TLS.
-A arquitetura não depende do registrador de domínio escolhido.
+- topologia: runtime Django/HomeHost → endpoint direto Neon em Frankfurt (eu-central-1); migrations, backup e restore também usam endpoint direto, todos por TLS.
+A arquitetura não depende do registrador de domínio escolhido. Em produção, o
+Django usa `ManifestStaticFilesStorage` com URLs fingerprintadas; o frontend
+Vite publica assets hashados, HTML e recursos públicos estáveis usam revalidação
+normal, e `/assets/` usa cache imutável.
 ## 6. Condicionantes da hospedagem
 Validações operacionais já realizadas incluem Python `3.12.13`, SSH/SFTP por
 chave, restart do Passenger, HTTPS da API, conexão TLS ao Neon, SMTP real,
@@ -517,17 +519,11 @@ Timeout inicial de referência:
 - configurável.
 Falhas atualizam EmailDelivery, preservam Lead, registram código sanitizado e permitem recuperação.
 ## 37. Retentativas
-Política inicial de referência:
-1. imediata;
-2. aproximadamente 15 minutos;
-3. aproximadamente 1 hora;
-4. aproximadamente 6 horas;
-5. aproximadamente 24 horas.
-Sem Celery e Redis. Execução por cron ou mecanismo simples validado.
-Reenvio manual no Admin deve ser explícito, protegido, auditável e evitar duplicidade acidental.
-O retry é executável pelo management command `process_email_retries`; a
-configuração de scheduler/cron real permanece pendente da Entrega 10. O Admin
-reutiliza a mesma delivery e permite reenvio manual somente para falhas.
+O fluxo normal não depende de retentativa automática: após o commit que persiste Lead e EmailDelivery, os envios SMTP são tentados imediatamente.
+
+Falhas atualizam a própria EmailDelivery com status, tentativas, timestamps e erro sanitizado. O management command `process_email_retries` permanece como ferramenta manual segura, sem cron permanente, Celery, Redis ou worker persistente.
+
+Reenvio manual no Admin deve ser explícito, protegido, auditável e evitar duplicidade acidental; ele reutiliza a mesma delivery.
 ## 38. Django Admin
 Admin provisório da V1.
 Recursos:
@@ -806,7 +802,7 @@ Requisitos:
 - proteção;
 - evidência.
 Backup da hospedagem não substitui cópia externa. GitHub protege código e mídia versionada, não o banco.
-Prazo final de retenção permanece pendente.
+A política de retenção foi testada operacionalmente; a observação das gerações futuras é manutenção.
 ## 56. Plano de transição
 ### Fundação documental
 - adicionar documentos;
@@ -864,7 +860,7 @@ As etapas representam dependências técnicas, não roadmap comercial. Specs dev
 ## 57. Riscos
 ### Limites da hospedagem e do provedor
 Mitigar mantendo portabilidade, evitando acoplamento ao cPanel/Neon e
-registrando as capacidades ainda não implementadas em workflows e runbooks.
+registrando capacidades e limites operacionais nos workflows e runbooks.
 ### SMTP inadequado
 Mitigar com abstração, registros persistidos, retentativas e possibilidade de troca.
 ### Falha após persistência
@@ -912,9 +908,8 @@ Criar ADR futuro para:
 - mudança da persistência antes do e-mail.
 Não criar ADR retroativo para cada decisão já consolidada.
 ## 60. Pendências técnicas
-- Implementar e validar workflows e runbooks de produção na HomeHost/Neon.
-- Confirmar limites da hospedagem.
-- Definir retenção de leads e backups.
+- Manter workflows e runbooks de produção na HomeHost/Neon.
+- Monitorar limites da hospedagem e retenção como manutenção operacional.
 - Revisar políticas.
 - Aprovar conteúdo dos e-mails.
 - Concluir mídias dos cases.

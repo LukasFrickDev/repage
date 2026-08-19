@@ -1,9 +1,9 @@
 # Observabilidade de produção
 
-- **Status:** logging, correlação e monitor versionados; evidência de produção ainda pendente
+- **Status:** validado operacionalmente em produção
 - **Ambiente:** HomeHost Passenger + API pública + GitHub Actions
 - **Responsável:** Lukas Frick
-- **Última validação:** componentes de log e workflow validados localmente; Passenger stderr e Raw Access já comprovados operacionalmente
+- **Última validação:** Passenger stderr, Raw Access, logs estruturados e execução Uptime validados
 - **Frequência:** monitor horário; inspeção sob falha ou após deploy
 
 ## Objetivo
@@ -64,43 +64,9 @@ ou o corpo do e-mail para issue, PR ou documento.
 
 ## Health e readiness
 
-### Latência observada e conexão PostgreSQL
+### Estado validado de saúde e conexão PostgreSQL
 
-O baseline operacional observado antes desta correção foi:
-
-- `/health/`: aproximadamente 40–60 ms;
-- `/health/ready/`: aproximadamente 3–5 s;
-- Django Admin: aproximadamente 1,9–2,8 s por request;
-- `POST /api/v1/leads/`: aproximadamente 12,35 s.
-
-Como `/health/` não acessa PostgreSQL e readiness, Admin e Lead acessam banco
-ou sessão, a hipótese operacional sustentada é o custo de abrir/fechar a
-conexão PostgreSQL em cada request. A primeira correção conservadora é manter
-conexão persistente curta em produção, com `CONN_MAX_AGE=30` e
-`CONN_HEALTH_CHECKS=True`. A validação pós-deploy e qualquer ganho de
-performance permanecem pendentes de medição real.
-
-Na implementação anterior, a estimativa estrutural do happy path do POST era
-de aproximadamente 20 statements SQL. Medição local posterior, com
-`CaptureQueriesContext`, registrou **12 statements** no happy path atual:
-quatro correspondentes aos rate limits atômicos e oito restantes à leitura,
-duplicidade, persistência do Lead, deliveries e idempotência, incluindo dois
-statements de controle transacional. O SMTP não faz parte do caminho crítico do
-request; o envio ocorre posteriormente pelo processamento de deliveries. Esse
-resultado é local e não declara ganho em produção: readiness, Admin e POST
-deverão ser medidos novamente após o próximo deploy.
-
-Uma medição local adicional registrou 1 statement no readiness e 5 statements
-em cada uma das páginas changelist e detalhe do Admin, com tempos SQL locais
-de 3–14 ms. Ela não reproduz a latência HomeHost/Neon e, portanto, não atribui
-os picos observados a uma query específica.
-
-Para uma amostra controlada após o próximo deploy, definir temporariamente
-`DJANGO_DB_TIMING_ENABLED=True` no Setup Python App e reiniciar o Passenger.
-Os eventos `request_completed` passam a registrar somente
-`db_query_count` e `db_duration_ms`, sem SQL, PII ou secrets. Coletar uma
-sequência de readiness, login/Admin, changelist, detalhe e POST controlado;
-depois restaurar `DJANGO_DB_TIMING_ENABLED=False` e reiniciar o Passenger.
+A observabilidade de produção foi validada com health, readiness no deploy/smoke, Admin, logs estruturados e fluxo de Lead/EmailDelivery. O endpoint `/health/` não consulta PostgreSQL; `/health/ready/` continua reservado a deploy, smoke e diagnóstico manual. A medição de performance detalhada permanece fora do fechamento desta entrega e não é usada como evidência de causa ou ganho.
 
 Verificar, sem criar Lead:
 
@@ -115,16 +81,14 @@ checks após publicação.
 
 ## Monitor horário
 
-`.github/workflows/uptime.yml` faz GET, sem secrets e sem Environment
-`production`, para:
+`.github/workflows/uptime.yml` faz GET, sem secrets e sem Environment `production`, somente para:
 
-- homepage;
-- API health;
-- API readiness.
+- `https://repage.com.br/`;
+- `https://api.repage.com.br/health/`.
 
-O schedule é `17 * * * *`, com timeout e retries finitos. A execução horária
-real fica pendente até o workflow estar na default branch/main; no PR é
-validada somente a configuração.
+`/health/ready/` não participa do schedule e permanece disponível para deploy, smoke e diagnóstico manual.
+
+O schedule é horário, com timeout e retries finitos. A execução manual do workflow Uptime na `main` foi aprovada (run #40). Não há claim de observação prolongada do scale-to-zero; evitar chamadas recorrentes ao readiness preserva esse comportamento.
 
 ## Falhas conhecidas
 
@@ -132,15 +96,12 @@ validada somente a configuração.
   observabilidade e investigada junto ao middleware;
 - Passenger stderr pode conter erro operacional, mas não deve ser copiado
   integralmente para tickets;
-- falha do uptime identifica o endpoint lógico, mas não substitui a análise de
-  health/readiness e do Passenger;
-- logging e uptime versionados ainda não constituem evidência de execução real
-  em produção antes da implantação/main.
+- falha do uptime identifica o endpoint lógico, mas não substitui a análise de health do processo e do Passenger;
+- a observação prolongada de scale-to-zero não faz parte desta validação e fica para manutenção operacional.
 
 ## Recuperação
 
-Em indisponibilidade, confirmar primeiro o workflow Uptime e os três endpoints;
-depois correlacionar horário, request ID e status com o Passenger stderr. Para
+Em indisponibilidade, confirmar primeiro o workflow Uptime e os dois endpoints monitorados; depois correlacionar horário, request ID e status com o Passenger stderr. Para
 falhas de e-mail, consultar `EmailDelivery` no Admin e correlacionar
 `delivery_id`/`lead_id` com os eventos sanitizados.
 
@@ -157,11 +118,13 @@ Já comprovado:
 - arquivamento de Raw Access habilitado;
 - X-Request-ID existente no contrato da API.
 
-Ainda pendente:
+Confirmado operacionalmente:
 
-- logs estruturados observados após implantação;
-- execução horária real do workflow na default branch/main;
-- correlação de uma ocorrência real sem expor PII.
+- Passenger stderr e Raw Access disponíveis;
+- logs estruturados observados sem payload, PII ou segredo;
+- homepage e `/health/` monitorados pelo workflow Uptime;
+- `/health/ready/` preservado fora do schedule;
+- execução manual do Uptime na `main` aprovada (run #40).
 
 ## Segurança e privacidade
 
