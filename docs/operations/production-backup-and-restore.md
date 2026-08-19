@@ -173,9 +173,7 @@ segredos em documentação versionada. O path remoto conhecido é fixo:
 /home/re190924/backups/repage/postgresql
 ~~~
 
-O procedimento semanal deve ser executado em uma estação protegida, com
-permissões locais restritas e armazenamento externo criptografado pelo
-operador. O procedimento abaixo usa apenas ferramentas padrão e foi validado operacionalmente:
+A primeira cópia externa real foi validada por SCP do HomeHost para armazenamento local controlado pelo operador, com archive e sidecar copiados, checksum recalculado no destino e arquivos mantidos com permissões restritas. O bloco detalhado abaixo é o procedimento operacional recomendado e reproduzível para a recorrência semanal; sua presença não afirma que cada comando ou etapa foi executado literalmente na primeira cópia:
 
 ~~~bash
 set -Eeuo pipefail

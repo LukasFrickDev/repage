@@ -3,7 +3,7 @@
 - **Status:** validado operacionalmente em produção
 - **Ambiente:** HomeHost Python App + SMTP operacional da Repage
 - **Responsável:** Lukas Frick
-- **Última validação:** SMTP real end-to-end, persistência antes do envio, falha isolada e cron diário validados
+- **Última validação:** SMTP real end-to-end, persistência antes do envio e cron diário validados; isolamento de falha coberto por testes automatizados
 - **Frequência:** cleanup diariamente às 03:17; backup diário separadamente às 03:20
 
 ## Objetivo
@@ -46,7 +46,7 @@ O transporte de produção usa o backend SMTP nativo do Django:
 TLS e SSL não podem estar ativos simultaneamente. A senha permanece somente
 no ambiente da Python App.
 
-O POST válido valida proteção e idempotência, persiste o `Lead` e as duas `EmailDelivery`, conclui o commit e só então tenta imediatamente os dois envios SMTP. Cada entrega atualiza seu próprio status, tentativas, timestamps e erro sanitizado. Falha SMTP não reverte o Lead nem transforma a criação persistida em erro da API. O management command `process_email_retries` permanece somente como ferramenta manual; o reenvio protegido pelo Admin reutiliza a implementação existente.
+O POST válido valida proteção e idempotência, persiste o `Lead` e as duas `EmailDelivery`, conclui o commit e só então tenta imediatamente os dois envios SMTP. Cada entrega atualiza seu próprio status, tentativas, timestamps e erro sanitizado. A implementação preserva o Lead quando SMTP falha e mantém a delivery recuperável; esse comportamento é coberto pelos testes automatizados aprovados. O management command `process_email_retries` permanece somente como ferramenta manual; o reenvio protegido pelo Admin reutiliza a implementação existente.
 
 ## Cron versionado
 
@@ -89,19 +89,23 @@ sem exibir o payload do selector.
 
 ## Validação operacional do SMTP pelo Django
 
-A validação já foi executada com endereços autorizados e controlados, confirmando:
+### Happy path real validado em produção
+
+Com endereços autorizados e controlados, foram confirmados:
 
 - autenticação SSL na porta 465;
-- notificação interna para `contato@repage.com.br`;
-- confirmação para um endereço de teste autorizado;
-- `Reply-To` na notificação interna;
-- persistência do `Lead` antes do envio;
-- estados `EmailDelivery` após sucesso e falha controlada;
+- notificação interna enviada e recebida;
+- confirmação ao visitante enviada e recebida;
+- persistência do `Lead` e das duas `EmailDelivery` antes do envio;
+- estados de sucesso das `EmailDelivery`;
 - inspeção pelo Django Admin;
 - ausência de PII e credenciais nos logs.
 
-Não usar dados reais de terceiros nem criar um job permanente de teste de
-e-mail.
+### Falha SMTP e reenvio
+
+Não foi provocada falha SMTP controlada em produção. Os testes automatizados aprovados cobrem o isolamento da falha, a preservação do Lead, a recuperação da delivery e o reenvio manual; o reenvio manual também foi validado no Admin.
+
+Não usar dados reais de terceiros nem criar um job permanente de teste de e-mail.
 
 ## Falhas conhecidas
 
@@ -137,10 +141,13 @@ Já comprovado:
 Confirmado operacionalmente:
 
 - cleanup às 03:17 e backup às 03:20, em tarefas separadas;
-- envio imediato após commit, com estado de cada `EmailDelivery`;
-- falha SMTP isolada sem rollback do Lead;
-- reenvio manual protegido pelo Admin;
+- happy path real com envio imediato após commit e estado de cada `EmailDelivery`;
+- notificação interna e confirmação ao visitante enviadas e recebidas;
+- inspeção das deliveries no Admin;
+- reenvio manual protegido validado no Admin;
 - nenhum cron permanente de `process_email_retries`.
+
+O isolamento de falha SMTP sem rollback do Lead é coberto pelos testes automatizados aprovados; não foi executada falha SMTP controlada em produção.
 
 ## Segurança e privacidade
 

@@ -60,6 +60,8 @@ A topologia de produção é:
 Django/HomeHost → PostgreSQL/Neon
 ```
 
+Na operação atual da V1, o runtime Django, migrations, backup e restore usam o endpoint direct, com TLS obrigatório. Esse é o estado operacional atual da V1, não uma obrigação permanente da decisão de usar Neon.
+
 Frankfurt substituiu a região inicial de São Paulo após medições reais de latência HomeHost → Neon. Neon é uma escolha operacional atual, não uma dependência arquitetural
 permanente. Uma futura migração para outro PostgreSQL compatível continua
 possível por backup e restauração validados.

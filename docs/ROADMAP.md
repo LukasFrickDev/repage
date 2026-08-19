@@ -240,7 +240,7 @@ A V1 deve servir como referência comercial da marca, apoiar prospecção e cond
 * HomeHost, Python, SSH/SFTP, Passenger, API HTTPS, SMTP, cron, logs, backup local, cópia externa e restore possuem validação operacional; a manutenção desses procedimentos permanece pós-Entrega 10.
 * PostgreSQL permanece a engine estrutural; a produção usa Neon porque o PostgreSQL 13.23 nativo da HomeHost é incompatível com Django 5.2.
 * SMTP depende de autenticação, TLS, SPF, DKIM, DMARC e entregabilidade.
-* Retenção de leads e backups deve ser definida antes de produção.
+* A política de backups já está definida e operacional: até 7 pares diários locais e até 4 pares semanais externos; eventual decisão ou revisão sobre retenção de Leads permanece separada.
 * Políticas exigem revisão jurídica antes da publicação.
 * O prerender build-time está decidido e validado; a Entrega 10 trata apenas da publicação e operação do artefato.
 * Domínio, DNS, SSL e Analytics dependem de acessos reais.

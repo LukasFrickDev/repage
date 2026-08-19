@@ -479,7 +479,7 @@ Esses números são política operacional, **não um gate temporal que obrigue a
 Para fechar a Entrega 10 é obrigatório comprovar:
 
 - cron diário definitivo configurado;
-- primeiro backup diário real produzido pelo cron definitivo;
+- job definitivo de backup validado no ambiente real e cron diário configurado;
 - arquivo fora do webroot;
 - permissões restritas;
 - checksum válido;
@@ -766,7 +766,7 @@ Em produção executar somente smoke e confirmação operacional, não nova desc
 - cleanup diário definitivo;
 - uptime horário sem readiness;
 - backup diário definitivo;
-- primeiro backup real;
+- job definitivo de backup validado no ambiente real;
 - primeira cópia externa;
 - restore real;
 - segurança final;
@@ -850,7 +850,7 @@ Somente depois da implementação/prova real:
 ### Backup/restore
 
 - [x] cron diário de backup definitivo ativo.
-- [x] primeiro backup diário real produzido pelo cron.
+- [x] job definitivo de backup validado no ambiente real e cron diário configurado.
 - [x] backup fora do webroot e com permissão restrita.
 - [x] checksum real validado.
 - [x] rotação local testada para política de até 7 cópias.
