@@ -10,14 +10,42 @@
 
 {% block extrahead %}
   {{ block.super }}
+  <script>
+    (() => {
+      let storedState = null;
+      try {
+        storedState = window.localStorage.getItem('django.admin.navSidebarIsOpen');
+      } catch (error) {
+        storedState = null;
+      }
+      document.documentElement.dataset.navSidebarState = storedState === 'false' ? 'closed' : 'open';
+      window.addEventListener('DOMContentLoaded', () => {
+        const toggle = document.getElementById('toggle-nav-sidebar');
+        const main = document.getElementById('main');
+        toggle?.addEventListener('click', () => {
+          document.documentElement.dataset.navSidebarState = main?.classList.contains('shifted') ? 'open' : 'closed';
+        });
+        const navSidebar = document.getElementById("nav-sidebar");
+        navSidebar?.addEventListener("click", (event) => {
+          if (!window.matchMedia("(max-width: 767px)").matches) return;
+          const link = event.target instanceof Element ? event.target.closest("a") : null;
+          if (link && navSidebar.contains(link)) {
+            window.localStorage.setItem("django.admin.navSidebarIsOpen", "false");
+          }
+        });
+      });
+    })();
+  </script>
 {% endblock %}
 
 {% block extrastyle %}
   {{ block.super }}
   <link rel="icon" href="{% static 'repage-admin/brand/logo.svg' %}" type="image/svg+xml">
-  {% block repage_admin_styles %}
-    <link rel="stylesheet" href="{% static 'repage-admin/admin.css' %}?v=system-font-20260815">
-  {% endblock %}
+{% endblock %}
+
+{% block responsive %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'repage-admin/admin.css' %}?v=system-font-20260815">
 {% endblock %}
 
 {% block branding %}
@@ -31,4 +59,33 @@
 
 {% block nav-global %}
   <div class="repage-admin-label" aria-label="Área administrativa Repage">Área interna</div>
+{% endblock %}
+
+{% block usertools %}
+  {% if has_permission %}
+    <div id="user-tools">
+      {% block welcome-msg %}
+        <strong class="repage-user-name">{% firstof user.get_short_name user.get_username %}</strong>
+      {% endblock %}
+      {% block userlinks %}
+        <div class="repage-user-actions">
+        {% if site_url %}
+          <a href="{{ site_url }}">Ver site</a>
+        {% endif %}
+        {% if user.is_active and user.is_staff %}
+          {% url 'django-admindocs-docroot' as docsroot %}
+          {% if docsroot %}<a href="{{ docsroot }}">Documentação</a>{% endif %}
+        {% endif %}
+        {% if user.has_usable_password %}
+          <a href="{% url 'admin:password_change' %}">Alterar senha</a>
+        {% endif %}
+        <form id="logout-form" method="post" action="{% url 'admin:logout' %}">
+          {% csrf_token %}
+          <button type="submit">Encerrar sessão</button>
+        </form>
+        {% include "admin/color_theme_toggle.html" %}
+        </div>
+      {% endblock %}
+    </div>
+  {% endif %}
 {% endblock %}

@@ -42,3 +42,12 @@ def test_cron_wrapper_uses_selector_parser_and_cleans_temporary_files():
     assert 'rm -rf -- "$temporary_dir"' in source
     assert 'Production cron job failed:' in source
     assert 'Production cron job succeeded:' in source
+
+
+def test_uptime_workflow_checks_homepage_and_health_only():
+    workflow = Path(__file__).parents[2] / ".github" / "workflows" / "uptime.yml"
+    source = workflow.read_text(encoding="utf-8")
+
+    assert "https://repage.com.br/" in source
+    assert "https://api.repage.com.br/health/" in source
+    assert "/health/ready/" not in source

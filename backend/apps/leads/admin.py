@@ -3,6 +3,7 @@ import re
 from django import forms
 from django.contrib import admin
 from django.contrib import messages
+from django.contrib.admin.utils import get_deleted_objects
 from django.core.exceptions import PermissionDenied
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
@@ -146,6 +147,25 @@ class LeadAdminForm(forms.ModelForm):
         return self.cleaned_data['acquisition_source'].strip()
 
 
+class _CascadeDeleteModelAdmin:
+    def has_delete_permission(self, request, obj=None):
+        return True
+
+
+class _CascadeDeleteAdminSite:
+    """Allow registered dependents in Lead's native cascade confirmation."""
+
+    def __init__(self, admin_site):
+        self.admin_site = admin_site
+        self.name = admin_site.name
+
+    def is_registered(self, model):
+        return self.admin_site.is_registered(model)
+
+    def get_model_admin(self, model):
+        return _CascadeDeleteModelAdmin()
+
+
 @admin.action(description='Arquivar Leads selecionados')
 def archive_leads(modeladmin, request, queryset):
     queryset.update(status=Lead.Status.ARCHIVED, updated_at=timezone.now())
@@ -177,6 +197,9 @@ class LeadAdmin(admin.ModelAdmin):
     search_fields = ('name', 'email', 'whatsapp', 'business_name', 'acquisition_source')
     actions = (archive_leads,)
     inlines = (EmailDeliveryInline,)
+
+    def get_deleted_objects(self, objs, request):
+        return get_deleted_objects(objs, request, _CascadeDeleteAdminSite(self.admin_site))
 
     def get_fieldsets(self, request, obj=None):
         if obj is None:
@@ -277,10 +300,6 @@ class LeadAdmin(admin.ModelAdmin):
             obj.privacy_policy_acknowledged = False
             obj.privacy_policy_version = ''
         super().save_model(request, obj, form, change)
-
-    def has_delete_permission(self, request, obj=None):
-        return False
-
 
 @admin.register(EmailDelivery)
 class EmailDeliveryAdmin(admin.ModelAdmin):

@@ -246,7 +246,7 @@ export const DirectContact = styled.div`
   text-align: center;
 
   @media (max-width: ${breakpoints.mobileMax}) {
-    align-items: flex-start;
+    align-items: center;
     flex-direction: column;
     gap: 0.15rem;
   }
@@ -299,9 +299,18 @@ export const Status = styled.p<{ $success?: boolean }>`
   flex: 1 1 18rem;
   min-width: 0;
   margin: 0;
-  color: ${({ $success }) => ($success ? 'rgba(201, 222, 255, 0.92)' : 'rgba(245, 242, 236, 0.78)')};
+  color: ${colors.white};
   font-family: ${fonts.primary};
   font-size: 0.92rem;
   line-height: 1.45;
   overflow-wrap: anywhere;
+
+  strong {
+    font-weight: 700;
+  }
+
+  @media (max-width: ${breakpoints.mobileMax}) {
+    flex: 0 1 auto;
+    width: 100%;
+  }
 `;

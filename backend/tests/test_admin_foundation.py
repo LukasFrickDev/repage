@@ -34,7 +34,14 @@ def test_admin_login_uses_repage_templates():
     assert 'repage-admin/brand/logo.svg' in content
     assert content.count('repage-admin/admin.css') == 1
     assert content.index('admin/css/login.css') < content.index('repage-admin/admin.css')
+    assert content.index('admin/css/responsive.css') < content.index('repage-admin/admin.css')
     assert content.index('repage-admin/theme.js') < content.index('admin/css/dark_mode.css')
+    assert 'django.admin.navSidebarIsOpen' in content
+    assert 'dataset.navSidebarState' in content
+    assert 'repage-login-tools' in content
+    assert 'matchMedia("(max-width: 767px)")' in content
+    assert 'localStorage.setItem("django.admin.navSidebarIsOpen", "false")' in content
+    assert content.index('dataset.navSidebarState') < content.index('admin/css/responsive.css')
     assert 'repage-admin/login.js' in content
     assert 'data-password-toggle' in content
     assert 'data-login-submit' in content

@@ -48,6 +48,11 @@ describe('LeadForm', () => {
     resolveRequest(new Response(JSON.stringify({ status: 'received', message: 'Recebemos sua solicitação.', request_id: 'request-id' }), { status: 201 }));
     const success = await screen.findByRole('status');
     expect(success).toHaveTextContent('Solicitação recebida. Obrigado por entrar em contato com a Repage. Você deve receber uma confirmação por e-mail nos próximos minutos. Se não encontrar, confira também a pasta de Spam ou Lixo eletrônico.');
+    expect(Array.from(success.querySelectorAll('strong')).map((node) => node.textContent)).toEqual([
+      'Solicitação recebida.',
+      'Spam',
+      'Lixo eletrônico',
+    ]);
     expect(success.parentElement).toContainElement(screen.getByRole('button', { name: 'Solicitar orçamento' }));
     expect(screen.getByLabelText('Nome')).toHaveValue('');
   });

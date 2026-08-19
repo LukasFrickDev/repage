@@ -11,6 +11,7 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from .email_service import process_delivery
 from .models import EmailDelivery, IdempotencyRecord, Lead
 from .protection import (
     ProtectionUnavailable,
@@ -244,6 +245,7 @@ class LeadCreateView(APIView):
 
         duplicate = find_duplicate_lead(values, fingerprint)
         expires_at = timezone.now() + timedelta(seconds=settings.IDEMPOTENCY_TTL_SECONDS)
+        delivery_ids = []
         try:
             with transaction.atomic():
                 IdempotencyRecord.objects.filter(
@@ -252,10 +254,12 @@ class LeadCreateView(APIView):
                 ).delete()
                 if duplicate is None:
                     lead = Lead.objects.create(**values)
-                    EmailDelivery.objects.bulk_create([
+                    deliveries = [
                         EmailDelivery(lead=lead, kind=EmailDelivery.Kind.INTERNAL_NOTIFICATION),
                         EmailDelivery(lead=lead, kind=EmailDelivery.Kind.VISITOR_CONFIRMATION),
-                    ])
+                    ]
+                    EmailDelivery.objects.bulk_create(deliveries)
+                    delivery_ids = [delivery.pk for delivery in deliveries]
                 else:
                     lead = duplicate
                 IdempotencyRecord.objects.create(
@@ -293,6 +297,15 @@ class LeadCreateView(APIView):
                 request_id,
                 http_status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
+
+        for delivery_id in delivery_ids:
+            try:
+                process_delivery(delivery_id)
+            except Exception:
+                logger.error(
+                    "lead_email_delivery_processing_failed",
+                    extra={"delivery_id": str(delivery_id)},
+                )
 
         payload = dict(SUCCESS_PAYLOAD)
         payload['request_id'] = str(request_id)
