@@ -261,6 +261,8 @@ def test_development_keeps_local_configuration_defaults():
     result = load_settings_with_environment(DJANGO_ENVIRONMENT='development')
 
     assert result.returncode == 0, result.stderr
+    assert project_settings.STORAGES['default']['BACKEND'] == 'django.core.files.storage.FileSystemStorage'
+    assert project_settings.STORAGES['staticfiles']['BACKEND'] == 'django.contrib.staticfiles.storage.StaticFilesStorage'
 
 
 def test_development_uses_local_static_root_and_postgres_ssl_default():
@@ -286,6 +288,8 @@ def test_production_applies_static_root_postgres_tls_and_security_hardening():
         """
 from config import settings
 print(settings.STATIC_ROOT)
+print(settings.STORAGES['default']['BACKEND'])
+print(settings.STORAGES['staticfiles']['BACKEND'])
 print(settings.DATABASES['default']['ENGINE'])
 print(settings.DATABASES['default']['OPTIONS'])
 print(settings.DATABASES['default']['CONN_MAX_AGE'])
@@ -335,6 +339,8 @@ print(settings.EMAIL_TIMEOUT)
     assert result.returncode == 0, result.stderr
     assert result.stdout.splitlines() == [
         '/srv/repage/static',
+        'django.core.files.storage.FileSystemStorage',
+        'django.contrib.staticfiles.storage.ManifestStaticFilesStorage',
         'django.db.backends.postgresql',
         "{'sslmode': 'require'}",
         '30',
