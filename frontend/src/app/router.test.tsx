@@ -511,8 +511,7 @@ describe('public routes', () => {
 });
 
 describe('primary navigation', () => {
-  it('keeps Início in the header only and preserves both logo destinations', async () => {
-    const user = userEvent.setup();
+  it('keeps Início in the header only and preserves both logo destinations', () => {
     renderAt('/');
 
     const desktopNavigation = document.querySelector('nav[aria-label="Navegação principal"]') as HTMLElement;
@@ -530,7 +529,12 @@ describe('primary navigation', () => {
     expect(within(footer).queryByRole('link', { name: 'Início' })).not.toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Repage, ir para o início' })).toHaveAttribute('href', '/');
     expect(screen.getByRole('link', { name: 'Repage, ir para a página inicial' })).toHaveAttribute('href', '/');
+  });
 
+  it('preserves the footer contact and social links', () => {
+    renderAt('/');
+
+    const footer = screen.getByRole('contentinfo');
     expect(within(footer).getByText("contato@repage.com.br")).toBeInTheDocument();
     expect(within(footer).queryByRole("link", { name: "contato@repage.com.br" })).not.toBeInTheDocument();
     const footerEmailIcon = within(footer).getByRole("link", { name: "Enviar e-mail para a Repage" });
@@ -543,6 +547,11 @@ describe('primary navigation', () => {
     expect(footerWhatsApp).toHaveAttribute("href", "https://wa.me/5511958244081?text=Ol%C3%A1!%20Conheci%20a%20Repage%20pelo%20site%20e%20gostaria%20de%20conversar%20sobre%20um%20projeto.");
     expect(footerWhatsApp).toHaveAttribute("target", "_blank");
     expect(footerWhatsApp).toHaveAttribute("rel", "noreferrer");
+  });
+
+  it('exposes the expected links in the mobile navigation', async () => {
+    const user = userEvent.setup();
+    renderAt('/');
 
     await user.click(screen.getByRole('button', { name: 'Abrir menu' }));
     const mobileNavigation = screen.getByRole('navigation', { name: 'Navegação móvel' });
