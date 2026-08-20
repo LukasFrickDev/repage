@@ -420,10 +420,12 @@ describe('public routes', () => {
     expect(contact?.scrollIntoView).toHaveBeenCalledWith({ block: 'start', behavior: 'smooth' });
   });
 
-  it('handles a direct reload-like entry with a hash', () => {
+  it('scrolls to but does not focus a direct reload-like hash entry', () => {
     renderAt('/#processo');
 
-    expect(document.getElementById('processo')).toHaveFocus();
+    const process = document.getElementById('processo');
+    expect(process).not.toHaveFocus();
+    expect(process?.scrollIntoView).toHaveBeenCalledWith({ block: 'start', behavior: 'smooth' });
   });
 
   it('keeps focus and hash coherent with back and forward navigation', async () => {
@@ -528,6 +530,19 @@ describe('primary navigation', () => {
     expect(within(footer).queryByRole('link', { name: 'Início' })).not.toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Repage, ir para o início' })).toHaveAttribute('href', '/');
     expect(screen.getByRole('link', { name: 'Repage, ir para a página inicial' })).toHaveAttribute('href', '/');
+
+    expect(within(footer).getByText("contato@repage.com.br")).toBeInTheDocument();
+    expect(within(footer).queryByRole("link", { name: "contato@repage.com.br" })).not.toBeInTheDocument();
+    const footerEmailIcon = within(footer).getByRole("link", { name: "Enviar e-mail para a Repage" });
+    expect(footerEmailIcon).toHaveAttribute("href", "mailto:contato@repage.com.br");
+    const footerInstagram = within(footer).getByRole("link", { name: "Abrir Instagram da Repage" });
+    expect(footerInstagram).toHaveAttribute("href", "https://instagram.com/repagebr");
+    expect(footerInstagram).toHaveAttribute("target", "_blank");
+    expect(footerInstagram).toHaveAttribute("rel", "noreferrer");
+    const footerWhatsApp = within(footer).getByRole("link", { name: "Falar com a Repage pelo WhatsApp" });
+    expect(footerWhatsApp).toHaveAttribute("href", "https://wa.me/5511958244081?text=Ol%C3%A1!%20Conheci%20a%20Repage%20pelo%20site%20e%20gostaria%20de%20conversar%20sobre%20um%20projeto.");
+    expect(footerWhatsApp).toHaveAttribute("target", "_blank");
+    expect(footerWhatsApp).toHaveAttribute("rel", "noreferrer");
 
     await user.click(screen.getByRole('button', { name: 'Abrir menu' }));
     const mobileNavigation = screen.getByRole('navigation', { name: 'Navegação móvel' });

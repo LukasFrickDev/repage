@@ -8,9 +8,9 @@ export function AnalyticsBridge() {
   const location = useLocation();
 
   useEffect(() => {
-    setAnalyticsConsent(preference.analytics);
+    setAnalyticsConsent(preference.analytics, preference.advertising);
     if (preference.analytics) trackPageView(location.pathname);
-  }, [location.pathname, preference.analytics]);
+  }, [location.pathname, preference.analytics, preference.advertising]);
 
   return null;
 }

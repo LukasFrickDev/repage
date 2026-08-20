@@ -79,6 +79,19 @@ test('homepage renders its definitive structure without horizontal overflow', as
     () => document.documentElement.scrollWidth > window.innerWidth,
   );
   expect(hasHorizontalOverflow).toBe(false);
+  const footer = page.getByRole("contentinfo");
+  await expect(footer.getByText("contato@repage.com.br")).toBeVisible();
+  await expect(footer.getByRole("link", { name: "contato@repage.com.br" })).toHaveCount(0);
+  const emailIcon = footer.getByRole("link", { name: "Enviar e-mail para a Repage" });
+  await expect(emailIcon).toHaveAttribute("href", "mailto:contato@repage.com.br");
+  const instagram = footer.getByRole("link", { name: "Abrir Instagram da Repage" });
+  await expect(instagram).toHaveAttribute("href", "https://instagram.com/repagebr");
+  await expect(instagram).toHaveAttribute("target", "_blank");
+  await expect(instagram).toHaveAttribute("rel", "noreferrer");
+  const whatsapp = footer.getByRole("link", { name: "Falar com a Repage pelo WhatsApp" });
+  await expect(whatsapp).toHaveAttribute("href", "https://wa.me/5511958244081?text=Ol%C3%A1!%20Conheci%20a%20Repage%20pelo%20site%20e%20gostaria%20de%20conversar%20sobre%20um%20projeto.");
+  await expect(whatsapp).toHaveAttribute("target", "_blank");
+  await expect(whatsapp).toHaveAttribute("rel", "noreferrer");
   expect(issues).toEqual([]);
 });
 
@@ -104,6 +117,33 @@ test('homepage remains usable with reduced motion and the mobile menu', async ({
   );
   expect(hasHorizontalOverflow).toBe(false);
   expect(issues).toEqual([]);
+});
+
+test('aligns homepage anchors directly below the fixed header', async ({ page }) => {
+  await page.goto('/');
+
+  const mobileMenuButton = page.getByRole('button', { name: 'Abrir menu' });
+  if (await mobileMenuButton.isVisible()) {
+    await mobileMenuButton.click();
+    const mobileNavigation = page.getByRole('navigation', { name: 'Navegação móvel' });
+    await expect(mobileNavigation).toBeVisible();
+    await mobileNavigation.getByRole('link', { name: 'Serviços' }).click();
+  } else {
+    const desktopNavigation = page.getByRole('navigation', { name: 'Navegação principal' });
+    await expect(desktopNavigation).toBeVisible();
+    await desktopNavigation.getByRole('link', { name: 'Serviços' }).click();
+  }
+
+  await expect(page).toHaveURL(/\/#servicos$/);
+
+  const anchorGap = () => page.evaluate(() => {
+    const header = document.querySelector('header')?.getBoundingClientRect();
+    const section = document.getElementById('servicos')?.getBoundingClientRect();
+    if (!header || !section) return Number.POSITIVE_INFINITY;
+    return Math.abs(section.top - header.bottom);
+  });
+
+  await expect.poll(anchorGap, { timeout: 3000 }).toBeLessThanOrEqual(2);
 });
 
 test('public routes stay non-indexable without explicit indexing opt-in', async ({ page }) => {

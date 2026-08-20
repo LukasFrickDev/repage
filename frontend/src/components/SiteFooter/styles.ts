@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
-import { breakpoints, colors, fonts, homepageTokens, motion } from '../../styles/theme';
+import { breakpoints, colors, fonts, homepageTokens, motion, withAlpha } from '../../styles/theme';
 import { HomepageEditorialFrame } from '../HomepageEditorialFrame';
 
 export const Footer = styled.footer`
@@ -12,23 +12,99 @@ export const Footer = styled.footer`
 
 export const Container = styled(HomepageEditorialFrame)`
   padding-top: clamp(2rem, 3.4vw, 3rem);
+  padding-bottom: clamp(1.25rem, 2vw, 1.75rem);
 `;
 
 export const MainBand = styled.div`
   display: grid;
-  grid-template-columns: minmax(18rem, 25rem) minmax(18rem, 21.25rem);
+  grid-template-columns: minmax(13rem, 1.25fr) minmax(8rem, 0.8fr) minmax(8rem, 0.8fr) minmax(12rem, 1fr);
   align-items: start;
-  justify-content: start;
-  gap: clamp(5rem, 10vw, 8.5rem);
+  justify-content: space-between;
+  gap: clamp(2rem, 4vw, 4.5rem);
 
   @media (max-width: ${breakpoints.contentMax}) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 2.5rem 2rem;
+  }
+
+  @media (max-width: ${breakpoints.tabletMax}) {
     grid-template-columns: 1fr;
-    gap: clamp(1.5rem, 6vw, 2.25rem);
+    gap: 2rem;
+  }
+`;
+
+export const FooterGroup = styled.div`
+  min-width: 0;
+`;
+
+export const GroupTitle = styled.h2`
+  margin: 0 0 0.75rem;
+  color: rgba(185, 192, 204, 0.52);
+  font-family: ${fonts.primary};
+  font-size: 0.7rem;
+  font-weight: 620;
+  letter-spacing: 0.08em;
+  line-height: 1.3;
+  text-transform: uppercase;
+`;
+
+export const ContactLinks = styled.address`
+  min-width: 0;
+  font-style: normal;
+`;
+
+export const ContactEmail = styled.p`
+  display: inline-block;
+  max-width: 100%;
+  margin: 0;
+  color: ${colors.white};
+  font-family: ${fonts.primary};
+  font-size: 0.82rem;
+  font-weight: 540;
+  overflow-wrap: anywhere;
+`;
+
+export const ContactActions = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin-top: 0.75rem;
+`;
+
+export const ContactAction = styled.a`
+  width: 2.75rem;
+  height: 2.75rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid ${withAlpha(colors.textSecondary, 0.12)};
+  border-radius: 50%;
+  background: transparent;
+  color: ${withAlpha(colors.textSecondary, 0.9)};
+
+  svg {
+    width: 1.15rem;
+    height: 1.15rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 1.45;
+  }
+
+  &:hover, &:focus-visible {
+    color: ${colors.highlight};
+    border-color: ${withAlpha(colors.highlight, 0.5)};
+  }
+
+  &:focus-visible {
+    outline: 2px solid ${colors.highlight};
+    outline-offset: 3px;
   }
 `;
 
 export const BrandBlock = styled.div`
-  max-width: 25rem;
+  max-width: 16rem;
 `;
 
 export const Brand = styled(Link)`
@@ -52,7 +128,7 @@ export const Brand = styled(Link)`
 `;
 
 export const BrandDescription = styled.p`
-  max-width: 24rem;
+  max-width: 16rem;
   margin-top: 0.8rem;
   color: rgba(185, 192, 204, 0.64);
   font-family: ${fonts.primary};
@@ -60,19 +136,17 @@ export const BrandDescription = styled.p`
   line-height: 1.55;
 `;
 
-export const Navigation = styled.nav`
-  display: grid;
-  grid-template-columns: repeat(2, minmax(8.5rem, 10rem));
-  grid-template-rows: repeat(3, auto);
-  justify-content: end;
-  gap: 0 clamp(0.9rem, 1.5vw, 1.25rem);
-  align-self: start;
+export const FooterLinks = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.15rem;
 
   a {
     position: relative;
     width: fit-content;
     min-height: 2.45rem;
-    padding-block: 0.5rem;
+    padding-block: 0.45rem;
     display: inline-flex;
     align-items: center;
     color: rgba(245, 242, 236, 0.74);
@@ -81,22 +155,6 @@ export const Navigation = styled.nav`
     font-weight: 540;
     text-decoration: none;
     transition: color ${motion.duration.fast} ${motion.easing.standard};
-  }
-
-  a:nth-child(1) { grid-area: 1 / 1; }
-  a:nth-child(2) { grid-area: 2 / 1; }
-  a:nth-child(3) { grid-area: 1 / 2; }
-  a:nth-child(4) { grid-area: 2 / 2; }
-  a:nth-child(5) { grid-area: 3 / 1; }
-  a:nth-child(6) { grid-area: 3 / 2; }
-
-  button {
-    grid-area: 4 / 1 / span 1 / span 2;
-  }
-
-  a:nth-child(n + 5) {
-    color: rgba(185, 192, 204, 0.55);
-    font-size: 0.8rem;
   }
 
   a::after {
@@ -122,15 +180,11 @@ export const Navigation = styled.nav`
   }
 
   @media (max-width: ${breakpoints.tabletMax}) {
-    grid-template-columns: repeat(2, minmax(7.5rem, 9rem));
-    justify-content: start;
-    gap: 0 clamp(0.75rem, 4vw, 1.25rem);
-
     a { min-height: 2.75rem; }
   }
 
   @media (prefers-reduced-motion: reduce) {
-    a, a::after { transition: none; }
+    a::after { transition: none; }
   }
 `;
 

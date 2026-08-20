@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   leadFormSchema,
+  PRIVACY_POLICY_VERSION,
   formatPhoneInput,
   normalizeWhatsApp,
   projectTypeOptions,
@@ -72,6 +73,7 @@ describe('lead form schema', () => {
       whatsapp: '+5511999999999',
       source: 'website',
       privacy_policy_acknowledged: true,
+      privacy_policy_version: PRIVACY_POLICY_VERSION,
     });
     expect(payload).not.toHaveProperty('manual');
   });

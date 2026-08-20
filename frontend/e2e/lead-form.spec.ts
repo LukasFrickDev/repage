@@ -4,13 +4,13 @@ const apiPath = '**/api/v1/leads/';
 
 async function openContact(page: Page) {
   await page.goto('/#contato');
-  await expect(page.locator('#contato')).toBeFocused();
+  await expect(page.locator('#contato')).toBeVisible();
   await expect(page.getByRole('form', { name: 'Solicitar orçamento' })).toBeVisible();
 }
 
 async function fillRequiredFields(page: Page) {
   await page.getByLabel('Nome').fill('Ana Souza');
-  await page.getByLabel('E-mail').fill('ana@example.com');
+  await page.getByRole('textbox', { name: 'E-mail' }).fill('ana@example.com');
   await page.getByLabel('Telefone').fill('(11) 99999-9999');
   await page.getByRole('combobox', { name: 'Tipo de projeto' }).click();
   await page.getByRole('option', { name: 'Landing page' }).click();
@@ -56,7 +56,7 @@ test.describe('lead form integration states', () => {
     expect(submittedPayload).toMatchObject({
       source: 'website',
       privacy_policy_acknowledged: true,
-      privacy_policy_version: 'pre-launch-v1',
+      privacy_policy_version: '2026-08-20-v1',
       whatsapp: '+5511999999999',
     });
   });

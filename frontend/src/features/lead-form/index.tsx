@@ -2,6 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { Link } from 'react-router-dom';
+import { getWhatsAppUrl } from '../../config/site';
 import { createIdempotencyKey, createLead, LeadApiError } from '../../services/api/leads';
 import {
   leadFormSchema,
@@ -377,7 +378,7 @@ export function LeadForm({ onInteractionStart }: LeadFormProps) {
         <S.DirectContact>
           <span>Prefere falar diretamente?</span>
           <S.WhatsAppLink
-            href={`https://wa.me/5511958244081?text=${encodeURIComponent('Olá! Conheci a Repage pelo site e gostaria de conversar sobre um projeto.')}`}
+            href={getWhatsAppUrl()}
             target="_blank"
             rel="noreferrer"
             onClick={() => trackEvent(ANALYTICS_EVENT_NAMES.whatsappClick)}

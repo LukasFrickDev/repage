@@ -25,7 +25,43 @@ describe('analytics service', () => {
     expect(window.dataLayer).toBeUndefined();
   });
 
-  it('loads the configured script once and sends only central events', () => {
+  it("does not initialize Google when only advertising is granted", () => {
+    setAnalyticsConsent(false, true);
+
+    expect(document.querySelector("script[data-repage-ga4]")).not.toBeInTheDocument();
+    expect(window.dataLayer).toBeUndefined();
+  });
+
+  it("maps advertising to Consent Mode and updates it while analytics is active", () => {
+    setAnalyticsConsent(true, false);
+
+    expect(window.dataLayer).toEqual(expect.arrayContaining([
+      ["consent", "default", {
+        analytics_storage: "granted",
+        ad_storage: "denied",
+        ad_user_data: "denied",
+        ad_personalization: "denied",
+      }],
+    ]));
+
+    setAnalyticsConsent(true, true);
+    expect(window.dataLayer).toContainEqual(["consent", "update", {
+      analytics_storage: "granted",
+      ad_storage: "granted",
+      ad_user_data: "granted",
+      ad_personalization: "granted",
+    }]);
+
+    setAnalyticsConsent(true, false);
+    expect(window.dataLayer).toContainEqual(["consent", "update", {
+      analytics_storage: "granted",
+      ad_storage: "denied",
+      ad_user_data: "denied",
+      ad_personalization: "denied",
+    }]);
+  });
+
+  it("loads the configured script once and sends only central events", () => {
     setAnalyticsConsent(true);
     setAnalyticsConsent(true);
     trackPageView('/portfolio?email=private#contact');
@@ -51,7 +87,13 @@ describe('analytics service', () => {
     setAnalyticsConsent(false);
     trackEvent('whatsapp_click');
 
-    expect(window['ga-disable-G-TEST123']).toBe(true);
+    expect(window["ga-disable-G-TEST123"]).toBe(true);
+    expect(window.dataLayer).toContainEqual(["consent", "update", {
+      analytics_storage: "denied",
+      ad_storage: "denied",
+      ad_user_data: "denied",
+      ad_personalization: "denied",
+    }]);
     expect(document.cookie).toContain('repage:consent:v1=keep');
     expect(document.cookie).not.toContain('_ga=abc');
   });

@@ -17,7 +17,7 @@ o Environment `production`, sem copiar segredos da aplicação para o workflow.
 - para validação manual, `CI` pode ser executado por `workflow_dispatch` na
   `main`;
 - Environment `production` restrito à `main`;
-- `VITE_SITE_INDEXING_ENABLED` igual a `false`;
+- `VITE_SITE_INDEXING_ENABLED` deve ser o literal `true` ou `false`; durante QA, produção permanece `false`.
 - private key exclusiva e host key ED25519 já cadastradas no Environment;
 - Python App, paths e Environment Variables da aplicação configurados no
   Setup Python App da HomeHost;
@@ -39,6 +39,7 @@ Variables do Environment `production`:
 - `DEPLOY_SSH_KNOWN_HOSTS`;
 - `VITE_API_BASE_URL`;
 - `VITE_SITE_INDEXING_ENABLED`;
+- `VITE_GA_MEASUREMENT_ID` (opcional e não secreto);
 - `VITE_PRIVACY_POLICY_VERSION`.
 
 Secret do Environment `production`:
@@ -87,10 +88,12 @@ segredos no shell SSH.
    diretamente ao `push` em `main`; `workflow_dispatch` do deploy só é aceito
    quando a referência é `main`.
 3. O deploy confirma que o SHA disparador ainda é o HEAD atual de
-   `origin/main`.
+   `origin/main`. O `workflow_dispatch` aceita o input booleano `force_frontend`;
+   quando usado, ele força somente o frontend.
 4. O mesmo SHA é usado para checkout, build e empacotamento.
-5. O frontend é construído com `VITE_SITE_INDEXING_ENABLED=false` e os
-   arquivos prerenderizados obrigatórios são verificados. Assets Vite usam nomes
+5. O frontend é construído com o valor validado de `VITE_SITE_INDEXING_ENABLED`
+   e os arquivos prerenderizados obrigatórios são verificados. `VITE_GA_MEASUREMENT_ID`
+   vem do GitHub Environment `production` e permanece vazio/fail-safe quando não configurado. Assets Vite usam nomes
    com hash; HTML e recursos públicos estáveis têm revalidação normal, enquanto
    `/assets/` recebe cache imutável.
 6. O backend é empacotado sem `.env`, `.venv`, `requirements-dev.txt`, testes, caches, logs,
@@ -121,7 +124,9 @@ touch /home/re190924/repage_backend/tmp/restart.txt
 
 16. O workflow executa o smoke completo de health, readiness, homepage,
     portfolio, case, páginas legais, sitemap, robots, Admin, meta robots e
-    rota inexistente com status HTTP exatamente `404`.
+    rota inexistente com status HTTP exatamente `404`. Robots e meta robots são
+    comparados dinamicamente ao valor aprovado de `VITE_SITE_INDEXING_ENABLED`;
+    em `true`, a home é `index, follow` e `/privacidade` permanece `noindex, follow`.
 
 O job de deploy possui timeout de 20 minutos. Esse limite é deliberadamente
 superior à duração observada para a transferência do frontend de produção e
@@ -156,8 +161,10 @@ Marker com state diferente sempre entra em recovery-full.
 No `push` normal e no `workflow_dispatch`, o planejamento é automático e
 seletivo. A execução manual controlada na `main` pode resultar em
 frontend-only, backend-only, full por fallback/recovery, finalize-only ou
-ordinary no-op. Não existe nesta V1 um mecanismo de republicação forçada do
-mesmo SHA.
+ordinary no-op. O `workflow_dispatch` possui `force_frontend`: ele força `deploy_frontend=1`,
+sem forçar backend, inclusive quando o SHA e a detecção de componentes não mudaram.
+Marker e recovery continuam prevalecendo; não é necessário criar commit vazio ou
+alterar arquivos manualmente no servidor.
 
 ## Falhas conhecidas
 
