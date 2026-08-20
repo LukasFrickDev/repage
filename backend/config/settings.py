@@ -195,7 +195,7 @@ CSRF_TRUSTED_ORIGINS = env_list('DJANGO_CSRF_TRUSTED_ORIGINS')
 PRIVACY_POLICY_VERSION = (
     required_env('PRIVACY_POLICY_VERSION')
     if ENVIRONMENT == 'production'
-    else os.getenv('PRIVACY_POLICY_VERSION', 'pre-launch-v1')
+    else os.getenv('PRIVACY_POLICY_VERSION', '2026-08-20-v1')
 )
 
 IDEMPOTENCY_TTL_SECONDS = env_int('IDEMPOTENCY_TTL_SECONDS', 86400, minimum=1)

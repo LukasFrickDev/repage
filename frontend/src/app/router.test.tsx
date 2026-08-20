@@ -529,6 +529,19 @@ describe('primary navigation', () => {
     expect(screen.getByRole('link', { name: 'Repage, ir para o início' })).toHaveAttribute('href', '/');
     expect(screen.getByRole('link', { name: 'Repage, ir para a página inicial' })).toHaveAttribute('href', '/');
 
+    expect(within(footer).getByText("contato@repage.com.br")).toBeInTheDocument();
+    expect(within(footer).queryByRole("link", { name: "contato@repage.com.br" })).not.toBeInTheDocument();
+    const footerEmailIcon = within(footer).getByRole("link", { name: "Enviar e-mail para a Repage" });
+    expect(footerEmailIcon).toHaveAttribute("href", "mailto:contato@repage.com.br");
+    const footerInstagram = within(footer).getByRole("link", { name: "Abrir Instagram da Repage" });
+    expect(footerInstagram).toHaveAttribute("href", "https://instagram.com/repagebr");
+    expect(footerInstagram).toHaveAttribute("target", "_blank");
+    expect(footerInstagram).toHaveAttribute("rel", "noreferrer");
+    const footerWhatsApp = within(footer).getByRole("link", { name: "Falar com a Repage pelo WhatsApp" });
+    expect(footerWhatsApp).toHaveAttribute("href", "https://wa.me/5511958244081?text=Ol%C3%A1!%20Conheci%20a%20Repage%20pelo%20site%20e%20gostaria%20de%20conversar%20sobre%20um%20projeto.");
+    expect(footerWhatsApp).toHaveAttribute("target", "_blank");
+    expect(footerWhatsApp).toHaveAttribute("rel", "noreferrer");
+
     await user.click(screen.getByRole('button', { name: 'Abrir menu' }));
     const mobileNavigation = screen.getByRole('navigation', { name: 'Navegação móvel' });
     expect(within(mobileNavigation).getAllByRole('link').slice(0, 5).map((link) => link.textContent)).toEqual([

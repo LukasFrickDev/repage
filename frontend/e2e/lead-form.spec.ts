@@ -56,7 +56,7 @@ test.describe('lead form integration states', () => {
     expect(submittedPayload).toMatchObject({
       source: 'website',
       privacy_policy_acknowledged: true,
-      privacy_policy_version: 'pre-launch-v1',
+      privacy_policy_version: '2026-08-20-v1',
       whatsapp: '+5511999999999',
     });
   });

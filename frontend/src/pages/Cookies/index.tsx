@@ -2,8 +2,8 @@ import { routeMetadata, useRouteMetadata } from '../../app/routeMetadata';
 import { useConsent } from '../../features/consent/useConsent';
 import * as S from '../StructuralPage/styles';
 
-const documentDate = '16 de agosto de 2026';
-const cookiePolicyVersion = 'pre-launch-v1';
+const cookiePolicyVersion = '2026-08-20-v1';
+const cookiePolicyDate = '20 de agosto de 2026';
 
 export function CookiesPage() {
   const { openPreferences } = useConsent();
@@ -16,9 +16,9 @@ export function CookiesPage() {
           <S.Eyebrow>Cookies</S.Eyebrow>
           <S.Title id="cookies-title" data-route-heading tabIndex={-1}>Política de Cookies</S.Title>
           <S.Description>
-            Este é um texto técnico de pré-lançamento sobre cookies e tecnologias semelhantes usados para funcionamento e, quando autorizado, medição do site.
+            Esta Política explica como cookies e tecnologias semelhantes são usados para funcionamento e, quando autorizado, medição do site.
           </S.Description>
-          <S.DocumentMeta>Data da versão: {documentDate}<br />Versão: pré-lançamento · {cookiePolicyVersion}</S.DocumentMeta>
+          <S.DocumentMeta>Data da versão: {cookiePolicyDate}<br />Versão: {cookiePolicyVersion}</S.DocumentMeta>
         </S.DocumentHeader>
 
         <S.DocumentBody>
@@ -52,10 +52,13 @@ export function CookiesPage() {
           <S.DocumentSection aria-labelledby="cookies-advertising">
             <S.SectionTitle id="cookies-advertising">Publicitários</S.SectionTitle>
             <S.Paragraph>
-              A categoria Publicitários existe no modelo de preferências, mas começa desligada e nenhuma tecnologia publicitária está ativa nesta V1. Google Ads, Meta Pixel, remarketing e tecnologias equivalentes não são carregados atualmente.
+              Publicitários começa desligado. Autorizar <code>advertising=true</code> sozinho não carrega a tag Google: ela só pode existir depois de consentimento para Analíticos.
             </S.Paragraph>
             <S.Paragraph>
-              Uma eventual ativação futura exigirá revisão da implementação, da finalidade e desta política quando aplicável.
+              Quando o GA4 estiver ativo, essa preferência controla os sinais de Consent Mode relacionados a <code>ad_storage</code>, <code>ad_user_data</code> e <code>ad_personalization</code>. Com Publicitários recusado, esses sinais permanecem <code>denied</code>; com Publicitários autorizado, podem ser <code>granted</code>.
+            </S.Paragraph>
+            <S.Paragraph>
+              Essa preparação permite mensuração de conversões por uma integração entre GA4 e Google Ads quando ela estiver configurada. Isso não significa que exista campanha publicitária ativa. Não há tag Google Ads dedicada nesta arquitetura, remarketing, Enhanced Conversions ou Meta Pixel nesta entrega.
             </S.Paragraph>
           </S.DocumentSection>
 

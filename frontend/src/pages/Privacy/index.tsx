@@ -1,7 +1,6 @@
 import { routeMetadata, useRouteMetadata } from '../../app/routeMetadata';
+import { siteConfig } from '../../config/site';
 import * as S from '../StructuralPage/styles';
-
-const documentDate = '16 de agosto de 2026';
 
 export function PrivacyPage() {
   useRouteMetadata(routeMetadata.privacy);
@@ -13,7 +12,7 @@ export function PrivacyPage() {
           <S.Eyebrow>Privacidade</S.Eyebrow>
           <S.Title id="privacy-title" data-route-heading tabIndex={-1}>Política de Privacidade</S.Title>
           <S.Description>
-            Este é um rascunho técnico de pré-lançamento, escrito para explicar de forma direta como a Repage trata dados relacionados ao site e aos contatos recebidos.
+            Esta Política explica de forma direta como a Repage trata dados relacionados ao site e aos contatos recebidos.
           </S.Description>
         </S.DocumentHeader>
 
@@ -24,7 +23,7 @@ export function PrivacyPage() {
               Esta Política descreve como a Repage trata dados pessoais fornecidos pelo visitante ao usar o site ou enviar uma solicitação de orçamento. A Repage é uma marca conduzida por Lukas Frick.
             </S.Paragraph>
             <S.Paragraph>
-              Assuntos relacionados a privacidade podem ser encaminhados para <a href="mailto:contato@repage.com.br">contato@repage.com.br</a>. Este texto é informativo e ainda não representa aconselhamento jurídico ou revisão jurídica definitiva.
+              Assuntos relacionados a privacidade podem ser encaminhados para <a href={"mailto:" + siteConfig.publicContacts.email}>{siteConfig.publicContacts.email}</a>.
             </S.Paragraph>
           </S.DocumentSection>
 
@@ -84,6 +83,9 @@ export function PrivacyPage() {
             <S.Paragraph>
               Os eventos definidos pela Repage não incluem conteúdo do formulário, nome, e-mail, WhatsApp, Lead ID ou request ID. Ainda assim, o Google Analytics pode processar dados técnicos próprios de seu funcionamento; esta política não promete anonimato absoluto.
             </S.Paragraph>
+            <S.Paragraph>
+              Quando uma integração entre GA4 e Google Ads estiver configurada, os eventos elegíveis poderão apoiar a mensuração de conversões, sempre respeitando o consentimento publicitário aplicável. Nesta V1 não há tag Google Ads dedicada, remarketing ou Enhanced Conversions, e nenhuma campanha paga está ativa.
+            </S.Paragraph>
           </S.DocumentSection>
 
           <S.DocumentSection aria-labelledby="privacy-sharing">
@@ -92,7 +94,7 @@ export function PrivacyPage() {
               Quando necessário ao funcionamento, os dados podem ser tratados por categorias de prestadores técnicos, como infraestrutura e hospedagem, serviços de e-mail e fornecedores necessários à operação. O Google Analytics é incluído somente após consentimento analítico.
             </S.Paragraph>
             <S.Paragraph>
-              A Repage não descreve neste rascunho fornecedores específicos que ainda não estejam definidos como parte operacional relevante e não vende dados pessoais.
+              A Repage não descreve nesta Política fornecedores específicos que ainda não estejam definidos como parte operacional relevante e não vende dados pessoais.
             </S.Paragraph>
           </S.DocumentSection>
 
@@ -106,7 +108,7 @@ export function PrivacyPage() {
           <S.DocumentSection aria-labelledby="privacy-rights">
             <S.SectionTitle id="privacy-rights">Direitos e preferências</S.SectionTitle>
             <S.Paragraph>
-              Conforme aplicável, o titular pode solicitar informações relacionadas ao tratamento, acesso, correção e eliminação, além de exercer outros direitos previstos na legislação aplicável. Solicitações podem ser encaminhadas para <a href="mailto:contato@repage.com.br">contato@repage.com.br</a>.
+              Conforme aplicável, o titular pode solicitar informações relacionadas ao tratamento, acesso, correção e eliminação, além de exercer outros direitos previstos na legislação aplicável. Solicitações podem ser encaminhadas para <a href={"mailto:" + siteConfig.publicContacts.email}>{siteConfig.publicContacts.email}</a>.
             </S.Paragraph>
             <S.Paragraph>
               As preferências opcionais de cookies e Analytics podem ser revistas a qualquer momento pela central de preferências disponível no rodapé.
@@ -118,7 +120,7 @@ export function PrivacyPage() {
             <S.Paragraph>
               Esta Política de Privacidade pode ser atualizada para refletir mudanças no funcionamento do site, nos serviços utilizados ou nas práticas de tratamento de dados. Quando houver alterações relevantes, a versão e a data desta página serão atualizadas.
             </S.Paragraph>
-            <S.DocumentMeta>Versão: pré-lançamento v1<br />Última atualização: {documentDate}</S.DocumentMeta>
+            <S.DocumentMeta>Versão: {siteConfig.privacyPolicy.version}<br />Última atualização: {siteConfig.privacyPolicy.date}</S.DocumentMeta>
           </S.DocumentSection>
 
           <S.Actions>

@@ -79,6 +79,19 @@ test('homepage renders its definitive structure without horizontal overflow', as
     () => document.documentElement.scrollWidth > window.innerWidth,
   );
   expect(hasHorizontalOverflow).toBe(false);
+  const footer = page.getByRole("contentinfo");
+  await expect(footer.getByText("contato@repage.com.br")).toBeVisible();
+  await expect(footer.getByRole("link", { name: "contato@repage.com.br" })).toHaveCount(0);
+  const emailIcon = footer.getByRole("link", { name: "Enviar e-mail para a Repage" });
+  await expect(emailIcon).toHaveAttribute("href", "mailto:contato@repage.com.br");
+  const instagram = footer.getByRole("link", { name: "Abrir Instagram da Repage" });
+  await expect(instagram).toHaveAttribute("href", "https://instagram.com/repagebr");
+  await expect(instagram).toHaveAttribute("target", "_blank");
+  await expect(instagram).toHaveAttribute("rel", "noreferrer");
+  const whatsapp = footer.getByRole("link", { name: "Falar com a Repage pelo WhatsApp" });
+  await expect(whatsapp).toHaveAttribute("href", "https://wa.me/5511958244081?text=Ol%C3%A1!%20Conheci%20a%20Repage%20pelo%20site%20e%20gostaria%20de%20conversar%20sobre%20um%20projeto.");
+  await expect(whatsapp).toHaveAttribute("target", "_blank");
+  await expect(whatsapp).toHaveAttribute("rel", "noreferrer");
   expect(issues).toEqual([]);
 });
 

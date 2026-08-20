@@ -1,6 +1,7 @@
 import { z } from 'zod';
+import { siteConfig } from '../../config/site';
 
-export const PRIVACY_POLICY_VERSION = import.meta.env.VITE_PRIVACY_POLICY_VERSION?.trim() || 'pre-launch-v1';
+export const PRIVACY_POLICY_VERSION = siteConfig.privacyPolicy.version;
 
 export const projectTypeOptions = [
   { value: 'landing_page', label: 'Landing page' },

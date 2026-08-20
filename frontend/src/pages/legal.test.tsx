@@ -20,7 +20,7 @@ function renderPage(page: 'privacy' | 'cookies') {
 }
 
 describe('legal pages', () => {
-  it('renders the factual pre-launch privacy policy', () => {
+  it('renders the final privacy policy', () => {
     renderPage('privacy');
 
     expect(screen.getByRole('heading', { level: 1, name: 'Política de Privacidade' })).toBeInTheDocument();
@@ -30,8 +30,9 @@ describe('legal pages', () => {
     expect(screen.getByText('versão da Política registrada no envio.')).toBeInTheDocument();
     expect(screen.getByText(/Os dados de solicitação são mantidos pelo período necessário/)).toBeInTheDocument();
     expect(screen.getByText(/O Google Analytics 4 é uma tecnologia não essencial/)).toBeInTheDocument();
-    expect(screen.getByText(/Versão: pré-lançamento v1/)).toBeInTheDocument();
-    expect(screen.queryByText(/Política de Privacidade em preparação/)).not.toBeInTheDocument();
+    expect(screen.getByText(/Versão: 2026-08-20-v1/)).toBeInTheDocument();
+    expect(screen.getByText(/Última atualização: 20 de agosto de 2026/)).toBeInTheDocument();
+    expect(screen.queryByText(/pré-lançamento|rascunho técnico|revisão jurídica definitiva/i)).not.toBeInTheDocument();
   });
 
   it('renders the cookie policy and opens the real preference center', async () => {
@@ -44,9 +45,13 @@ describe('legal pages', () => {
     expect(screen.getByRole('heading', { name: 'Publicitários' })).toBeInTheDocument();
     expect(screen.getByText('repage:consent:v1')).toBeInTheDocument();
     expect(screen.getByText('_ga')).toBeInTheDocument();
-    expect(screen.getByText(/Google Ads, Meta Pixel, remarketing/)).toBeInTheDocument();
-    expect(screen.getByText(/não são carregados atualmente/)).toBeInTheDocument();
-    expect(screen.getByText(/pré-lançamento · pre-launch-v1/)).toBeInTheDocument();
+    const advertising = screen.getByRole('heading', { name: 'Publicitários' }).closest('section');
+    expect(advertising).toHaveTextContent(/advertising=true.*tag Google/);
+    expect(advertising).toHaveTextContent(/ad_storage.*ad_user_data.*ad_personalization/);
+    expect(advertising).toHaveTextContent(/Google Ads.*remarketing.*Enhanced Conversions.*Meta Pixel/);
+    expect(advertising).toHaveTextContent(/campanha publicitária ativa/);
+    expect(screen.getByText(/Versão: 2026-08-20-v1/)).toBeInTheDocument();
+    expect(screen.queryByText(/pré-lançamento|pre-launch-v1/i)).not.toBeInTheDocument();
 
     await user.click(screen.getByRole('button', { name: 'Revisar preferências' }));
     expect(screen.getByRole('dialog', { name: 'Preferências de cookies' })).toBeInTheDocument();
