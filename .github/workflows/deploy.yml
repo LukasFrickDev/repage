@@ -4,6 +4,12 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+    inputs:
+      force_frontend:
+        description: Rebuild and redeploy frontend even when component detection is unchanged
+        required: false
+        default: false
+        type: boolean
 
 permissions:
   contents: read
@@ -30,6 +36,8 @@ jobs:
       DEPLOY_SSH_KNOWN_HOSTS: ${{ vars.DEPLOY_SSH_KNOWN_HOSTS }}
       VITE_API_BASE_URL: ${{ vars.VITE_API_BASE_URL }}
       VITE_SITE_INDEXING_ENABLED: ${{ vars.VITE_SITE_INDEXING_ENABLED }}
+      VITE_GA_MEASUREMENT_ID: ${{ vars.VITE_GA_MEASUREMENT_ID }}
+      FORCE_FRONTEND: ${{ (github.event_name == 'workflow_dispatch' && inputs.force_frontend == true) && '1' || '0' }}
       VITE_PRIVACY_POLICY_VERSION: ${{ vars.VITE_PRIVACY_POLICY_VERSION }}
       DEPLOY_SHA: ${{ github.sha }}
     steps:
@@ -41,7 +49,14 @@ jobs:
       - name: Validate production build inputs
         run: |
           set -Eeuo pipefail
-          test "$VITE_SITE_INDEXING_ENABLED" = "false"
+          case "$VITE_SITE_INDEXING_ENABLED" in
+            true|false) ;;
+            *) echo "VITE_SITE_INDEXING_ENABLED must be exactly true or false." >&2; exit 1 ;;
+          esac
+          case "$FORCE_FRONTEND" in
+            0|1) ;;
+            *) echo "FORCE_FRONTEND must be 0 or 1." >&2; exit 1 ;;
+          esac
           test -n "$VITE_API_BASE_URL"
           test -n "$VITE_PRIVACY_POLICY_VERSION"
           test -n "$DEPLOY_SHA"
@@ -73,7 +88,7 @@ jobs:
           cache: npm
           cache-dependency-path: frontend/package-lock.json
 
-      - name: Build frontend SAFE
+      - name: Build frontend
         if: steps.deploy_plan.outputs.deploy_frontend == '1'
         working-directory: frontend
         run: |
@@ -144,13 +159,12 @@ jobs:
           curl --fail --silent --show-error --location --max-time 15 --retry 3 --retry-delay 2 https://repage.com.br/ --output "$smoke_tmp/homepage.html"
           curl --fail --silent --show-error --location --max-time 15 --retry 3 --retry-delay 2 https://repage.com.br/portfolio/ >/dev/null
           curl --fail --silent --show-error --location --max-time 15 --retry 3 --retry-delay 2 https://repage.com.br/portfolio/axium/ >/dev/null
-          curl --fail --silent --show-error --location --max-time 15 --retry 3 --retry-delay 2 https://repage.com.br/privacidade/ >/dev/null
+          curl --fail --silent --show-error --location --max-time 15 --retry 3 --retry-delay 2 https://repage.com.br/privacidade/ --output "$smoke_tmp/privacy.html"
           curl --fail --silent --show-error --location --max-time 15 --retry 3 --retry-delay 2 https://repage.com.br/cookies/ >/dev/null
           curl --fail --silent --show-error --location --max-time 15 --retry 3 --retry-delay 2 https://repage.com.br/sitemap.xml >/dev/null
           curl --fail --silent --show-error --location --max-time 15 --retry 3 --retry-delay 2 https://repage.com.br/robots.txt --output "$smoke_tmp/robots.txt"
           curl --fail --silent --show-error --location --max-time 15 --retry 3 --retry-delay 2 https://api.repage.com.br/admin/ >/dev/null
-          grep -Eq '^[[:space:]]*Disallow:[[:space:]]*/[[:space:]]*$' "$smoke_tmp/robots.txt"
-          python - "$smoke_tmp/homepage.html" <<'PY'
+          python - "$smoke_tmp/robots.txt" "$smoke_tmp/homepage.html" "$smoke_tmp/privacy.html" "$VITE_SITE_INDEXING_ENABLED" <<PY
           from html.parser import HTMLParser
           from pathlib import Path
           import sys
@@ -158,7 +172,7 @@ jobs:
           class RobotsMetaParser(HTMLParser):
               def __init__(self):
                   super().__init__()
-                  self.valid = False
+                  self.values = []
 
               def handle_starttag(self, tag, attrs):
                   if tag.lower() != "meta":
@@ -166,13 +180,31 @@ jobs:
                   attributes = {key.lower(): value or "" for key, value in attrs}
                   name = " ".join(attributes.get("name", "").split()).lower()
                   content = " ".join(attributes.get("content", "").split()).lower()
-                  if name == "robots" and content == "noindex, nofollow":
-                      self.valid = True
+                  if name == "robots":
+                      self.values.append(content)
 
-          parser = RobotsMetaParser()
-          parser.feed(Path(sys.argv[1]).read_text(encoding="utf-8"))
-          if not parser.valid:
+          robots_path, homepage_path, privacy_path, indexing_value = sys.argv[1:]
+          indexing_enabled = indexing_value == "true"
+          expected_robots = (
+              "User-agent: *\nAllow: /\n\nSitemap: https://repage.com.br/sitemap.xml\n"
+              if indexing_enabled
+              else "User-agent: *\nDisallow: /\n"
+          )
+          if Path(robots_path).read_text(encoding="utf-8") != expected_robots:
+              raise SystemExit("robots.txt policy check failed.")
+
+          def robots_meta(path):
+              parser = RobotsMetaParser()
+              parser.feed(Path(path).read_text(encoding="utf-8"))
+              return parser.values
+
+          expected_home = "index, follow" if indexing_enabled else "noindex, nofollow"
+          if robots_meta(homepage_path) != [expected_home]:
               raise SystemExit("Homepage robots meta policy check failed.")
+
+          expected_privacy = "noindex, follow" if indexing_enabled else "noindex, nofollow"
+          if robots_meta(privacy_path) != [expected_privacy]:
+              raise SystemExit("Privacy robots meta policy check failed.")
           PY
           status_code="$(curl --silent --show-error --location --max-time 15 --retry 3 --retry-delay 2 --output /dev/null --write-out '%{http_code}' https://repage.com.br/route-that-does-not-exist-for-smoke)"
           test "$status_code" = "404"

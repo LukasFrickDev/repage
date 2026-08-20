@@ -81,7 +81,17 @@ function requestScript() {
   script.addEventListener('error', () => { scriptFailed = true; }, { once: true });
 }
 
-function initialize() {
+function consentSignals(analytics: boolean, advertising: boolean) {
+  const granted = analytics && advertising ? "granted" : "denied";
+  return {
+    analytics_storage: analytics ? "granted" : "denied",
+    ad_storage: granted,
+    ad_user_data: granted,
+    ad_personalization: granted,
+  };
+}
+
+function initialize(advertising: boolean) {
   if (typeof window === 'undefined' || !measurementId) return;
 
   window[`ga-disable-${measurementId}`] = false;
@@ -90,10 +100,11 @@ function initialize() {
 
   if (!initialized) {
     initialized = true;
+    window.gtag("consent", "default", consentSignals(true, advertising));
     window.gtag('js', new Date());
     window.gtag('config', measurementId, { send_page_view: false });
   } else {
-    window.gtag('consent', 'update', { analytics_storage: 'granted' });
+    window.gtag("consent", "update", consentSignals(true, advertising));
   }
 
   requestScript();
@@ -107,20 +118,20 @@ export function getAnalyticsMeasurementId() {
   return measurementId;
 }
 
-export function setAnalyticsConsent(allowed: boolean) {
+export function setAnalyticsConsent(allowed: boolean, advertising = false) {
   analyticsEnabled = allowed && Boolean(measurementId);
 
   if (!allowed) {
     lastPagePath = null;
     if (initialized && getGtag()) {
-      getGtag()?.('consent', 'update', { analytics_storage: 'denied' });
+      getGtag()?.("consent", "update", consentSignals(false, false));
     }
     if (measurementId && typeof window !== 'undefined') window[`ga-disable-${measurementId}`] = true;
     removeAnalyticsCookies();
     return;
   }
 
-  initialize();
+  initialize(advertising);
 }
 
 function safePath(pathname: string) {

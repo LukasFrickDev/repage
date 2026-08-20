@@ -21,7 +21,13 @@ if [[ ! "$DEPLOY_SHA" =~ ^[0-9a-fA-F]{40}$ ]]; then
   exit 1
 fi
 
-if [ "$mode" = 'apply' ]; then
+force_frontend="${FORCE_FRONTEND:-0}"
+case "$force_frontend" in
+  0|1) ;;
+  *) echo "Invalid FORCE_FRONTEND flag." >&2; exit 1 ;;
+esac
+
+if [ "$mode" = "apply" ]; then
   : "${DEPLOY_PLAN_FRONTEND:?DEPLOY_PLAN_FRONTEND is required}"
   : "${DEPLOY_PLAN_BACKEND:?DEPLOY_PLAN_BACKEND is required}"
   case "$DEPLOY_PLAN_FRONTEND:$DEPLOY_PLAN_BACKEND" in
@@ -153,7 +159,7 @@ resolve_plan() {
     fi
   fi
 
-  plan_output="$(bash .github/scripts/resolve-deploy-plan.sh "$state_status" "$state_sha" "$marker_present" "$DEPLOY_SHA")"
+  plan_output="$(bash .github/scripts/resolve-deploy-plan.sh "$state_status" "$state_sha" "$marker_present" "$DEPLOY_SHA" "$force_frontend")"
   read -r deploy_frontend deploy_backend finalize_only recovery_full <<< "$plan_output"
   log_step "Resolved deploy plan frontend=${deploy_frontend} backend=${deploy_backend} finalize_only=${finalize_only} recovery_full=${recovery_full}"
 }

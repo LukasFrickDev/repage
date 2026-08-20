@@ -37,7 +37,7 @@ export function ConsentProvider({ children }: PropsWithChildren) {
     };
 
     writeConsentPreference(nextPreference);
-    setAnalyticsConsent(nextPreference.analytics);
+    setAnalyticsConsent(nextPreference.analytics, nextPreference.advertising);
     if (nextPreference.analytics) {
       trackEvent(ANALYTICS_EVENT_NAMES.consentUpdate, {
         analytics: true,
