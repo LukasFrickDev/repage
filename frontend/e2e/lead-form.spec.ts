@@ -2,6 +2,14 @@ import { expect, test, type Page } from '@playwright/test';
 
 const apiPath = '**/api/v1/leads/';
 
+function deferred() {
+  let resolve!: () => void;
+  const promise = new Promise<void>((resolvePromise) => {
+    resolve = resolvePromise;
+  });
+  return { promise, resolve };
+}
+
 async function openContact(page: Page) {
   await page.goto('/#contato');
   await expect(page.locator('#contato')).toBeVisible();
@@ -32,25 +40,31 @@ test.describe('lead form integration states', () => {
   test('submits through the real form and exposes loading then 201 success', async ({ page }) => {
     let releaseRequest!: () => void;
     let submittedPayload: Record<string, unknown> | undefined;
+    const requestIntercepted = deferred();
+    const responseFulfilled = deferred();
     const requestReleased = new Promise<void>((resolve) => { releaseRequest = resolve; });
     await page.route(apiPath, async (route) => {
       submittedPayload = route.request().postDataJSON() as Record<string, unknown>;
+      requestIntercepted.resolve();
       await requestReleased;
       await route.fulfill({
         status: 201,
         contentType: 'application/json',
         body: JSON.stringify({ status: 'received', message: 'Recebemos sua solicitação.', request_id: 'e2e-request' }),
       });
+      responseFulfilled.resolve();
     });
     await openContact(page);
     await fillRequiredFields(page);
     await page.getByLabel('Marca, negócio ou projeto').fill('Negócio fictício');
 
     await page.getByRole('button', { name: 'Solicitar orçamento' }).click();
+    await requestIntercepted.promise;
     await expect(page.getByRole('button', { name: 'Enviando…' })).toBeDisabled();
     await expect(page.getByLabel('Nome')).toHaveValue('Ana Souza');
 
     releaseRequest();
+    await responseFulfilled.promise;
     await expect(page.getByRole('status')).toContainText('Solicitação recebida.');
     await expect(page.getByLabel('Nome')).toHaveValue('');
     expect(submittedPayload).toMatchObject({
@@ -85,11 +99,15 @@ test.describe('lead form integration states', () => {
 
   test('reuses the attempt key after 429 and keeps the honeypot out of focus order', async ({ page }) => {
     const requests: { headers: Record<string, string>; payload: Record<string, unknown> }[] = [];
+    const requestIntercepted = [deferred(), deferred()];
+    const responseFulfilled = [deferred(), deferred()];
     await page.route(apiPath, async (route) => {
+      const requestIndex = requests.length;
       requests.push({
         headers: route.request().headers(),
         payload: route.request().postDataJSON() as Record<string, unknown>,
       });
+      requestIntercepted[requestIndex].resolve();
       await route.fulfill({
         status: requests.length === 1 ? 429 : 201,
         contentType: 'application/json',
@@ -97,6 +115,7 @@ test.describe('lead form integration states', () => {
           ? { error: { code: 'rate_limited', message: 'Tente novamente mais tarde.' }, request_id: 'e2e-429' }
           : { status: 'received', message: 'Recebemos sua solicitação.', request_id: 'e2e-201' }),
       });
+      responseFulfilled[requestIndex].resolve();
     });
     await openContact(page);
     await fillRequiredFields(page);
@@ -125,9 +144,13 @@ test.describe('lead form integration states', () => {
     expect(honeypotStyles.tabIndex).toBe(-1);
 
     await page.getByRole('button', { name: 'Solicitar orçamento' }).click();
+    await requestIntercepted[0].promise;
+    await responseFulfilled[0].promise;
     await expect(page.getByRole('alert')).toContainText('Tente novamente mais tarde.');
     await expect(page.getByLabel('Nome')).toHaveValue('Ana Souza');
     await page.getByRole('button', { name: 'Solicitar orçamento' }).click();
+    await requestIntercepted[1].promise;
+    await responseFulfilled[1].promise;
     await expect(page.getByRole('status')).toContainText('Solicitação recebida.');
 
     expect(requests).toHaveLength(2);
