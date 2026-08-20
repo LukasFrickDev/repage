@@ -29,9 +29,11 @@ const GlobalStyles = createGlobalStyle`
   ::selection { background: ${withAlpha(colors.violet, 0.32)}; color: ${colors.paper}; }
   :focus-visible { outline: 3px solid ${colors.neonBlue}; outline-offset: 4px; }
   [data-route-heading][tabindex='-1']:focus-visible { outline: none; }
-  :where(section[id], main[id])[tabindex='-1']:focus,
-  :where(section[id], main[id])[tabindex='-1']:focus-visible {
-    outline: none;
+  @media (max-width: ${breakpoints.mobileMax}) {
+    :where(section[id], main[id])[tabindex='-1']:focus,
+    :where(section[id], main[id])[tabindex='-1']:focus-visible {
+      outline: none;
+    }
   }
   @media (prefers-reduced-motion: reduce) {
     * { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; transition-duration: 0.01ms !important; }
