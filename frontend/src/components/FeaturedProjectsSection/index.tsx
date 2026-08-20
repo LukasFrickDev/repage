@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { RefObject } from 'react';
 import { ArrowRight } from 'lucide-react';
 import {
@@ -35,6 +35,7 @@ type ProjectStageProps = {
   isActive: boolean;
   isStatic: boolean;
   loading: 'eager' | 'lazy';
+  mediaEnabled: boolean;
 };
 
 const handoffTiming = {
@@ -86,6 +87,7 @@ function ProjectStage({
   isActive,
   isStatic,
   loading,
+  mediaEnabled,
 }: ProjectStageProps) {
   const stageMotion = useProjectStageMotion(progress, window);
   const layerStyle = isStatic ? { opacity: 1, x: 0 } : { opacity: stageMotion.opacity, x: stageMotion.layerX };
@@ -106,22 +108,26 @@ function ProjectStage({
           aria-label={`Ver case ${project.title}`}
           tabIndex={canInteract ? undefined : -1}
         >
-          <ProjectBrowserFrame
-            src={desktop.path}
-            alt={desktop.alt}
-            width={desktop.width}
-            height={desktop.height}
-            loading={loading}
-          />
+          {mediaEnabled && (
+            <ProjectBrowserFrame
+              src={desktop.path}
+              alt={desktop.alt}
+              width={desktop.width}
+              height={desktop.height}
+              loading={loading}
+            />
+          )}
           <S.DeviceFrame>
             <S.DeviceViewport>
-              <S.MobileImage
-                src={mobile.path}
-                alt={mobile.alt}
-                width={mobile.width}
-                height={mobile.height}
-                loading={loading}
-              />
+              {mediaEnabled && (
+                <S.MobileImage
+                  src={mobile.path}
+                  alt={mobile.alt}
+                  width={mobile.width}
+                  height={mobile.height}
+                  loading={loading}
+                />
+              )}
             </S.DeviceViewport>
           </S.DeviceFrame>
         </S.ProjectMediaLink>
@@ -180,11 +186,12 @@ function usePortfolioProgress(target: RefObject<HTMLDivElement | null>) {
 export function FeaturedProjectsSection() {
   const prefersReducedMotion = useHydrationSafeReducedMotion();
   const [activeProject, setActiveProject] = useState(-1);
+  const [mediaEnabled, setMediaEnabled] = useState(false);
   const trackRef = useRef<HTMLDivElement>(null);
   const progress = usePortfolioProgress(trackRef);
-  const introOpacity = useTransform(progress, [0, 0.12, 0.18], [1, 1, 0]);
-  const introY = useTransform(progress, [0, 0.12, 0.18], [0, -4, -112]);
-  const introScale = useTransform(progress, [0, 0.12, 0.18], [1, 1, 0.97]);
+  const introOpacity = useTransform(progress, [0, 0.05, 0.08, 0.14, 0.15], [1, 1, 0.96, 0.28, 0]);
+  const introY = useTransform(progress, [0, 0.05, 0.08, 0.14, 0.15], [0, -2, -8, -72, -112]);
+  const introScale = useTransform(progress, [0, 0.05, 0.08, 0.14, 0.15], [1, 1, 0.995, 0.98, 0.97]);
   const [echo, axium, devSchedule] = listHomepageFeaturedProjects();
   const isStatic = Boolean(prefersReducedMotion);
   const projects = [
@@ -204,6 +211,25 @@ export function FeaturedProjectsSection() {
       mobile: devSchedule.mobileProof ?? devSchedule.cover,
     },
   ] as const;
+
+  useEffect(() => {
+    const target = trackRef.current;
+    if (!target) return;
+
+    if (typeof IntersectionObserver === 'undefined') {
+      setMediaEnabled(true);
+      return;
+    }
+
+    const observer = new IntersectionObserver((entries) => {
+      if (!entries.some((entry) => entry.isIntersecting)) return;
+      setMediaEnabled(true);
+      observer.disconnect();
+    }, { rootMargin: '0px 0px -10% 0px' });
+
+    observer.observe(target);
+    return () => observer.disconnect();
+  }, []);
 
   useMotionValueEvent(progress, 'change', (latest) => {
     const nextProject = getActiveProject(latest);
@@ -239,6 +265,7 @@ export function FeaturedProjectsSection() {
                 isActive={activeProject === index}
                 isStatic={isStatic}
                 loading={index === 0 ? 'eager' : 'lazy'}
+                mediaEnabled={mediaEnabled}
               />
             ))}
             {isStatic && (

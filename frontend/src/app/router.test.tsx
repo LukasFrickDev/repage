@@ -36,6 +36,29 @@ function renderAt(entry: string) {
   );
 }
 
+function installFeaturedIntersectionObserver() {
+  let callback!: IntersectionObserverCallback;
+  const originalObserver = globalThis.IntersectionObserver;
+
+  vi.stubGlobal('IntersectionObserver', class {
+    constructor(nextCallback: IntersectionObserverCallback) {
+      callback = nextCallback;
+    }
+
+    observe = vi.fn();
+    unobserve = vi.fn();
+    disconnect = vi.fn();
+  });
+
+  return {
+    enterViewport: () => callback(
+      [{ isIntersecting: true } as IntersectionObserverEntry],
+      {} as IntersectionObserver,
+    ),
+    restore: () => vi.stubGlobal('IntersectionObserver', originalObserver),
+  };
+}
+
 describe('public routes', () => {
   beforeAll(async () => {
     await Promise.all([
@@ -307,20 +330,23 @@ describe('public routes', () => {
   });
 
   it('renders the definitive homepage structure from the typed project and media sources', () => {
-    renderAt('/');
+    const intersectionObserver = installFeaturedIntersectionObserver();
 
-    const sections = [...document.querySelectorAll('main [data-home-section]')]
+    try {
+      renderAt('/');
+
+      const sections = [...document.querySelectorAll('main [data-home-section]')]
       .map((section) => section.getAttribute('data-home-section'));
-    expect(sections).toEqual(['hero', 'projects', 'services', 'value', 'process', 'about', 'contact']);
+      expect(sections).toEqual(['hero', 'projects', 'services', 'value', 'process', 'about', 'contact']);
 
-    const projectsSection = document.querySelector('[data-home-section="projects"]') as HTMLElement;
-    const projectHeadings = [...projectsSection.querySelectorAll('h3')];
-    expect(projectHeadings.map((heading) => heading.textContent)).toEqual([
+      const projectsSection = document.querySelector('[data-home-section="projects"]') as HTMLElement;
+      const projectHeadings = [...projectsSection.querySelectorAll('h3')];
+      expect(projectHeadings.map((heading) => heading.textContent)).toEqual([
       'EchoCosmicEnergia',
       'Axium',
       'DevSchedule',
-    ]);
-    expect(within(projectsSection).queryByText('Projeto pago')).not.toBeInTheDocument();
+      ]);
+      expect(within(projectsSection).queryByText('Projeto pago')).not.toBeInTheDocument();
     expect(within(projectsSection).queryByText('Projeto próprio')).not.toBeInTheDocument();
     expect(within(projectsSection).queryByText('Desafio técnico')).not.toBeInTheDocument();
     expect(within(projectsSection).queryByText('GreenTweet')).not.toBeInTheDocument();
@@ -335,24 +361,27 @@ describe('public routes', () => {
     });
     expect(projectsSection.querySelector('a[href="/portfolio"]')).toHaveTextContent('Ver todos os projetos');
 
-    const projectImages = [...projectsSection.querySelectorAll('img')];
-    expect(projectImages).toHaveLength(6);
+      expect(projectsSection.querySelectorAll('img[src^="/projects/"]')).toHaveLength(0);
+      act(() => intersectionObserver.enterViewport());
+
+      const projectImages = [...projectsSection.querySelectorAll('img')];
+      expect(projectImages).toHaveLength(6);
     projectImages.forEach((image) => {
       expect(image).toHaveAttribute('src', expect.stringMatching(/^\/projects\/.+\.png$/));
       expect(Number(image.getAttribute('width'))).toBeGreaterThan(0);
       expect(Number(image.getAttribute('height'))).toBeGreaterThan(0);
       expect(image).toHaveAccessibleName();
     });
-    expect(document.querySelector('video')).not.toBeInTheDocument();
+      expect(document.querySelector('video')).not.toBeInTheDocument();
 
-    const heroSection = document.querySelector('[data-home-section="hero"]') as HTMLElement;
+      const heroSection = document.querySelector('[data-home-section="hero"]') as HTMLElement;
     expect(heroSection.querySelector('img[src^="/projects/"]')).not.toBeInTheDocument();
     expect(within(heroSection).getByText('Ideia')).toBeInTheDocument();
     expect(within(heroSection).getByText('Estrutura')).toBeInTheDocument();
     expect(within(heroSection).getByText('03')).toBeInTheDocument();
     expect(within(heroSection).getByText('Experiência digital')).toBeInTheDocument();
 
-    const servicesSection = document.querySelector('[data-home-section="services"]') as HTMLElement;
+      const servicesSection = document.querySelector('[data-home-section="services"]') as HTMLElement;
     expect(within(servicesSection).getAllByRole('heading', { level: 3 }).slice(0, 3).map((heading) => heading.textContent)).toEqual([
       'Landing pages',
       'Sites institucionais',
@@ -363,10 +392,10 @@ describe('public routes', () => {
     expect(within(servicesSection).getByText(/Para necessidades que vão além de uma página/)).toBeInTheDocument();
     expect(within(servicesSection).getByRole('heading', { level: 3, name: 'O projeto pode continuar evoluindo.' })).toBeInTheDocument();
 
-    const valueSection = document.querySelector('[data-home-section="value"]') as HTMLElement;
+      const valueSection = document.querySelector('[data-home-section="value"]') as HTMLElement;
     expect(within(valueSection).getAllByRole('listitem')).toHaveLength(4);
 
-    const processSection = document.querySelector('[data-home-section="process"]') as HTMLElement;
+      const processSection = document.querySelector('[data-home-section="process"]') as HTMLElement;
     expect(within(processSection).getAllByRole('listitem')).toHaveLength(6);
     expect(within(processSection).getAllByRole('heading', { level: 3 }).map((heading) => heading.textContent)).toEqual([
       'Conversa',
@@ -380,6 +409,9 @@ describe('public routes', () => {
     const contactSection = document.querySelector('[data-home-section="contact"]') as HTMLElement;
     expect(within(contactSection).queryByText(/em preparação|em breve/i)).not.toBeInTheDocument();
     expect(within(contactSection).getByRole('form', { name: 'Solicitar orçamento' })).toBeInTheDocument();
+    } finally {
+      intersectionObserver.restore();
+    }
   });
 
   it('moves focus to the destination heading after a route change', async () => {
