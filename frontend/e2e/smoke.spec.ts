@@ -121,18 +121,29 @@ test('homepage remains usable with reduced motion and the mobile menu', async ({
 
 test('aligns homepage anchors directly below the fixed header', async ({ page }) => {
   await page.goto('/');
-  await page.getByRole('link', { name: 'Serviços' }).first().click();
+
+  const mobileMenuButton = page.getByRole('button', { name: 'Abrir menu' });
+  if (await mobileMenuButton.isVisible()) {
+    await mobileMenuButton.click();
+    const mobileNavigation = page.getByRole('navigation', { name: 'Navegação móvel' });
+    await expect(mobileNavigation).toBeVisible();
+    await mobileNavigation.getByRole('link', { name: 'Serviços' }).click();
+  } else {
+    const desktopNavigation = page.getByRole('navigation', { name: 'Navegação principal' });
+    await expect(desktopNavigation).toBeVisible();
+    await desktopNavigation.getByRole('link', { name: 'Serviços' }).click();
+  }
+
   await expect(page).toHaveURL(/\/#servicos$/);
 
   const anchorGap = () => page.evaluate(() => {
     const header = document.querySelector('header')?.getBoundingClientRect();
     const section = document.getElementById('servicos')?.getBoundingClientRect();
     if (!header || !section) return Number.POSITIVE_INFINITY;
-    return section.top - header.bottom;
+    return Math.abs(section.top - header.bottom);
   });
 
   await expect.poll(anchorGap, { timeout: 3000 }).toBeLessThanOrEqual(2);
-  expect(await anchorGap()).toBeGreaterThanOrEqual(-2);
 });
 
 test('public routes stay non-indexable without explicit indexing opt-in', async ({ page }) => {
