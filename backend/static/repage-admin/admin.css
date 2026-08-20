@@ -770,6 +770,13 @@ body.delete-confirmation #content-main > form input[type="submit"],
   background: var(--delete-button-bg);
 }
 
+#changelist .actions .delete-selected-action,
+#changelist .actions .delete-selected-action:hover,
+#changelist .actions .delete-selected-action:focus,
+#changelist .actions .delete-selected-action:focus-visible {
+  color: var(--button-fg);
+}
+
 #changelist .actions .delete-selected-action:hover,
 #changelist .actions .delete-selected-action:focus,
 body.delete-confirmation #content-main > form input[type="submit"]:hover,
@@ -817,6 +824,13 @@ body.delete-confirmation .secondary-button:focus {
 #changelist .actions .action-counter {
   flex: 0 1 auto;
   margin-left: auto;
+}
+
+@media (min-width: 768px) {
+  #changelist .actions .action-counter {
+    min-inline-size: 22ch;
+    white-space: nowrap;
+  }
 }
 
 #changelist .field-name,
@@ -1087,6 +1101,7 @@ textarea:focus {
   #header {
     align-items: stretch;
     flex-direction: column;
+    flex-shrink: 0;
     position: relative;
     z-index: 40;
     gap: 12px;
@@ -1146,8 +1161,11 @@ textarea:focus {
   .repage-user-actions {
     align-items: center;
     display: flex;
+    flex: 0 0 auto;
     flex-wrap: wrap;
     gap: 8px 10px;
+    height: auto;
+    min-height: 0;
     width: 100%;
   }
 
@@ -1168,6 +1186,7 @@ textarea:focus {
 
   #logout-form {
     display: flex;
+    flex: 0 0 auto;
   }
 
   #user-tools .repage-theme-toggle {
