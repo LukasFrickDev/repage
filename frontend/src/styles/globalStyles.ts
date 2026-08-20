@@ -1,5 +1,5 @@
 import { createGlobalStyle } from 'styled-components';
-import { breakpoints, colors, fonts, withAlpha } from './theme';
+import { breakpoints, colors, fonts, layout, withAlpha } from './theme';
 
 const GlobalStyles = createGlobalStyle`
   @font-face {
@@ -25,7 +25,7 @@ const GlobalStyles = createGlobalStyle`
   img { display: block; max-width: 100%; }
   h1, h2, h3, h4, p { margin: 0; }
   a { color: inherit; }
-  :where(section[id], main[id]) { scroll-margin-top: 6rem; }
+  :where(section[id], main[id]) { scroll-margin-top: ${layout.headerHeight}; }
   ::selection { background: ${withAlpha(colors.violet, 0.32)}; color: ${colors.paper}; }
   :focus-visible { outline: 3px solid ${colors.neonBlue}; outline-offset: 4px; }
   [data-route-heading][tabindex='-1']:focus-visible { outline: none; }
