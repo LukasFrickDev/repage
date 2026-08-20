@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import pytest
 from django.contrib import admin
 from django.contrib.auth import get_user_model
@@ -65,3 +67,35 @@ def test_authenticated_admin_root_redirects_to_leads_changelist():
 
     changelist_response = client.get(reverse('admin:leads_lead_changelist'))
     assert changelist_response.context['site_url'] == 'https://repage.com.br'
+
+
+@pytest.mark.django_db
+def test_admin_preserves_sidebar_and_mobile_header_contracts():
+    user = get_user_model().objects.create_superuser(
+        username='repage-admin-readiness',
+        email='admin-readiness@example.test',
+        password='Fictitious-Admin-Readiness-123!',
+    )
+    client = Client()
+    client.force_login(user)
+
+    admin_css = (Path(__file__).parents[1] / 'static/repage-admin/admin.css').read_text()
+    mobile_css = admin_css.split('@media (max-width: 767px)', 1)[1]
+
+    assert '#header' in mobile_css
+    assert 'flex-shrink: 0;' in mobile_css
+    assert '#user-tools' in mobile_css
+    assert '.repage-user-actions' in mobile_css
+    assert 'display: flex;' in mobile_css
+    assert 'flex: 0 0 auto;' in mobile_css
+    assert 'flex-wrap: wrap;' in mobile_css
+    assert 'height: auto;' in mobile_css
+    assert 'min-height: 0;' in mobile_css
+    assert '#logout-form' in mobile_css
+    assert '.repage-theme-toggle' in mobile_css
+    assert 'body.app-leads.model-lead.change-list' not in admin_css
+    assert 'repageLeadChangelistReady' not in admin_css
+    assert '#changelist .actions .delete-selected-action' in admin_css
+    assert 'color: var(--button-fg);' in admin_css
+    assert 'min-inline-size: 22ch;' in admin_css
+    assert 'white-space: nowrap;' in admin_css

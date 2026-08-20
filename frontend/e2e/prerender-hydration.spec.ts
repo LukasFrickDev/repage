@@ -116,7 +116,8 @@ test('keeps SPA navigation, metadata, back/forward and anchor focus after hydrat
   await expect(page.getByRole('heading', { level: 1, name: 'Axium' })).toBeVisible();
   expect((await routeState(page)).canonical).toBe('https://repage.com.br/portfolio/axium');
 
-  await page.getByRole('navigation', { name: 'Navegação do rodapé' }).getByRole('link', { name: 'Privacidade' }).click();
+  const footer = page.locator('[data-home-section="footer"]');
+  await footer.getByRole('link', { name: 'Privacidade' }).click();
   await expect(page).toHaveURL(/\/privacidade$/);
   await expect(page.locator('script[type="application/ld+json"][data-repage-structured-data="true"]')).toHaveCount(0);
   const privacy = await routeState(page);

@@ -15,6 +15,7 @@ from django.db import IntegrityError, connections
 from django.core.management import call_command
 from django.test import Client
 from django.test import override_settings
+from django.utils.translation import ngettext
 from django.utils import timezone
 from django.urls import reverse
 from rest_framework.test import APIClient
@@ -894,6 +895,28 @@ def test_admin_registers_lead_with_search_filters_and_archive_action():
     )
     assert model_admin.form is LeadAdminForm
     assert model_admin.whatsapp_display(lead) == '(11) 99999-9999'
+
+
+@pytest.mark.django_db
+def test_admin_lead_changelist_uses_plural_aware_initial_selection_note():
+    email_lead()
+    email_lead()
+    client = Client()
+    client.force_login(admin_resend_user())
+
+    response = client.get(reverse('admin:leads_lead_changelist'))
+    changelist = response.context['cl']
+    expected = ngettext(
+        '%(sel)s of %(cnt)s selected',
+        '%(sel)s of %(cnt)s selected',
+        0,
+    ) % {
+        'sel': 0,
+        'cnt': len(changelist.result_list),
+    }
+
+    assert response.context['selection_note'] == expected
+    assert expected in response.content.decode()
 
 
 @pytest.mark.django_db

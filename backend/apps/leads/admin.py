@@ -11,6 +11,7 @@ from django.template.response import TemplateResponse
 from django.urls import path, reverse
 from django.utils.html import format_html, format_html_join
 from django.utils import timezone
+from django.utils.translation import ngettext
 
 from .email_service import process_manual_delivery
 from .models import EmailDelivery, Lead
@@ -197,6 +198,21 @@ class LeadAdmin(admin.ModelAdmin):
     search_fields = ('name', 'email', 'whatsapp', 'business_name', 'acquisition_source')
     actions = (archive_leads,)
     inlines = (EmailDeliveryInline,)
+
+    def changelist_view(self, request, extra_context=None):
+        response = super().changelist_view(request, extra_context=extra_context)
+        if isinstance(response, TemplateResponse) and response.context_data:
+            changelist = response.context_data.get('cl')
+            if changelist is not None:
+                response.context_data['selection_note'] = ngettext(
+                    '%(sel)s of %(cnt)s selected',
+                    '%(sel)s of %(cnt)s selected',
+                    0,
+                ) % {
+                    'sel': 0,
+                    'cnt': len(changelist.result_list),
+                }
+        return response
 
     def get_deleted_objects(self, objs, request):
         return get_deleted_objects(objs, request, _CascadeDeleteAdminSite(self.admin_site))

@@ -1,8 +1,14 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { LeadForm } from './index';
+
+const originalFetch = globalThis.fetch;
+
+afterEach(() => {
+  vi.stubGlobal('fetch', originalFetch);
+});
 
 function renderForm() {
   return render(
