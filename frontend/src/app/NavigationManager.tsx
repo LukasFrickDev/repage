@@ -28,7 +28,7 @@ export function NavigationManager() {
       if (target) {
         const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
         target.scrollIntoView({ block: 'start', behavior: reduceMotion ? 'auto' : 'smooth' });
-        focusElement(target);
+        if (!isInitialLocation) focusElement(target);
       }
 
       return;

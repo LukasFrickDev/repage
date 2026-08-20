@@ -420,10 +420,12 @@ describe('public routes', () => {
     expect(contact?.scrollIntoView).toHaveBeenCalledWith({ block: 'start', behavior: 'smooth' });
   });
 
-  it('handles a direct reload-like entry with a hash', () => {
+  it('scrolls to but does not focus a direct reload-like hash entry', () => {
     renderAt('/#processo');
 
-    expect(document.getElementById('processo')).toHaveFocus();
+    const process = document.getElementById('processo');
+    expect(process).not.toHaveFocus();
+    expect(process?.scrollIntoView).toHaveBeenCalledWith({ block: 'start', behavior: 'smooth' });
   });
 
   it('keeps focus and hash coherent with back and forward navigation', async () => {
