@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Maximize2 } from 'lucide-react';
-import type { MouseEvent, Ref } from 'react';
+import type { MouseEvent } from 'react';
 import styled from 'styled-components';
 import { breakpoints, colors, homepageTokens } from '../../styles/theme';
 
@@ -16,9 +16,6 @@ type ProjectBrowserFrameProps = {
   poster?: string;
   fallbackSrc?: string;
   onExpand?: (event: MouseEvent<HTMLButtonElement>) => void;
-  imageRef?: Ref<HTMLImageElement>;
-  onLoad?: () => void;
-  onError?: () => void;
   expandLabel?: string;
 };
 
@@ -148,7 +145,7 @@ const ExpandButton = styled.button`
   &:hover, &:focus-visible { background: rgba(108, 99, 255, 0.84); }
 `;
 
-export function ProjectBrowserFrame({ listing = false, gallery = false, kind = 'image', poster, fallbackSrc, imageRef, onExpand, onLoad, onError, expandLabel = 'Abrir mídia no viewer', src, alt, width, height, loading = 'lazy' }: ProjectBrowserFrameProps) {
+export function ProjectBrowserFrame({ listing = false, gallery = false, kind = 'image', poster, fallbackSrc, onExpand, expandLabel = 'Abrir mídia no viewer', src, alt, width, height, loading = 'lazy' }: ProjectBrowserFrameProps) {
   const [failed, setFailed] = useState(false);
 
   return (
@@ -160,7 +157,7 @@ export function ProjectBrowserFrame({ listing = false, gallery = false, kind = '
       {onExpand ? <ExpandButton type="button" onClick={onExpand} aria-label={expandLabel}><Maximize2 size={14} aria-hidden="true" /></ExpandButton> : null}
       <Viewport $gallery={gallery}>
         {failed ? (
-          fallbackSrc ? <Image ref={imageRef} $gallery={gallery} src={fallbackSrc} alt={alt} width={width} height={height} loading="lazy" onLoad={onLoad} /> : <Fallback role="img" aria-label={`${alt} — mídia indisponível`}>Mídia indisponível</Fallback>
+          fallbackSrc ? <Image $gallery={gallery} src={fallbackSrc} alt={alt} width={width} height={height} loading="lazy" /> : <Fallback role="img" aria-label={`${alt} — mídia indisponível`}>Mídia indisponível</Fallback>
         ) : kind === 'video' ? (
           <Video
             $gallery={gallery}
@@ -173,10 +170,10 @@ export function ProjectBrowserFrame({ listing = false, gallery = false, kind = '
             preload="none"
             aria-label={alt}
             data-project-video="true"
-            onError={() => { setFailed(true); onError?.(); }}
+            onError={() => setFailed(true)}
           />
         ) : (
-          <Image ref={imageRef} $gallery={gallery} src={src} alt={alt} width={width} height={height} loading={loading} onLoad={onLoad} onError={() => { setFailed(true); onError?.(); }} />
+          <Image $gallery={gallery} src={src} alt={alt} width={width} height={height} loading={loading} onError={() => setFailed(true)} />
         )}
       </Viewport>
     </Frame>

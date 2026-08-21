@@ -36,6 +36,29 @@ function renderAt(entry: string) {
   );
 }
 
+function installFeaturedIntersectionObserver() {
+  let callback!: IntersectionObserverCallback;
+  const originalObserver = globalThis.IntersectionObserver;
+
+  vi.stubGlobal('IntersectionObserver', class {
+    constructor(nextCallback: IntersectionObserverCallback) {
+      callback = nextCallback;
+    }
+
+    observe = vi.fn();
+    unobserve = vi.fn();
+    disconnect = vi.fn();
+  });
+
+  return {
+    enterViewport: () => callback(
+      [{ isIntersecting: true } as IntersectionObserverEntry],
+      {} as IntersectionObserver,
+    ),
+    restore: () => vi.stubGlobal('IntersectionObserver', originalObserver),
+  };
+}
+
 describe('public routes', () => {
   beforeAll(async () => {
     await Promise.all([
@@ -307,6 +330,9 @@ describe('public routes', () => {
   });
 
   it('renders the definitive homepage structure from the typed project and media sources', () => {
+    const intersectionObserver = installFeaturedIntersectionObserver();
+
+    try {
       renderAt('/');
 
       const sections = [...document.querySelectorAll('main [data-home-section]')]
@@ -335,10 +361,11 @@ describe('public routes', () => {
     });
     expect(projectsSection.querySelector('a[href="/portfolio"]')).toHaveTextContent('Ver todos os projetos');
 
-      expect(projectsSection.querySelectorAll('img[src^="/projects/"]')).toHaveLength(2);
+      expect(projectsSection.querySelectorAll('img[src^="/projects/"]')).toHaveLength(0);
+      act(() => intersectionObserver.enterViewport());
 
       const projectImages = [...projectsSection.querySelectorAll('img')];
-      expect(projectImages).toHaveLength(2);
+      expect(projectImages).toHaveLength(6);
     projectImages.forEach((image) => {
       expect(image).toHaveAttribute('src', expect.stringMatching(/^\/projects\/.+\.png$/));
       expect(Number(image.getAttribute('width'))).toBeGreaterThan(0);
@@ -382,6 +409,9 @@ describe('public routes', () => {
     const contactSection = document.querySelector('[data-home-section="contact"]') as HTMLElement;
     expect(within(contactSection).queryByText(/em preparação|em breve/i)).not.toBeInTheDocument();
     expect(within(contactSection).getByRole('form', { name: 'Solicitar orçamento' })).toBeInTheDocument();
+    } finally {
+      intersectionObserver.restore();
+    }
   });
 
   it('moves focus to the destination heading after a route change', async () => {
