@@ -1,0 +1,209 @@
+name: Deploy staging
+
+on:
+  workflow_dispatch:
+    inputs:
+      deploy_ref:
+        description: Branch, tag or 40-character commit SHA to deploy
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: staging-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy staging
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: staging
+    env:
+      DEPLOY_SSH_HOST: ${{ vars.DEPLOY_SSH_HOST }}
+      DEPLOY_SSH_PORT: ${{ vars.DEPLOY_SSH_PORT }}
+      DEPLOY_SSH_USER: ${{ vars.DEPLOY_SSH_USER }}
+      DEPLOY_FRONTEND_PATH: ${{ vars.DEPLOY_FRONTEND_PATH }}
+      DEPLOY_BACKEND_PATH: ${{ vars.DEPLOY_BACKEND_PATH }}
+      DEPLOY_SSH_KNOWN_HOSTS: ${{ vars.DEPLOY_SSH_KNOWN_HOSTS }}
+      VITE_API_BASE_URL: ${{ vars.VITE_API_BASE_URL }}
+      VITE_SITE_INDEXING_ENABLED: ${{ vars.VITE_SITE_INDEXING_ENABLED }}
+      VITE_GA_MEASUREMENT_ID: ${{ vars.VITE_GA_MEASUREMENT_ID }}
+      VITE_PRIVACY_POLICY_VERSION: ${{ vars.VITE_PRIVACY_POLICY_VERSION }}
+      DEPLOY_PYTHON_APP_ROOT: repage_backend_staging
+      DEPLOY_PYTHON_BIN: /home/re190924/virtualenv/repage_backend_staging/3.12/bin/python
+    steps:
+      - name: Checkout infrastructure
+        uses: actions/checkout@v7
+        with:
+          ref: main
+          path: infrastructure
+          fetch-depth: 0
+
+      - name: Checkout target ref
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.deploy_ref }}
+          path: source
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Resolve target commit
+        working-directory: source
+        run: |
+          set -Eeuo pipefail
+          deploy_sha="$(git rev-parse --verify HEAD^{commit})"
+          if [[ ! "$deploy_sha" =~ ^[0-9a-fA-F]{40}$ ]]; then
+            echo 'Resolved deploy SHA is not a 40-character commit SHA.' >&2
+            exit 1
+          fi
+          git -C ../infrastructure fetch --no-tags origin "$deploy_sha"
+          git -C ../infrastructure cat-file -e "${deploy_sha}^{commit}"
+          echo "DEPLOY_SHA=$deploy_sha" >> "$GITHUB_ENV"
+
+      - name: Validate staging build inputs
+        env:
+          DEPLOY_SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
+        run: |
+          set -Eeuo pipefail
+          test "$GITHUB_REF" = 'refs/heads/main'
+          test "$DEPLOY_FRONTEND_PATH" = '/home/re190924/staging.repage.com.br'
+          test "$DEPLOY_BACKEND_PATH" = '/home/re190924/repage_backend_staging'
+          test "$VITE_API_BASE_URL" = 'https://staging-api.repage.com.br'
+          test "$VITE_SITE_INDEXING_ENABLED" = 'false'
+          test -z "$VITE_GA_MEASUREMENT_ID"
+          test -n "$VITE_PRIVACY_POLICY_VERSION"
+          test -n "$DEPLOY_SSH_HOST"
+          test -n "$DEPLOY_SSH_PORT"
+          test -n "$DEPLOY_SSH_USER"
+          test -n "$DEPLOY_SSH_KNOWN_HOSTS"
+          test -n "$DEPLOY_SSH_PRIVATE_KEY"
+          test -n "$DEPLOY_SHA"
+          [[ "$DEPLOY_SHA" =~ ^[0-9a-fA-F]{40}$ ]]
+
+      - name: Plan staging deploy
+        id: deploy_plan
+        env:
+          DEPLOY_SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
+        working-directory: infrastructure
+        run: |
+          set -Eeuo pipefail
+          plan_file="$RUNNER_TEMP/deploy-plan.out"
+          bash .github/scripts/deploy-production.sh plan | tee "$plan_file"
+          cat "$plan_file" >> "$GITHUB_OUTPUT"
+
+      - name: Setup Node
+        if: steps.deploy_plan.outputs.deploy_frontend == '1'
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: source/frontend/package-lock.json
+
+      - name: Build frontend
+        if: steps.deploy_plan.outputs.deploy_frontend == '1'
+        working-directory: source/frontend
+        run: |
+          set -Eeuo pipefail
+          npm ci
+          npm run build
+          test -f dist/index.html
+          test -f dist/404.html
+          test -f dist/portfolio/index.html
+          test -f dist/portfolio/axium/index.html
+          test -f dist/privacidade/index.html
+          test -f dist/sitemap.xml
+          test -f dist/robots.txt
+          test -f dist/.htaccess
+
+      - name: Package deploy artifacts
+        if: steps.deploy_plan.outputs.deploy_frontend == '1' || steps.deploy_plan.outputs.deploy_backend == '1'
+        working-directory: source
+        run: |
+          set -Eeuo pipefail
+          if [ "${{ steps.deploy_plan.outputs.deploy_frontend }}" = '1' ]; then
+            (cd frontend/dist && find . -type f -print | sed 's#^./##' | sort) > "$RUNNER_TEMP/frontend.manifest"
+            tar -czf "$RUNNER_TEMP/frontend.tar.gz" -C frontend/dist .
+          fi
+          if [ "${{ steps.deploy_plan.outputs.deploy_backend }}" = '1' ]; then
+            tar -czf "$RUNNER_TEMP/backend.tar.gz" \
+              --exclude='./.env' \
+              --exclude='./.env.*' \
+              --exclude='./.venv' \
+              --exclude='./.pytest_cache' \
+              --exclude='./.ruff_cache' \
+              --exclude='./requirements-dev.txt' \
+              --exclude='./__pycache__' \
+              --exclude='*/__pycache__' \
+              --exclude='./tmp' \
+              --exclude='./tests' \
+              --exclude='./docker-compose.yml' \
+              --exclude='./env.txt' \
+              --exclude='*.log' \
+              -C backend .
+            tar -tzf "$RUNNER_TEMP/backend.tar.gz" \
+              | sed 's#^\./##' \
+              | awk 'NF && $0 !~ /\/$/' \
+              | sort > "$RUNNER_TEMP/backend.manifest"
+          fi
+
+      - name: Deploy over pinned SSH
+        if: steps.deploy_plan.outputs.deploy_frontend == '1' || steps.deploy_plan.outputs.deploy_backend == '1'
+        working-directory: infrastructure
+        env:
+          DEPLOY_SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
+          FRONTEND_ARCHIVE: ${{ runner.temp }}/frontend.tar.gz
+          BACKEND_ARCHIVE: ${{ runner.temp }}/backend.tar.gz
+          FRONTEND_MANIFEST: ${{ runner.temp }}/frontend.manifest
+          BACKEND_MANIFEST: ${{ runner.temp }}/backend.manifest
+          DEPLOY_PLAN_FRONTEND: ${{ steps.deploy_plan.outputs.deploy_frontend }}
+          DEPLOY_PLAN_BACKEND: ${{ steps.deploy_plan.outputs.deploy_backend }}
+          DEPLOY_PLAN_FINALIZE_ONLY: ${{ steps.deploy_plan.outputs.finalize_only }}
+          DEPLOY_PLAN_RECOVERY_FULL: ${{ steps.deploy_plan.outputs.recovery_full }}
+        run: bash .github/scripts/deploy-production.sh
+
+      - name: Smoke staging endpoints
+        if: steps.deploy_plan.outputs.deploy_frontend == '1' || steps.deploy_plan.outputs.deploy_backend == '1' || steps.deploy_plan.outputs.finalize_only == '1'
+        env:
+          STAGING_FRONTEND_URL: https://staging.repage.com.br
+          STAGING_API_URL: https://staging-api.repage.com.br
+        run: |
+          set -Eeuo pipefail
+          smoke_tmp="$(mktemp -d)"
+          trap 'rm -rf "$smoke_tmp"' EXIT
+          curl --fail --silent --show-error --location --max-time 15 --retry 3 --retry-delay 2 "$STAGING_API_URL/health/" >/dev/null
+          curl --fail --silent --show-error --location --max-time 15 --retry 3 --retry-delay 2 "$STAGING_API_URL/health/ready/" >/dev/null
+          curl --fail --silent --show-error --location --max-time 15 --retry 3 --retry-delay 2 "$STAGING_API_URL/admin/" >/dev/null
+          curl --fail --silent --show-error --location --max-time 15 --retry 3 --retry-delay 2 "$STAGING_FRONTEND_URL/" --output "$smoke_tmp/homepage.html"
+          for path in /portfolio /portfolio/axium /privacidade /cookies; do
+            status_code="$(curl --fail --silent --show-error --max-time 15 --retry 3 --retry-delay 2 --output /dev/null --write-out '%{http_code}' "$STAGING_FRONTEND_URL$path")"
+            test "$status_code" = '200'
+          done
+          curl --fail --silent --show-error --location --max-time 15 --retry 3 --retry-delay 2 "$STAGING_FRONTEND_URL/robots.txt" --output "$smoke_tmp/robots.txt"
+          python - "$smoke_tmp/robots.txt" "$smoke_tmp/homepage.html" <<'PY'
+          from pathlib import Path
+          import sys
+
+          robots_path, homepage_path = sys.argv[1:]
+          if Path(robots_path).read_text(encoding='utf-8') != 'User-agent: *\nDisallow: /\n':
+              raise SystemExit('staging robots.txt policy check failed.')
+          homepage = Path(homepage_path).read_text(encoding='utf-8').lower()
+          if 'noindex' not in homepage or 'nofollow' not in homepage:
+              raise SystemExit('staging homepage must remain noindex/nofollow.')
+          if 'googletagmanager.com' in homepage or 'gtag(' in homepage:
+              raise SystemExit('staging homepage must not load analytics.')
+          PY
+          status_code="$(curl --silent --show-error --location --max-time 15 --retry 3 --retry-delay 2 --output /dev/null --write-out '%{http_code}' "$STAGING_FRONTEND_URL/route-that-does-not-exist-for-smoke")"
+          test "$status_code" = '404'
+
+      - name: Finalize staging deploy after smoke
+        if: steps.deploy_plan.outputs.deploy_frontend == '1' || steps.deploy_plan.outputs.deploy_backend == '1' || steps.deploy_plan.outputs.finalize_only == '1'
+        working-directory: infrastructure
+        env:
+          DEPLOY_SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
+          DEPLOY_PLAN_FRONTEND: ${{ steps.deploy_plan.outputs.deploy_frontend }}
+          DEPLOY_PLAN_BACKEND: ${{ steps.deploy_plan.outputs.deploy_backend }}
+        run: bash .github/scripts/deploy-production.sh finalize

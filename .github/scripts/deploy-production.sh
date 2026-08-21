@@ -16,6 +16,9 @@ esac
 : "${DEPLOY_BACKEND_PATH:?DEPLOY_BACKEND_PATH is required}"
 : "${DEPLOY_SHA:?DEPLOY_SHA is required}"
 
+deploy_python_bin="${DEPLOY_PYTHON_BIN:-/home/re190924/virtualenv/repage_backend/3.12/bin/python}"
+deploy_python_app_root="${DEPLOY_PYTHON_APP_ROOT:-repage_backend}"
+
 if [[ ! "$DEPLOY_SHA" =~ ^[0-9a-fA-F]{40}$ ]]; then
   echo 'DEPLOY_SHA must be a 40-character hexadecimal commit SHA.' >&2
   exit 1
@@ -219,7 +222,8 @@ if [ "$deploy_backend" = '1' ]; then
     "${DEPLOY_SSH_USER}@${DEPLOY_SSH_HOST}:${stage}/backend.manifest"
 fi
 
-"${remote[@]}" bash -s -- "$DEPLOY_SHA" "$DEPLOY_FRONTEND_PATH" "$DEPLOY_BACKEND_PATH" "$deploy_frontend" "$deploy_backend" <<'REMOTE'
+"${remote[@]}" bash -s -- "$DEPLOY_SHA" "$DEPLOY_FRONTEND_PATH" "$DEPLOY_BACKEND_PATH" \
+  "$deploy_frontend" "$deploy_backend" "$deploy_python_bin" "$deploy_python_app_root" <<'REMOTE'
 set -Eeuo pipefail
 
 log_step() {
@@ -241,6 +245,8 @@ frontend_path="$2"
 backend_path="$3"
 deploy_frontend="$4"
 deploy_backend="$5"
+python_bin="$6"
+python_app_root="$7"
 stage="${backend_path}/tmp/repage-deploy-${sha}"
 frontend_archive="${stage}/frontend.tar.gz"
 backend_archive="${stage}/backend.tar.gz"
@@ -418,7 +424,7 @@ update_backend() {
   log_step "DONE update backend duration=$(( $(date +%s) - backend_started ))s"
 
   run_step 'install backend requirements' \
-    /home/re190924/virtualenv/repage_backend/3.12/bin/python \
+    "$python_bin" \
     -m pip install -r "$backend_path/requirements.txt"
 
   selector_stdout="${stage}/cloudlinux-selector.stdout"
@@ -430,7 +436,7 @@ update_backend() {
   /usr/sbin/cloudlinux-selector run-script \
     --json \
     --interpreter python \
-    --app-root repage_backend \
+    --app-root "$python_app_root" \
     --script-name scripts/production_manage.py \
     >"$selector_stdout" 2>"$selector_stderr"
   selector_exit=$?
@@ -440,7 +446,7 @@ update_backend() {
     exit 1
   fi
 
-  selector_report="$('/home/re190924/virtualenv/repage_backend/3.12/bin/python' \
+  selector_report="$("$python_bin" \
     "$backend_path/scripts/parse_cloudlinux_result.py" "$selector_stdout")"
   printf '%s\n' "$selector_report"
   log_step "DONE CloudLinux management duration=$(( $(date +%s) - cloudlinux_started ))s"
