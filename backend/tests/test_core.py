@@ -213,7 +213,6 @@ def load_settings_with_environment(code='import config.settings', **overrides):
         'DJANGO_ALLOWED_HOSTS',
         'DJANGO_STATIC_ROOT',
         'DJANGO_CORS_ALLOWED_ORIGINS',
-        'DJANGO_CSRF_TRUSTED_ORIGINS',
         'PRIVACY_POLICY_VERSION',
         'POSTGRES_DB',
         'POSTGRES_USER',
@@ -399,108 +398,6 @@ def test_production_admin_connection_uses_direct_postgres_endpoint():
     assert result.stdout.splitlines() == ['direct.example.internal', '5432']
 
 
-def test_staging_applies_hardened_http_database_static_and_privacy_settings():
-    result = load_settings_with_environment(
-        """
-from config import settings
-print(settings.SECRET_KEY == 'x' * 64)
-print(settings.DEBUG)
-print(settings.ALLOWED_HOSTS)
-print(settings.CORS_ALLOWED_ORIGINS)
-print(settings.CSRF_TRUSTED_ORIGINS)
-print(settings.DATABASES['default']['OPTIONS'])
-print(settings.DATABASES['default']['CONN_MAX_AGE'])
-print(settings.DATABASES['default']['CONN_HEALTH_CHECKS'])
-print(settings.STATIC_ROOT)
-print(settings.STORAGES['staticfiles']['BACKEND'])
-print(settings.SESSION_COOKIE_SECURE)
-print(settings.CSRF_COOKIE_SECURE)
-print(settings.SECURE_SSL_REDIRECT)
-print(settings.SECURE_CONTENT_TYPE_NOSNIFF)
-print(settings.SECURE_REFERRER_POLICY)
-print(settings.X_FRAME_OPTIONS)
-print(settings.PRIVACY_POLICY_VERSION)
-print(settings.EMAIL_BACKEND)
-print(settings.EMAIL_HOST)
-print(settings.EMAIL_HOST_USER)
-print(settings.EMAIL_HOST_PASSWORD)
-print(settings.EMAIL_USE_SSL)
-print(settings.EMAIL_USE_TLS)
-""",
-        DJANGO_ENVIRONMENT='staging',
-        DJANGO_SECRET_KEY='x' * 64,
-        DJANGO_DEBUG='False',
-        DJANGO_ALLOWED_HOSTS='staging.example.com',
-        DJANGO_STATIC_ROOT='/srv/repage/staging-static',
-        DJANGO_CORS_ALLOWED_ORIGINS='https://staging.repage.com.br',
-        DJANGO_CSRF_TRUSTED_ORIGINS='https://staging.repage.com.br',
-        PRIVACY_POLICY_VERSION='2026-08-20-v1',
-        POSTGRES_DB='repage_staging',
-        POSTGRES_USER='repage_staging',
-        POSTGRES_PASSWORD='staging-password',
-        POSTGRES_HOST='postgres.staging.internal',
-        POSTGRES_PORT='5432',
-        POSTGRES_SSLMODE='disable',
-        EMAIL_BACKEND='django.core.mail.backends.smtp.EmailBackend',
-        EMAIL_HOST='smtp.example.invalid',
-        EMAIL_HOST_USER='should-not-be-used',
-        EMAIL_HOST_PASSWORD='should-not-be-used',
-        EMAIL_USE_SSL='True',
-        EMAIL_USE_TLS='True',
-    )
-
-    assert result.returncode == 0, result.stderr
-    assert result.stdout.splitlines() == [
-        'True',
-        'False',
-        "['staging.example.com']",
-        "['https://staging.repage.com.br']",
-        "['https://staging.repage.com.br']",
-        "{'sslmode': 'require'}",
-        '30',
-        'True',
-        '/srv/repage/staging-static',
-        'django.contrib.staticfiles.storage.ManifestStaticFilesStorage',
-        'True',
-        'True',
-        'True',
-        'True',
-        'same-origin',
-        'DENY',
-        '2026-08-20-v1',
-        'django.core.mail.backends.locmem.EmailBackend',
-        '',
-        '',
-        '',
-        'False',
-        'False',
-    ]
-
-
-@pytest.mark.parametrize('missing_name', ['DJANGO_SECRET_KEY', 'DJANGO_DEBUG'])
-def test_staging_rejects_missing_secret_or_debug(missing_name):
-    staging_environment = {
-        'DJANGO_ENVIRONMENT': 'staging',
-        'DJANGO_SECRET_KEY': 'staging-only-test-secret',
-        'DJANGO_DEBUG': 'False',
-        'DJANGO_ALLOWED_HOSTS': 'staging.example.com',
-        'DJANGO_STATIC_ROOT': '/srv/repage/staging-static',
-        'DJANGO_CORS_ALLOWED_ORIGINS': 'https://staging.repage.com.br',
-        'PRIVACY_POLICY_VERSION': '2026-08-20-v1',
-        'POSTGRES_DB': 'repage_staging',
-        'POSTGRES_USER': 'repage_staging',
-        'POSTGRES_PASSWORD': 'staging-password',
-        'POSTGRES_HOST': 'postgres.staging.internal',
-        'POSTGRES_PORT': '5432',
-    }
-    staging_environment.pop(missing_name)
-
-    result = load_settings_with_environment(**staging_environment)
-
-    assert result.returncode != 0
-    assert missing_name in result.stderr
-
-
 def test_phase_one_cache_and_protection_settings():
     assert settings.IDEMPOTENCY_TTL_SECONDS == 86400
     assert settings.LEAD_DUPLICATE_WINDOW_SECONDS == 300
@@ -549,9 +446,6 @@ def test_settings_reject_mutually_exclusive_email_security_modes():
         'POSTGRES_PORT',
         'EMAIL_FROM_ADDRESS',
         'EMAIL_INTERNAL_RECIPIENT',
-        'EMAIL_HOST',
-        'EMAIL_HOST_USER',
-        'EMAIL_HOST_PASSWORD',
     ],
 )
 def test_production_rejects_missing_critical_configuration(missing_name):

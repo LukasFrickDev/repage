@@ -37,7 +37,6 @@ def required_env(name: str) -> str:
 
 
 ENVIRONMENT = os.getenv('DJANGO_ENVIRONMENT', 'development').strip().lower()
-HARDENED_ENVIRONMENT = ENVIRONMENT in {'production', 'staging'}
 configured_secret_key = os.getenv('DJANGO_SECRET_KEY', '').strip()
 SECRET_KEY = configured_secret_key or 'dev-only-change-me'
 DEBUG = env_bool('DJANGO_DEBUG', True)
@@ -48,7 +47,7 @@ if DJANGO_LOG_LEVEL not in {'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'}:
         'DJANGO_LOG_LEVEL deve ser DEBUG, INFO, WARNING, ERROR ou CRITICAL.'
     )
 
-if HARDENED_ENVIRONMENT:
+if ENVIRONMENT == 'production':
     if not configured_secret_key or configured_secret_key == 'dev-only-change-me':
         raise ImproperlyConfigured('DJANGO_SECRET_KEY deve ser definido em produção.')
     if DEBUG:
@@ -102,7 +101,7 @@ TEMPLATES = [
     },
 ]
 
-if HARDENED_ENVIRONMENT:
+if ENVIRONMENT == 'production':
     postgres_connection_role = os.getenv('POSTGRES_CONNECTION_ROLE', 'runtime').strip().lower()
     if postgres_connection_role not in {'runtime', 'admin'}:
         raise ImproperlyConfigured('POSTGRES_CONNECTION_ROLE deve ser runtime ou admin.')
@@ -152,7 +151,7 @@ STATIC_URL = 'static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = (
     Path(required_env('DJANGO_STATIC_ROOT'))
-    if HARDENED_ENVIRONMENT
+    if ENVIRONMENT == 'production'
     else Path(os.getenv('DJANGO_STATIC_ROOT', BASE_DIR / 'staticfiles'))
 )
 STORAGES = {
@@ -162,7 +161,7 @@ STORAGES = {
     'staticfiles': {
         'BACKEND': (
             'django.contrib.staticfiles.storage.ManifestStaticFilesStorage'
-            if HARDENED_ENVIRONMENT
+            if ENVIRONMENT == 'production'
             else 'django.contrib.staticfiles.storage.StaticFilesStorage'
         ),
     },
@@ -170,7 +169,7 @@ STORAGES = {
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-if HARDENED_ENVIRONMENT:
+if ENVIRONMENT == 'production':
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
     SESSION_COOKIE_HTTPONLY = True
@@ -180,7 +179,7 @@ if HARDENED_ENVIRONMENT:
     SECURE_REFERRER_POLICY = 'same-origin'
     X_FRAME_OPTIONS = 'DENY'
 
-if HARDENED_ENVIRONMENT:
+if ENVIRONMENT == 'production':
     CORS_ALLOWED_ORIGINS = env_list('DJANGO_CORS_ALLOWED_ORIGINS')
     if not CORS_ALLOWED_ORIGINS:
         raise ImproperlyConfigured(
@@ -195,7 +194,7 @@ CORS_ALLOW_HEADERS = (*default_headers, 'idempotency-key')
 CSRF_TRUSTED_ORIGINS = env_list('DJANGO_CSRF_TRUSTED_ORIGINS')
 PRIVACY_POLICY_VERSION = (
     required_env('PRIVACY_POLICY_VERSION')
-    if HARDENED_ENVIRONMENT
+    if ENVIRONMENT == 'production'
     else os.getenv('PRIVACY_POLICY_VERSION', '2026-08-20-v1')
 )
 
@@ -239,16 +238,6 @@ if ENVIRONMENT == 'production':
     EMAIL_PORT = env_int('EMAIL_PORT', 465, minimum=1)
     EMAIL_HOST_USER = required_env('EMAIL_HOST_USER')
     EMAIL_HOST_PASSWORD = required_env('EMAIL_HOST_PASSWORD')
-    EMAIL_USE_TLS = env_bool('EMAIL_USE_TLS', False)
-    EMAIL_USE_SSL = env_bool('EMAIL_USE_SSL', False)
-elif ENVIRONMENT == 'staging':
-    EMAIL_BACKEND = 'django.core.mail.backends.locmem.EmailBackend'
-    EMAIL_HOST = ''
-    EMAIL_PORT = 587
-    EMAIL_HOST_USER = ''
-    EMAIL_HOST_PASSWORD = ''
-    EMAIL_USE_TLS = False
-    EMAIL_USE_SSL = False
 else:
     EMAIL_BACKEND = os.getenv(
         'EMAIL_BACKEND',
@@ -258,8 +247,8 @@ else:
     EMAIL_PORT = env_int('EMAIL_PORT', 587, minimum=1)
     EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '').strip()
     EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
-    EMAIL_USE_TLS = env_bool('EMAIL_USE_TLS', False)
-    EMAIL_USE_SSL = env_bool('EMAIL_USE_SSL', False)
+EMAIL_USE_TLS = env_bool('EMAIL_USE_TLS', False)
+EMAIL_USE_SSL = env_bool('EMAIL_USE_SSL', False)
 if EMAIL_USE_TLS and EMAIL_USE_SSL:
     raise ImproperlyConfigured('EMAIL_USE_TLS e EMAIL_USE_SSL não podem estar ativos simultaneamente.')
 if ENVIRONMENT == 'production' and (EMAIL_PORT != 465 or EMAIL_USE_TLS or not EMAIL_USE_SSL):
