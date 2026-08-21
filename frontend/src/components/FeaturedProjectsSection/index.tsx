@@ -89,38 +89,16 @@ function ProjectStage({
   loading,
   mediaEnabled,
 }: ProjectStageProps) {
-  const [desktopLoaded, setDesktopLoaded] = useState(false);
-  const [mobileLoaded, setMobileLoaded] = useState(false);
-  const desktopImageRef = useRef<HTMLImageElement>(null);
-  const mobileImageRef = useRef<HTMLImageElement>(null);
   const stageMotion = useProjectStageMotion(progress, window);
-  const mediaReady = mediaEnabled && desktopLoaded && mobileLoaded;
-  const layerStyle = isStatic
-    ? { opacity: mediaReady ? 1 : 0, x: 0 }
-    : { opacity: mediaReady ? stageMotion.opacity : 0, x: stageMotion.layerX };
-  const infoStyle = isStatic
-    ? { opacity: mediaReady ? 1 : 0, y: 0 }
-    : { opacity: mediaReady ? stageMotion.infoOpacity : 0, y: stageMotion.infoY };
+  const layerStyle = isStatic ? { opacity: 1, x: 0 } : { opacity: stageMotion.opacity, x: stageMotion.layerX };
+  const infoStyle = isStatic ? { opacity: 1, y: 0 } : { opacity: stageMotion.infoOpacity, y: stageMotion.infoY };
   const mediaStyle = isStatic ? { scale: 1, y: 0 } : { scale: stageMotion.mediaScale, y: stageMotion.mediaY };
-  const canInteract = mediaReady && (isStatic || isActive);
-
-  useEffect(() => {
-    if (!mediaEnabled) return;
-
-    const desktopImage = desktopImageRef.current;
-    const mobileImage = mobileImageRef.current;
-
-    // complete + naturalWidth === 0 is a concluded failure; onError already
-    // treats that case as degraded readiness, so it must not stay invisible.
-    if (desktopImage?.complete) setDesktopLoaded(true);
-    if (mobileImage?.complete) setMobileLoaded(true);
-  }, [mediaEnabled]);
+  const canInteract = isStatic || isActive;
 
   return (
     <S.ProjectLayer
       $active={canInteract}
       $static={isStatic}
-      data-project-media-ready={mediaReady}
       style={layerStyle}
       aria-hidden={!canInteract}
     >
@@ -137,9 +115,6 @@ function ProjectStage({
               width={desktop.width}
               height={desktop.height}
               loading={loading}
-              imageRef={desktopImageRef}
-              onLoad={() => setDesktopLoaded(true)}
-              onError={() => setDesktopLoaded(true)}
             />
           )}
           <S.DeviceFrame>
@@ -151,9 +126,6 @@ function ProjectStage({
                   width={mobile.width}
                   height={mobile.height}
                   loading={loading}
-                  ref={mobileImageRef}
-                  onLoad={() => setMobileLoaded(true)}
-                  onError={() => setMobileLoaded(true)}
                 />
               )}
             </S.DeviceViewport>
@@ -214,7 +186,7 @@ function usePortfolioProgress(target: RefObject<HTMLDivElement | null>) {
 export function FeaturedProjectsSection() {
   const prefersReducedMotion = useHydrationSafeReducedMotion();
   const [activeProject, setActiveProject] = useState(-1);
-  const [enabledMediaStages, setEnabledMediaStages] = useState(() => [true, false, false]);
+  const [mediaEnabled, setMediaEnabled] = useState(false);
   const trackRef = useRef<HTMLDivElement>(null);
   const progress = usePortfolioProgress(trackRef);
   const introOpacity = useTransform(progress, [0, 0.05, 0.08, 0.14, 0.15], [1, 1, 0.96, 0.28, 0]);
@@ -240,20 +212,28 @@ export function FeaturedProjectsSection() {
     },
   ] as const;
 
+  useEffect(() => {
+    const target = trackRef.current;
+    if (!target) return;
+
+    if (typeof IntersectionObserver === 'undefined') {
+      setMediaEnabled(true);
+      return;
+    }
+
+    const observer = new IntersectionObserver((entries) => {
+      if (!entries.some((entry) => entry.isIntersecting)) return;
+      setMediaEnabled(true);
+      observer.disconnect();
+    }, { rootMargin: '0px 0px -10% 0px' });
+
+    observer.observe(target);
+    return () => observer.disconnect();
+  }, []);
+
   useMotionValueEvent(progress, 'change', (latest) => {
     const nextProject = getActiveProject(latest);
     setActiveProject((currentProject) => currentProject === nextProject ? currentProject : nextProject);
-    setEnabledMediaStages((currentStages) => {
-      const nextStages = currentStages.slice();
-      let changed = false;
-      stageWindows.forEach((stage, index) => {
-        if (!nextStages[index] && latest >= Math.max(0, stage.start - 0.08)) {
-          nextStages[index] = true;
-          changed = true;
-        }
-      });
-      return changed ? nextStages : currentStages;
-    });
   });
 
   return (
@@ -285,7 +265,7 @@ export function FeaturedProjectsSection() {
                 isActive={activeProject === index}
                 isStatic={isStatic}
                 loading={index === 0 ? 'eager' : 'lazy'}
-                mediaEnabled={enabledMediaStages[index]}
+                mediaEnabled={mediaEnabled}
               />
             ))}
             {isStatic && (
