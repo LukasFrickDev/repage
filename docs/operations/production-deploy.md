@@ -124,9 +124,12 @@ touch /home/re190924/repage_backend/tmp/restart.txt
 
 16. O workflow executa o smoke completo de health, readiness, homepage,
     portfolio, case, páginas legais, sitemap, robots, Admin, meta robots e
-    rota inexistente com status HTTP exatamente `404`. Robots e meta robots são
-    comparados dinamicamente ao valor aprovado de `VITE_SITE_INDEXING_ENABLED`;
-    em `true`, a home é `index, follow` e `/privacidade` permanece `noindex, follow`.
+    rota inexistente com status HTTP exatamente `404`. As rotas prerenderizadas
+    sem trailing slash devem responder `200`; as variantes não-root com
+    trailing slash devem responder `301` para a URL canônica sem slash. Robots
+    e meta robots são comparados dinamicamente ao valor aprovado de
+    `VITE_SITE_INDEXING_ENABLED`; em `true`, a home é `index, follow` e
+    `/privacidade` permanece `noindex, follow`.
 
 O job de deploy possui timeout de 20 minutos. Esse limite é deliberadamente
 superior à duração observada para a transferência do frontend de produção e
