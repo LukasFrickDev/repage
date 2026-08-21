@@ -157,10 +157,22 @@ jobs:
           curl --fail --silent --show-error --location --max-time 15 --retry 3 --retry-delay 2 https://api.repage.com.br/health/ >/dev/null
           curl --fail --silent --show-error --location --max-time 15 --retry 3 --retry-delay 2 https://api.repage.com.br/health/ready/ >/dev/null
           curl --fail --silent --show-error --location --max-time 15 --retry 3 --retry-delay 2 https://repage.com.br/ --output "$smoke_tmp/homepage.html"
-          curl --fail --silent --show-error --location --max-time 15 --retry 3 --retry-delay 2 https://repage.com.br/portfolio/ >/dev/null
-          curl --fail --silent --show-error --location --max-time 15 --retry 3 --retry-delay 2 https://repage.com.br/portfolio/axium/ >/dev/null
-          curl --fail --silent --show-error --location --max-time 15 --retry 3 --retry-delay 2 https://repage.com.br/privacidade/ --output "$smoke_tmp/privacy.html"
-          curl --fail --silent --show-error --location --max-time 15 --retry 3 --retry-delay 2 https://repage.com.br/cookies/ >/dev/null
+          for canonical_path in /portfolio /portfolio/axium /privacidade /cookies; do
+            status_code="$(curl --fail --silent --show-error --max-time 15 --retry 3 --retry-delay 2 --output /dev/null --write-out '%{http_code}' "https://repage.com.br${canonical_path}")"
+            test "$status_code" = "200"
+          done
+          curl --fail --silent --show-error --max-time 15 --retry 3 --retry-delay 2 --output "$smoke_tmp/privacy.html" https://repage.com.br/privacidade
+          for slash_path in /portfolio/ /portfolio/axium/ /privacidade/ /cookies/; do
+            headers_path="$smoke_tmp/redirect.headers"
+            status_code="$(curl --silent --show-error --max-time 15 --retry 3 --retry-delay 2 --dump-header "$headers_path" --output /dev/null --write-out '%{http_code}' "https://repage.com.br${slash_path}")"
+            test "$status_code" = "301"
+            canonical_path="${slash_path%/}"
+            location="$(awk 'BEGIN { IGNORECASE = 1 } /^location:/ { sub(/\r$/, "", $2); print $2; exit }' "$headers_path")"
+            case "$location" in
+              "$canonical_path"|"https://repage.com.br${canonical_path}") ;;
+              *) exit 1 ;;
+            esac
+          done
           curl --fail --silent --show-error --location --max-time 15 --retry 3 --retry-delay 2 https://repage.com.br/sitemap.xml >/dev/null
           curl --fail --silent --show-error --location --max-time 15 --retry 3 --retry-delay 2 https://repage.com.br/robots.txt --output "$smoke_tmp/robots.txt"
           curl --fail --silent --show-error --location --max-time 15 --retry 3 --retry-delay 2 https://api.repage.com.br/admin/ >/dev/null

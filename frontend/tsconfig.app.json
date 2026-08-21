@@ -28,6 +28,7 @@
   "exclude": [
     "src/entry-server.tsx",
     "src/data/projects/projectReadiness.test.ts",
-    "src/indexHtml.test.ts"
+    "src/indexHtml.test.ts",
+    "src/htaccess.test.ts"
   ]
 }
