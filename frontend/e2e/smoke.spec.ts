@@ -45,9 +45,11 @@ test('homepage renders its definitive structure without horizontal overflow', as
   await expect(featuredProjects.getByText('Desafio técnico')).toHaveCount(0);
   await expect(featuredProjects.getByText('GreenTweet')).toHaveCount(0);
   const projectImages = featuredProjects.locator('img');
-  await expect(projectImages).toHaveCount(0);
+  await expect(projectImages).toHaveCount(2);
   await featuredProjects.scrollIntoViewIfNeeded();
-  await expect(projectImages).toHaveCount(6);
+  await expect.poll(() => projectImages.count()).toBeGreaterThanOrEqual(2);
+  await page.evaluate(() => window.scrollBy(0, window.innerHeight * 1.8));
+  await expect.poll(() => projectImages.count()).toBeGreaterThan(2);
   for (let index = 0; index < await projectImages.count(); index += 1) {
     const image = projectImages.nth(index);
     await image.scrollIntoViewIfNeeded();

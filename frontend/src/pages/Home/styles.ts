@@ -99,8 +99,6 @@ export const BrandEntranceIdentity = styled.div<{ $fontReady: boolean }>`
   font-weight: 620;
   letter-spacing: -0.07em;
   line-height: 0.9;
-  visibility: ${({ $fontReady }) => ($fontReady ? 'visible' : 'hidden')};
-
   img {
     width: clamp(3.8rem, 7.6vw, 7.8rem);
     height: clamp(3.8rem, 7.6vw, 7.8rem);

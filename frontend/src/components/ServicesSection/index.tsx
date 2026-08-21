@@ -1,5 +1,5 @@
 import { useScroll, useSpring, useTransform } from 'framer-motion';
-import { useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { servicesSectionContent } from '../../content/repageContent';
 import { breakpoints, homepageTokens } from '../../styles/theme';
 import * as S from './styles';
@@ -104,6 +104,8 @@ const mediaSignature = {
 
 export function ServicesSection() {
   const prefersReducedMotion = useHydrationSafeReducedMotion();
+  const [readyMediaStages, setReadyMediaStages] = useState(() => [false, false, false]);
+  const firstMediaRef = useRef<HTMLImageElement>(null);
   const compactMotion = typeof window !== 'undefined'
     && window.matchMedia(`(max-width: ${breakpoints.tabletMax})`).matches;
   const introRef = useRef<HTMLDivElement>(null);
@@ -185,6 +187,19 @@ export function ServicesSection() {
     { opacity: thirdContinuityOpacity, x: thirdContinuityX },
   ];
 
+  useEffect(() => {
+    // complete + naturalWidth === 0 is a concluded failure; onError already
+    // treats that case as degraded readiness, so it must not stay invisible.
+    if (firstMediaRef.current?.complete) {
+      setReadyMediaStages((currentStages) => {
+        if (currentStages[0]) return currentStages;
+        const nextStages = currentStages.slice();
+        nextStages[0] = true;
+        return nextStages;
+      });
+    }
+  }, []);
+
   return (
     <S.Section id="servicos" data-home-section="services" aria-labelledby="services-title" tabIndex={-1}>
       <S.Container>
@@ -224,16 +239,18 @@ export function ServicesSection() {
 
         <S.ServicesContent>
           <S.Offers>
-            {servicesSectionContent.services.map((service) => {
+            {servicesSectionContent.services.map((service, index) => {
               const kind = service.visual as ServiceVisualKind;
               const motionContext = { compact: compactMotion, kind } satisfies OfferMotionContext;
+              const mediaReady = readyMediaStages[index];
 
               return (
                 <S.Offer
                   key={service.title}
                   $kind={kind}
+                  data-service-media-ready={mediaReady}
                   initial={prefersReducedMotion ? false : 'hidden'}
-                  whileInView={prefersReducedMotion ? undefined : 'visible'}
+                  whileInView={prefersReducedMotion || !mediaReady ? undefined : 'visible'}
                   viewport={{ once: false, amount: homepageTokens.services.offerRevealAmount }}
                 >
                   <S.OfferCopy
@@ -271,7 +288,21 @@ export function ServicesSection() {
                           alt={service.media.alt}
                           width={service.media.width}
                           height={service.media.height}
-                          loading="lazy"
+                          ref={index === 0 ? firstMediaRef : undefined}
+                          loading={index === 0 ? 'eager' : 'lazy'}
+                          fetchPriority={index === 0 ? 'high' : 'auto'}
+                          onLoad={() => setReadyMediaStages((currentStages) => {
+                            if (currentStages[index]) return currentStages;
+                            const nextStages = currentStages.slice();
+                            nextStages[index] = true;
+                            return nextStages;
+                          })}
+                          onError={() => setReadyMediaStages((currentStages) => {
+                            if (currentStages[index]) return currentStages;
+                            const nextStages = currentStages.slice();
+                            nextStages[index] = true;
+                            return nextStages;
+                          })}
                         />
                       </S.ServiceMediaViewport>
                     </S.ServiceMediaSurface>
