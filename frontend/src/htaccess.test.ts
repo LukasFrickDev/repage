@@ -23,3 +23,11 @@ describe('static hosting route normalization', () => {
     expect(htaccess).toContain('ErrorDocument 404 /404.html');
   });
 });
+
+describe('versioned font caching', () => {
+  it('caches only the fingerprinted Instrument Sans file immutably', () => {
+    expect(htaccess).toContain('SetEnvIf Request_URI "^/fonts/instrument-sans/InstrumentSans-Variable\\.aa72922aafcc\\.woff2$" repage_versioned_font=1');
+    expect(htaccess).toContain('Header always set Cache-Control "public, max-age=31536000, immutable" env=repage_versioned_font');
+    expect(htaccess).toContain('SetEnvIf Request_URI "^/(?:brands|fonts|projects|seo)/" repage_stable_asset=1');
+  });
+});

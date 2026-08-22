@@ -4,7 +4,7 @@ import globalStylesSource from './globalStyles.ts?raw';
 describe('global typography', () => {
   it('serves the approved Instrument Sans variable font locally', () => {
     expect(globalStylesSource).toContain("font-family: 'Instrument Sans';");
-    expect(globalStylesSource).toContain("url('/fonts/instrument-sans/InstrumentSans-Variable.woff2') format('woff2')");
+    expect(globalStylesSource).toContain("url('/fonts/instrument-sans/InstrumentSans-Variable.aa72922aafcc.woff2') format('woff2')");
     expect(globalStylesSource).toContain('font-weight: 400 700;');
     expect(globalStylesSource).toContain('font-display: swap;');
   });

@@ -15,22 +15,37 @@ import { ANALYTICS_EVENT_NAMES, trackEvent } from '../../services/analytics';
 import { useHydrationSafeReducedMotion } from '../../hooks/useHydrationSafeReducedMotion';
 import * as S from './styles';
 
+type IntroFontState = 'pending' | 'ready' | 'fallback';
+
 const Home = () => {
   const prefersReducedMotion = useHydrationSafeReducedMotion();
-  const [introFontReady, setIntroFontReady] = useState(false);
+  const [introFontState, setIntroFontState] = useState<IntroFontState>('pending');
   const entranceDelay = prefersReducedMotion ? 0 : 0.68;
 
   useEffect(() => {
     let active = true;
-    const revealIntro = () => {
-      if (active) setIntroFontReady(true);
+    let settled = false;
+    const settleIntro = (state: Exclude<IntroFontState, 'pending'>) => {
+      if (!active || settled) return;
+      settled = true;
+      window.clearTimeout(timeoutId);
+      setIntroFontState(state);
     };
-    const timeoutId = window.setTimeout(revealIntro, 1200);
+    const timeoutId = window.setTimeout(() => settleIntro('fallback'), 1200);
 
     if (!document.fonts) {
-      revealIntro();
+      settleIntro('fallback');
     } else {
-      document.fonts.load('620 1em "Instrument Sans"').then(revealIntro, revealIntro);
+      document.fonts.load('620 1em "Instrument Sans"', 'Repage').then(
+        () => {
+          try {
+            settleIntro(document.fonts.check('620 1em "Instrument Sans"', 'Repage') ? 'ready' : 'fallback');
+          } catch {
+            settleIntro('fallback');
+          }
+        },
+        () => settleIntro('fallback'),
+      );
     }
 
     return () => {
@@ -46,12 +61,12 @@ const Home = () => {
       <S.Hero data-home-section="hero" aria-labelledby="hero-title">
         <S.HeroBackdrop aria-hidden="true" />
         {!prefersReducedMotion && (
-          <S.BrandEntrance $fontReady={introFontReady} aria-hidden="true">
-            <S.BrandEntranceIdentity $fontReady={introFontReady}>
+          <S.BrandEntrance $started={introFontState !== 'pending'} aria-hidden="true">
+            <S.BrandEntranceIdentity $fontReady={introFontState === 'ready'}>
               <img src="/brands/logo-offwhiote.svg" alt="" />
               <span>Repage</span>
             </S.BrandEntranceIdentity>
-            <S.BrandEntranceLine $fontReady={introFontReady} />
+            <S.BrandEntranceLine $started={introFontState !== 'pending'} />
           </S.BrandEntrance>
         )}
         <S.HeroInner>
