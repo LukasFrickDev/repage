@@ -7,7 +7,7 @@ const indexHtml = readFileSync(resolve(process.cwd(), 'index.html'), 'utf8');
 
 describe('font loading policy', () => {
   it('preloads the same local font used by the @font-face', () => {
-    const fontUrl = '/fonts/instrument-sans/InstrumentSans-Variable.woff2';
+    const fontUrl = '/fonts/instrument-sans/InstrumentSans-Variable.aa72922aafcc.woff2';
 
     expect(indexHtml).toContain(`<link rel="preload" href="${fontUrl}" as="font" type="font/woff2" crossorigin />`);
     expect(globalStylesSource).toContain(`url('${fontUrl}') format('woff2')`);

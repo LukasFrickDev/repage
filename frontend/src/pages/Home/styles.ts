@@ -56,7 +56,7 @@ export const Hero = styled.section`
   }
 `;
 
-export const BrandEntrance = styled.div<{ $fontReady: boolean }>`
+export const BrandEntrance = styled.div<{ $started: boolean }>`
   position: absolute;
   z-index: 6;
   inset: 0;
@@ -65,7 +65,7 @@ export const BrandEntrance = styled.div<{ $fontReady: boolean }>`
   overflow: hidden;
   pointer-events: none;
   background: ${colors.backgroundSecondary};
-  animation: ${({ $fontReady }) => ($fontReady ? css`${entranceLift} 1.48s cubic-bezier(0.76, 0, 0.24, 1) forwards` : 'none')};
+  animation: ${({ $started }) => ($started ? css`${entranceLift} 1.48s cubic-bezier(0.76, 0, 0.24, 1) forwards` : 'none')};
   will-change: transform;
 
   &::before {
@@ -119,7 +119,7 @@ export const BrandEntranceIdentity = styled.div<{ $fontReady: boolean }>`
   }
 `;
 
-export const BrandEntranceLine = styled.span<{ $fontReady: boolean }>`
+export const BrandEntranceLine = styled.span<{ $started: boolean }>`
   position: absolute;
   right: 0;
   bottom: clamp(3rem, 9vw, 8rem);
@@ -127,7 +127,7 @@ export const BrandEntranceLine = styled.span<{ $fontReady: boolean }>`
   height: 2px;
   background: linear-gradient(90deg, transparent, ${colors.highlight}, ${colors.neonBlue});
   transform-origin: right center;
-  animation: ${({ $fontReady }) => ($fontReady ? css`${entranceLineLift} 1.18s cubic-bezier(0.22, 1, 0.36, 1) forwards` : 'none')};
+  animation: ${({ $started }) => ($started ? css`${entranceLineLift} 1.18s cubic-bezier(0.22, 1, 0.36, 1) forwards` : 'none')};
 
   @media (max-width: ${breakpoints.tabletMax}) {
     width: 72vw;

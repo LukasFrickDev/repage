@@ -4,7 +4,7 @@ import { breakpoints, colors, fonts, layout, withAlpha } from './theme';
 const GlobalStyles = createGlobalStyle`
   @font-face {
     font-family: 'Instrument Sans';
-    src: url('/fonts/instrument-sans/InstrumentSans-Variable.woff2') format('woff2');
+    src: url('/fonts/instrument-sans/InstrumentSans-Variable.aa72922aafcc.woff2') format('woff2');
     font-style: normal;
     font-weight: 400 700;
     font-display: swap;
